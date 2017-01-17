@@ -29,4 +29,4 @@ Each branch represents a certain tutorial.
 
 Happy Todo-ing!
 
-![Todo-aholic](http://imgur.com/WCR7lsb)
+![Adrenalina MKT&IT - 2017](http://i.imgur.com/WCR7lsb.png)
