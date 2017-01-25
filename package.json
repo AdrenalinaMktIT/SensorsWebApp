@@ -2,17 +2,23 @@
   "name"         : "SensorsWebApp",
   "version"      : "0.0.1",
   "description"  : "SensorsWebApp.",
-  "main"         : "index.html",
+  "main"         : "server.js",
   "author"       : "Adrenalina MKT&IT",
   "dependencies" : {
-    "angular" : "*",
-    "angular-ui-router": "*",
-    "bootstrap": "*",
-    "jquery": "*",
     "body-parser": "^1.15.2",
+    "cookie-parser": "^1.4.1",
     "express"    : "~4.14.0",
+    "express-session": "*",
     "method-override": "^2.3.7",
     "mongoose"   : "~4.7.4",
-    "morgan"     : "^1.7.0"
+    "morgan"     : "^1.7.0",
+    "ejs" : "~0.8.5",
+    "passport" : "~0.1.17",
+    "passport-local" : "~0.1.6",
+    "passport-facebook" : "~1.0.2",
+    "passport-twitter" : "~1.0.2",
+    "passport-google-oauth" : "~0.1.5",
+    "connect-flash" : "~0.1.1",
+    "bcrypt-nodejs" : "latest"
   }
 }
