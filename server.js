@@ -13,7 +13,7 @@ var morgan = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
-
+var favicon = require('serve-favicon');
 var configDB = require('./app/config/database.js');
 
 // configuration ===============================================================
@@ -27,6 +27,9 @@ require('./app/config/passport')(passport); // pass passport for configuration
     //app.use(express.logger('dev')); // log every request to the console
     //app.use(express.cookieParser()); // read cookies (needed for auth)
     //app.use(express.bodyParser()); // get information from html forms
+
+app.use(express.static(__dirname + '/public'));
+
 
 // log every request to the console
     app.use(morgan('dev'));
@@ -55,6 +58,8 @@ require('./app/config/passport')(passport); // pass passport for configuration
     app.use(passport.initialize());
     app.use(passport.session()); // persistent login sessions
     app.use(flash()); // use connect-flash for flash messages stored in session
+
+    app.use(favicon(__dirname + '/public/assets/img/favicon.ico'));
 
 //});
 

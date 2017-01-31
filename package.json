@@ -10,6 +10,7 @@
     "express"    : "~4.14.0",
     "express-session": "*",
     "method-override": "^2.3.7",
+    "serve-favicon": "latest",
     "mongoose"   : "~4.7.4",
     "morgan"     : "^1.7.0",
     "ejs" : "~0.8.5",
