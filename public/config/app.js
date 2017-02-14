@@ -73,6 +73,8 @@ app.controller('UserCtrl', ['$scope', '$http', function ($scope, $http) {
 
     $scope.formData = {};
 
+    $scope.lang = 'es';
+
     $scope.gridOptions = {
         enableSorting: true,
         paginationPageSizes: [25, 50, 75],

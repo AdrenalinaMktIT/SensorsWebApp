@@ -6,9 +6,9 @@
     <!-- Default panel contents -->
     <div class="panel-heading">Listado</div>
     <div class="panel-body">
-        <div ng-controller="UserCtrl">
+        <div ng-controller="UserCtrl" ui-i18n="{{lang}}">
             <button id="addBtn" ng-click="grid.appScope.read(row.entity)" type="button" class="btn btn-default"><i class="fa fa-plus" aria-hidden="true"></i></button>
-            <div id="grid1" ui-grid="gridOptions" ui-i18n="es" ui-grid-selection ui-grid-exporter ui-grid-pagination class="grid"></div>
+            <div id="grid1" ui-grid="gridOptions" ui-grid-selection ui-grid-exporter ui-grid-pagination class="grid"></div>
         </div>
     </div>
 </div>
