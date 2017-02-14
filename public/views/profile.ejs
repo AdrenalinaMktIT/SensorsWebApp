@@ -11,6 +11,10 @@
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
+    <link rel="styleSheet" href="../libs/angular-ui-grid/ui-grid.min.css"/>
+
+    <link rel="styleSheet" href="../assets/css/main.css"/>
+
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
 
     <!-- Latest compiled and minified JavaScript -->
@@ -18,8 +22,15 @@
 
     <!-- JS (load angular, ui-router, and our custom js file) -->
     <script src="../libs/angular/angular.min.js"></script>
+
+    <script src="http://ui-grid.info/docs/grunt-scripts/csv.js"></script>
+    <script src="http://ui-grid.info/docs/grunt-scripts/pdfmake.js"></script>
+    <script src="http://ui-grid.info/docs/grunt-scripts/vfs_fonts.js"></script>
+
+    <script src="../libs/angular-ui-grid/ui-grid.min.js"></script>
     <script src="../libs/angular-ui-router/release/angular-ui-router.min.js"></script>
     <script src="../config/app.js"></script>
+    <!--<script src="../controllers/user.controller.js"></script>-->
 </head>
 
 <!-- apply our angular app to our site -->
@@ -89,7 +100,11 @@
                 </div>
                 <button type="submit" class="btn btn-default"><i class="fa fa-search" aria-hidden="true"></i> Enviar</button>
             </form>
-            <a href="/logout" type="button" class="btn btn-default navbar-btn navbar-right"><i class="fa fa-sign-out" aria-hidden="true"></i> Salir</a>
+            <ul class="nav navbar-nav navbar-right">
+                <a href="/logout" type="button" class="btn btn-default navbar-btn"><i class="fa fa-sign-out" aria-hidden="true"></i> Salir</a>
+                <p class="navbar-text"><i class="fa fa-user-circle" aria-hidden="true"></i> <%= user.name %></p>
+            </ul>
+
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
 </nav>
@@ -100,38 +115,7 @@
     <!-- THIS IS WHERE WE WILL INJECT OUR CONTENT ============================== -->
     <div ui-view></div>
 
-    <div class="row">
-
-        <!-- LOCAL INFORMATION -->
-        <div class="col-sm-6">
-            <div class="well">
-                <h3><span class="fa fa-user"></span> Local</h3>
-
-                <p>
-                    <strong>id</strong>: <%= user._id %><br>
-                    <strong>email</strong>: <%= user.local.email %><br>
-                    <strong>password</strong>: <%= user.local.password %>
-                </p>
-
-            </div>
-        </div>
-
-        <!-- FACEBOOK INFORMATION -->
-        <div class="col-sm-6">
-            <div class="well">
-                <h3 class="text-primary"><span class="fa fa-facebook"></span> Facebook</h3>
-
-                <p>
-                    <strong>id</strong>: <%= user.facebook.id %><br>
-                    <strong>token</strong>: <%= user.facebook.token %><br>
-                    <strong>email</strong>: <%= user.facebook.email %><br>
-                    <strong>name</strong>: <%= user.facebook.name %>
-                </p>
-
-            </div>
-        </div>
-
-    </div>
+    <% include footer.html %>
 
 </div>
 </body>
