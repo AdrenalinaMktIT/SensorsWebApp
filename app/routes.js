@@ -129,6 +129,18 @@ module.exports = function(app, passport) {
         });
     });
 
+    // get a user
+    app.get('/api/users/:user_id', function(req, res) {
+        User.find({
+            _id : req.params.user_id
+        }, function(err, user) {
+            if (err)
+                res.send(err);
+
+            res.json(user);
+        });
+    });
+
 };
 
 // route middleware to make sure
