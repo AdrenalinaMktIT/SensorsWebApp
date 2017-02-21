@@ -1,4 +1,4 @@
-var app = angular.module('sensorsWebApp', ['userController', 'userService', 'ui.router', 'ui.grid', 'ui.grid.pagination', 'ui.grid.selection', 'ui.grid.exporter']);
+var app = angular.module('sensorsWebApp', ['userController', 'clientService', 'timezoneService', 'userService', 'ui.router', 'ui.bootstrap', 'ui.grid', 'ui.grid.pagination', 'ui.grid.selection', 'ui.grid.exporter']);
 
 app.config(function($stateProvider, $urlRouterProvider) {
 

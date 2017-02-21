@@ -1,5 +1,3 @@
-// app/models/user.js
-// load the things we need
 var mongoose = require('mongoose');
 var bcrypt   = require('bcrypt-nodejs');
 
@@ -18,7 +16,10 @@ var userSchema = mongoose.Schema({
             type: String,
             default: 'Default User Description'
         },
-        client_id: Number,
+        client_id: {
+            type: Number,
+            ref: 'Client'
+        },
         user_type: {
             type: String,
             default: 'Monitoreo',
@@ -26,7 +27,7 @@ var userSchema = mongoose.Schema({
         },
         timezone_id: {
             type: Number,
-            default: -3
+            ref: 'Timezone'
         },
         active: {
             type: Boolean,

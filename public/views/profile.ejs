@@ -9,43 +9,41 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
     <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">-->
 
     <link rel="styleSheet" href="../libs/angular-ui-grid/ui-grid.min.css"/>
 
     <link rel="styleSheet" href="../assets/css/main.css"/>
 
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <!--<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>-->
 
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>-->
 
     <!-- JS (load angular, ui-router, and our custom js file) -->
     <script src="../libs/angular/angular.min.js"></script>
+
+    <script src="../libs/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
 
     <script src="http://ui-grid.info/docs/grunt-scripts/csv.js"></script>
     <script src="http://ui-grid.info/docs/grunt-scripts/pdfmake.js"></script>
     <script src="http://ui-grid.info/docs/grunt-scripts/vfs_fonts.js"></script>
 
+    <script src="../libs/underscore/underscore-min.js"></script>
+
     <script src="../libs/angular-ui-grid/ui-grid.min.js"></script>
     <script src="../libs/angular-ui-router/release/angular-ui-router.min.js"></script>
     <script src="../config/app.js"></script>
+    <script src="../services/client.service.js"></script>
+    <script src="../services/timezone.service.js"></script>
     <script src="../services/user.service.js"></script>
     <script src="../controllers/user.controller.js"></script>
 </head>
 
-<!-- apply our angular app to our site -->
 <body ng-app="sensorsWebApp">
 <nav class="navbar navbar-inverse">
     <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
             <a class="navbar-brand" href="#">
                 <img alt="Brand" height="20" width="20" src="../assets/img/adrenalina_logo.png">
             </a>
@@ -54,11 +52,11 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li class="active dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                <li uib-dropdown>
+                    <a uib-dropdown-toggle>
                         <i class="fa fa-cog" aria-hidden="true"></i> Admin <i class="fa fa-caret-down" aria-hidden="true"></i>
                     </a>
-                    <ul class="dropdown-menu">
+                    <ul uib-dropdown-menu>
                         <li><a ui-sref="groups">Grupos</a></li>
                         <li><a ui-sref="sensors">Sensores</a></li>
                         <li role="separator" class="divider"></li>
@@ -71,27 +69,27 @@
                 </li>
             </ul>
             <ul class="nav navbar-nav">
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                <li uib-dropdown>
+                    <a uib-dropdown-toggle>
                         <i class="fa fa-line-chart" aria-hidden="true"></i> Monitoreo <i class="fa fa-caret-down" aria-hidden="true"></i>
                     </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Status</a></li>
-                        <li><a href="#">Historico</a></li>
+                    <ul uib-dropdown-menu>
+                        <li><a ui-sref="status">Status</a></li>
+                        <li><a ui-sref="historical">Historico</a></li>
                     </ul>
                 </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                <li uib-dropdown>
+                    <a uib-dropdown-toggle>
                         <i class="fa fa-file-o" aria-hidden="true"></i> Reportes <i class="fa fa-caret-down" aria-hidden="true"></i>
                     </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Listado</a></li>
-                        <li><a href="#">Calculos</a></li>
-                        <li><a href="#">Mensajes</a></li>
+                    <ul uib-dropdown-menu>
+                        <li><a ui-sref="listing">Listado</a></li>
+                        <li><a ui-sref="calculations">Calculos</a></li>
+                        <li><a ui-sref="messages">Mensajes</a></li>
                         <li role="separator" class="divider"></li>
-                        <li><a href="#">Estados</a></li>
+                        <li><a ui-sref="statuses">Estados</a></li>
                         <li role="separator" class="divider"></li>
-                        <li><a href="#">Parametros</a></li>
+                        <li><a ui-sref="settings">Parametros</a></li>
                     </ul>
                 </li>
             </ul>

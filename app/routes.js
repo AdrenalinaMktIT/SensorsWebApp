@@ -1,7 +1,9 @@
 // app/routes.js
 module.exports = function(app, passport) {
 
-    var User       		= require('./models/user');
+    var User = require('./models/user');
+    var Client = require('./models/client');
+    var Timezone = require('./models/timezone');
 
     // =====================================
     // HOME PAGE (with login links) ========
@@ -80,14 +82,36 @@ module.exports = function(app, passport) {
     // get all users
     app.get('/api/users', function(req, res) {
 
-        // use mongoose to get all users in the database
         User.find(function(err, users) {
 
-            // if there is an error retrieving, send the error. nothing after res.send(err) will execute
             if (err)
                 res.send(err);
 
-            res.json(users); // return all users in JSON format
+            res.json(users);
+        });
+    });
+
+    // get all clients
+    app.get('/api/clients', function(req, res) {
+
+        Client.find(function(err, clients) {
+
+            if (err)
+                res.send(err);
+
+            res.json(clients);
+        });
+    });
+
+    // get all timezones
+    app.get('/api/timezones', function(req, res) {
+
+        Timezone.find(function(err, timezones) {
+
+            if (err)
+                res.send(err);
+
+            res.json(timezones);
         });
     });
 
@@ -95,21 +119,69 @@ module.exports = function(app, passport) {
     app.post('/api/users', function(req, res) {
 
         // create a user, information comes from AJAX request from Angular
-        User.create({
-            text : req.body.text,
-            done : false
-        }, function(err, users) {
+        // find a user whose name is the same as the forms username
+        // we are checking to see if the user trying to login already exists
+        User.findOne({ 'name' :  req.body.name }, function(err, user) {
+            // if there are any errors, return the error
             if (err)
-                res.send(err);
+                return done(err);
 
-            // get and return all the users after you create another
-            User.find(function(err, users) {
-                if (err)
-                    res.send(err);
-                res.json(users);
-            });
+            // check to see if theres already a user with that email
+            if (user) {
+                return done(null, false, req.flash('signupMessage', 'Ese usuario ya ha sido creado.'));
+            } else {
+
+                // if there is no user with that email
+                // create the user
+                var newUser            = new User();
+
+                // set the user's local credentials
+                newUser.name = req.body.name;
+                newUser.password = newUser.generateHash(req.body.password); // use the generateHash function in our user model
+                newUser.description = req.body.description;
+                newUser.client_id = req.body.client;
+                newUser.user_type = req.body.type;
+                newUser.timezone = req.body.timezone;
+                newUser.active = req.body.active;
+
+                // save the user
+                newUser.save(function(err) {
+                    if (err)
+                        throw err;
+                    return done(null, newUser);
+                });
+            }
         });
+    });
 
+    app.post('/api/clients', function(req, res) {
+
+        Client.findOne({ 'name' :  req.body.name }, function(err, client) {
+            if (err)
+                return done(err);
+
+            if (client) {
+                return done(null, false, req.flash('signupMessage', 'Ese usuario ya ha sido creado.'));
+            } else {
+
+                var newClient = new Client();
+
+                // set the user's local credentials
+                newClient.name = req.body.name;
+                newClient.password = newUser.generateHash(req.body.password); // use the generateHash function in our user model
+                newClient.description = req.body.description;
+                newClient.client_id = req.body.client;
+                newClient.user_type = req.body.type;
+                newClient.timezone = req.body.timezone;
+                newClient.active = req.body.active;
+
+                newClient.save(function(err) {
+                    if (err)
+                        throw err;
+                    return done(null, newClient);
+                });
+            }
+        });
     });
 
     // delete a user
@@ -129,6 +201,22 @@ module.exports = function(app, passport) {
         });
     });
 
+    // delete a client
+    app.delete('/api/clients/:client_id', function(req, res) {
+        Client.remove({
+            _id : req.params.client_id
+        }, function(err, client) {
+            if (err)
+                res.send(err);
+
+            Client.find(function(err, clients) {
+                if (err)
+                    res.send(err);
+                res.json(clients);
+            });
+        });
+    });
+
     // get a user
     app.get('/api/users/:user_id', function(req, res) {
         User.find({
@@ -141,6 +229,75 @@ module.exports = function(app, passport) {
         });
     });
 
+    // get a client
+    app.get('/api/clients/:client_id', function(req, res) {
+        Client.find({
+            _id : req.params.client_id
+        }, function(err, client) {
+            if (err)
+                res.send(err);
+
+            res.json(client);
+        });
+    });
+
+    // get a timezone
+    app.get('/api/timezones/:timezone_id', function(req, res) {
+        Timezone.find({
+            _id : req.params.timezone_id
+        }, function(err, timezone) {
+            if (err)
+                res.send(err);
+
+            res.json(timezone);
+        });
+    });
+
+    // update a user
+    app.put('/api/users/:user_id', function(req, res) {
+        User.findOne({
+            _id : req.params.user_id
+        }, function(err, user) {
+            if (err)
+                res.send(err);
+            else {
+                // Update each attribute with any possible attribute that may have been submitted in the body of the request
+                // If that attribute isn't in the request body, default back to whatever it was before.
+                user.name = req.body.name || user.name;
+                user.password = user.generateHash(req.body.password) || user.password;
+                user.description = req.body.description || user.description;
+                user.client_id = req.body.client || user.client_id;
+                user.user_type = req.body.type || user.user_type;
+                user.timezone_id = req.body.timezone || user.timezone_id;
+                user.active = req.body.active;
+
+                // Save the updated document back to the database
+                user.save(function(err) {
+                    if (err)
+                        throw err;
+                    res.send(user);
+                });
+            }
+        });
+    });
+
+    // update a client
+    app.put('/api/clients/:client_id', function(req, res) {
+        User.find({
+            _id : req.params.client_id
+        }, function(err, client) {
+            if (err)
+                res.send(err);
+
+            clients.name = req.body.name;
+            clients.password = req.body.password;
+            clients.description = req.body.description;
+            clients.client_id = req.body.client;
+            clients.user_type = req.body.type;
+            clients.timezone = req.body.timezone;
+            clients.active = req.body.active;
+        });
+    });
 };
 
 // route middleware to make sure
