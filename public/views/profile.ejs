@@ -34,9 +34,19 @@
     <script src="../libs/angular-ui-grid/ui-grid.min.js"></script>
     <script src="../libs/angular-ui-router/release/angular-ui-router.min.js"></script>
     <script src="../config/app.js"></script>
+
+    <script src="../services/alert.service.js"></script>
+    <script src="../services/device.service.js"></script>
     <script src="../services/client.service.js"></script>
+    <script src="../services/group.service.js"></script>
+    <script src="../services/sensor.service.js"></script>
     <script src="../services/timezone.service.js"></script>
     <script src="../services/user.service.js"></script>
+
+    <script src="../controllers/alert.controller.js"></script>
+    <script src="../controllers/device.controller.js"></script>
+    <script src="../controllers/group.controller.js"></script>
+    <script src="../controllers/sensor.controller.js"></script>
     <script src="../controllers/user.controller.js"></script>
 </head>
 
@@ -109,7 +119,7 @@
 </nav>
 <div class="container">
 
-    <% include header.html %>
+    <!--<% include header.html %>-->
 
     <!-- THIS IS WHERE WE WILL INJECT OUR CONTENT ============================== -->
     <div ui-view></div>

@@ -1,9 +1,17 @@
 // app/routes.js
 module.exports = function(app, passport) {
 
-    var User = require('./models/user');
+    var Alert = require('./models/alert');
+    var Carrier = require('./models/carrier');
     var Client = require('./models/client');
+    var Device = require('./models/device');
+    var Group = require('./models/group');
+    var Model = require('./models/model');
+    var Profile = require('./models/profile');
+    var Sensor = require('./models/sensor');
     var Timezone = require('./models/timezone');
+    var Type = require('./models/type');
+    var User = require('./models/user');
 
     // =====================================
     // HOME PAGE (with login links) ========
@@ -79,15 +87,27 @@ module.exports = function(app, passport) {
     });
 
     // API ---------------------------------------------------------------------
-    // get all users
-    app.get('/api/users', function(req, res) {
+    // get all alerts
+    app.get('/api/alerts', function(req, res) {
 
-        User.find(function(err, users) {
+        Alert.find(function(err, alerts) {
 
             if (err)
                 res.send(err);
 
-            res.json(users);
+            res.json(alerts);
+        });
+    });
+    
+    // get all carriers
+    app.get('/api/carriers', function(req, res) {
+
+        Carrier.find(function(err, carriers) {
+
+            if (err)
+                res.send(err);
+
+            res.json(carriers);
         });
     });
 
@@ -103,6 +123,66 @@ module.exports = function(app, passport) {
         });
     });
 
+    // get all devices
+    app.get('/api/devices', function(req, res) {
+
+        Device.find(function(err, devices) {
+
+            if (err)
+                res.send(err);
+
+            res.json(devices);
+        });
+    });
+
+    // get all groups
+    app.get('/api/groups', function(req, res) {
+
+        Group.find(function(err, groups) {
+
+            if (err)
+                res.send(err);
+
+            res.json(groups);
+        });
+    });
+
+    // get all models
+    app.get('/api/models', function(req, res) {
+
+        Model.find(function(err, models) {
+
+            if (err)
+                res.send(err);
+
+            res.json(models);
+        });
+    });
+
+    // get all profiles
+    app.get('/api/profiles', function(req, res) {
+
+        Profile.find(function(err, profiles) {
+
+            if (err)
+                res.send(err);
+
+            res.json(profiles);
+        });
+    });
+
+    // get all sensors
+    app.get('/api/sensors', function(req, res) {
+
+        Sensor.find(function(err, sensors) {
+
+            if (err)
+                res.send(err);
+
+            res.json(sensors);
+        });
+    });
+
     // get all timezones
     app.get('/api/timezones', function(req, res) {
 
@@ -112,6 +192,30 @@ module.exports = function(app, passport) {
                 res.send(err);
 
             res.json(timezones);
+        });
+    });
+
+    // get all types
+    app.get('/api/types', function(req, res) {
+
+        Type.find(function(err, types) {
+
+            if (err)
+                res.send(err);
+
+            res.json(types);
+        });
+    });
+    
+    // get all users
+    app.get('/api/users', function(req, res) {
+
+        User.find(function(err, users) {
+
+            if (err)
+                res.send(err);
+
+            res.json(users);
         });
     });
 
@@ -133,7 +237,7 @@ module.exports = function(app, passport) {
 
                 // if there is no user with that email
                 // create the user
-                var newUser            = new User();
+                var newUser = new User();
 
                 // set the user's local credentials
                 newUser.name = req.body.name;

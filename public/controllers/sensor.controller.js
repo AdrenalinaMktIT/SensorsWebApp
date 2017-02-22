@@ -1,7 +1,7 @@
-angular.module('userController', [])
+angular.module('sensorController', [])
 
-// inject the User service factory into our controller
-    .controller('UserCtrl', function ($http, $uibModal, $log, Clients, Timezones, Users) {
+// inject the Sensor service factory into our controller
+    .controller('SensorCtrl', function ($http, $uibModal, $log, Sensors) {
 
         var vm = this;
 
@@ -12,14 +12,15 @@ angular.module('userController', [])
         vm.gridOptions = {
             enableSorting: true,
             /*paginationPageSizes: [25, 50, 75],
-            paginationPageSize: 25,*/
+             paginationPageSize: 25,*/
             gridMenuShowHideColumns: false,
+            enableFiltering: true,
             /*enableRowHeaderSelection: true,*/
             showGridFooter: true,
             columnDefs: [
                 { field: 'name', displayName: 'NOMBRE', enableHiding: false },
                 { field: 'description', displayName: 'DESCRIPCION', enableHiding: false },
-                { field: 'user_type', displayName: 'TIPO DE USUARIO', enableHiding: false },
+                { field: 'image', displayName: 'TIPO', enableHiding: false },
                 { field: 'crud', displayName: 'VER / EDITAR / BORRAR', enableHiding: false, enableSorting: false,
                     cellTemplate:
                     '<button id="readBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'read\')" type="button" class="btn btn-xs btn-info"><i class="fa fa-eye" aria-hidden="true"></i> Ver</button> ' +
@@ -30,18 +31,16 @@ angular.module('userController', [])
         };
 
         // GET =====================================================================
-        // when landing on the page, get all users and show them
-        // use the service to get all the users
-        loadUsers();
-        loadClients();
-        loadTimezones();
+        // when landing on the page, get all sensors and show them
+        // use the service to get all the sensors
+        loadSensors();
 
-        function loadUsers() {
-            Users.getAll()
+        function loadSensors() {
+            Sensors.getAll()
                 .then(function successCallback(response) {
                     // this callback will be called asynchronously
                     // when the response is available
-                    vm.users = response.data;
+                    vm.sensors = response.data;
                     console.log(response.data);
                     vm.gridOptions.data = response.data;
                 }, function errorCallback(response) {
@@ -51,37 +50,9 @@ angular.module('userController', [])
                 });
         }
 
-        function loadClients() {
-            Clients.getAll()
-                .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.clients = response.data;
-                    console.log(response.data);
-                }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                    console.log('Error: ' + response);
-                });
-        }
-
-        function loadTimezones() {
-            Timezones.getAll()
-                .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.timezones = response.data;
-                    console.log(response.data);
-                }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                    console.log('Error: ' + response);
-                });
-        }
-
         // CREATE ==================================================================
         // when submitting the add form, send the text to the node API
-        vm.createUser = function() {
+        vm.createSensor = function() {
 
             // validate the formData to make sure that something is there
             // if form is empty, nothing will happen
@@ -89,14 +60,14 @@ angular.module('userController', [])
             if (!$.isEmptyObject(vm.formData)) {
 
                 // call the create function from our service (returns a promise object)
-                Users.create(vm.formData)
+                Sensors.create(vm.formData)
 
-                // if successful creation, call our get function to get all the new users
+                // if successful creation, call our get function to get all the new sensors
                     .then(function successCallback(response) {
                         // this callback will be called asynchronously
                         // when the response is available
-                        vm.formData = {}; // clear the form so our user is ready to enter another
-                        vm.users = response.data;
+                        vm.formData = {}; // clear the form so our sensor is ready to enter another
+                        vm.sensors = response.data;
                         console.log(response.data);
                         vm.gridOptions.data = response.data;
                     }, function errorCallback(response) {
@@ -116,25 +87,25 @@ angular.module('userController', [])
 
             if (mode != 'add') {
 
-                //vm.getUser(id);
-                Users.get(id)
-                // if successful creation, call our get function to get all the new users
+                //vm.getSensor(id);
+                Sensors.get(id)
+                // if successful creation, call our get function to get all the new sensors
                     .then(function successCallback(response) {
                         // this callback will be called asynchronously
                         // when the response is available
-                        //vm.user = response.data[0];
+                        //vm.sensor = response.data[0];
 
                         vm.id = response.data[0]._id;
                         vm.name = response.data[0].name;
                         vm.password = response.data[0].password;
                         vm.description = response.data[0].description;
                         vm.client = response.data[0].client_id;
-                        vm.type = response.data[0].user_type;
+                        vm.type = response.data[0].sensor_type;
                         vm.timezone = response.data[0].timezone_id;
                         vm.active = response.data[0].active;
 
-                        var user = {
-                            userId: vm.id,
+                        var sensor = {
+                            sensorId: vm.id,
                             name: vm.name,
                             password: vm.password,
                             description: vm.description,
@@ -153,14 +124,8 @@ angular.module('userController', [])
                             size: 'lg',
                             //appendTo: parentElem,
                             resolve: {
-                                user: function () {
-                                    return user;
-                                },
-                                clients: function () {
-                                    return vm.clients;
-                                },
-                                timezones: function () {
-                                    return vm.timezones;
+                                sensor: function () {
+                                    return sensor;
                                 },
                                 mode: function () {
                                     return mode;
@@ -173,33 +138,33 @@ angular.module('userController', [])
                                 case 'read':
                                     break;
                                 case 'update':
-                                    var userData = {
-                                        userId: data.user.userId,
-                                        name: data.user.name,
-                                        password: data.user.password,
-                                        description: data.user.description,
-                                        client: data.user.client._id,
-                                        type: data.user.type,
-                                        timezone: data.user.timezone._id,
-                                        active: data.user.active !== 'No'
+                                    var sensorData = {
+                                        sensorId: data.sensor.sensorId,
+                                        name: data.sensor.name,
+                                        password: data.sensor.password,
+                                        description: data.sensor.description,
+                                        client: data.sensor.client._id,
+                                        type: data.sensor.type,
+                                        timezone: data.sensor.timezone._id,
+                                        active: data.sensor.active !== 'No'
                                     };
-                                    Users.update(data.user.userId, userData);
+                                    Sensors.update(data.sensor.sensorId, sensorData);
                                     break;
                                 case 'delete':
-                                    Users.delete(data.user.userId);
+                                    Sensors.delete(data.sensor.sensorId);
                                     break;
                                 case 'add':
-                                    var userData = {
-                                        //userId: data.user.userId,
-                                        name: data.user.name,
-                                        password: data.user.password,
-                                        description: data.user.description,
-                                        client: data.user.client._id,
-                                        type: data.user.type,
-                                        timezone: data.user.timezone._id,
-                                        active: data.user.active !== 'No'
+                                    var sensorData = {
+                                        //sensorId: data.sensor.sensorId,
+                                        name: data.sensor.name,
+                                        password: data.sensor.password,
+                                        description: data.sensor.description,
+                                        client: data.sensor.client._id,
+                                        type: data.sensor.type,
+                                        timezone: data.sensor.timezone._id,
+                                        active: data.sensor.active !== 'No'
                                     };
-                                    Users.add(userData);
+                                    Sensors.add(sensorData);
                                     break;
                             }
                         }, function () {
@@ -219,14 +184,8 @@ angular.module('userController', [])
                     size: 'lg',
                     //appendTo: parentElem,
                     resolve: {
-                        user: function () {
+                        sensor: function () {
                             return null;
-                        },
-                        clients: function () {
-                            return vm.clients;
-                        },
-                        timezones: function () {
-                            return vm.timezones;
                         },
                         mode: function () {
                             return mode;
@@ -236,17 +195,17 @@ angular.module('userController', [])
 
                 modalInstance.result.then(function (data) {
 
-                    var userData = {
-                        //userId: data.user.userId,
-                        name: data.user.name,
-                        password: data.user.password,
-                        description: data.user.description,
-                        client: data.user.client._id,
-                        type: data.user.type,
-                        timezone: data.user.timezone._id,
-                        active: data.user.active !== 'No'
+                    var sensorData = {
+                        //sensorId: data.sensor.sensorId,
+                        name: data.sensor.name,
+                        password: data.sensor.password,
+                        description: data.sensor.description,
+                        client: data.sensor.client._id,
+                        type: data.sensor.type,
+                        timezone: data.sensor.timezone._id,
+                        active: data.sensor.active !== 'No'
                     };
-                    Users.create(userData);
+                    Sensors.create(sensorData);
                 }, function () {
                     $log.info('modal-component dismissed at: ' + new Date());
                 });
@@ -254,14 +213,14 @@ angular.module('userController', [])
         };
 
         // DELETE ==================================================================
-        // delete a user after checking it
-        vm.deleteUser = function(id) {
-            Users.delete(id)
-            // if successful creation, call our get function to get all the new users
+        // delete a sensor after checking it
+        vm.deleteSensor = function(id) {
+            Sensors.delete(id)
+            // if successful creation, call our get function to get all the new sensors
                 .then(function successCallback(response) {
                     // this callback will be called asynchronously
                     // when the response is available
-                    vm.users = response.data;
+                    vm.sensors = response.data;
                     console.log(response.data);
                     vm.gridOptions.data = response.data;
                 }, function errorCallback(response) {
@@ -272,16 +231,12 @@ angular.module('userController', [])
         };
     });
 
-angular.module('userController').controller('ModalInstanceCtrl', function ($uibModalInstance, user, clients, timezones, mode) {
+angular.module('sensorController').controller('ModalInstanceCtrl', function ($uibModalInstance, sensor, mode) {
     var vm = this;
 
     vm.isView = vm.isUpdate = vm.isDelete = vm.isAdd = false;
 
-    vm.user = user;
-
-    vm.clients = clients;
-
-    vm.timezones = timezones;
+    vm.sensor = sensor;
 
     vm.actives = ['Si', 'No'];
 
@@ -290,10 +245,8 @@ angular.module('userController').controller('ModalInstanceCtrl', function ($uibM
     vm.isDisabled = true;
 
     if (mode != 'add') {
-        vm.user.client = clients[user.client-1];
-        vm.user.timezone = _.find(timezones, function(val){ return val._id == user.timezone; });
-        vm.user.active = user.active ? 'Si' : 'No';
-        vm.user.type = user.type;
+        vm.sensor.active = sensor.active ? 'Si' : 'No';
+        vm.sensor.type = sensor.type;
     }
 
     switch (mode) {
@@ -324,15 +277,15 @@ angular.module('userController').controller('ModalInstanceCtrl', function ($uibM
     };
 
     vm.add = function () {
-        $uibModalInstance.close({mode: 'add', user: vm.user});
+        $uibModalInstance.close({mode: 'add', sensor: vm.sensor});
     };
 
     vm.update = function () {
-        $uibModalInstance.close({mode: 'update', user: vm.user});
+        $uibModalInstance.close({mode: 'update', sensor: vm.sensor});
     };
 
     vm.delete = function () {
-        $uibModalInstance.close({mode: 'delete', user: vm.user});
+        $uibModalInstance.close({mode: 'delete', sensor: vm.sensor});
     };
 
     vm.cancel = function () {

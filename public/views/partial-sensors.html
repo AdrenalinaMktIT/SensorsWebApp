@@ -1,15 +1,15 @@
-<div class="container" ng-controller="GroupCtrl as vm">
+<div class="container" ng-controller="SensorCtrl as vm">
 
     <div class="page-header text-center">
-        <h1><span class="fa fa-users"></span> Grupos</h1>
+        <h1><span class="fa fa-thermometer-full"></span> Sensores</h1>
     </div>
 
     <div class="well text-center">
-        <p>Esta pagina permite <span class="text-success">agregar</span>, <span class="text-warning">editar</span> y <span class="text-danger">eliminar</span> grupos.</p>
+        <p>Esta pagina permite <span class="text-success">agregar</span>, <span class="text-warning">editar</span> y <span class="text-danger">eliminar</span> sensores.</p>
     </div>
 
     <div ui-i18n="{{vm.lang}}">
-        <button id="addBtn" ng-click="vm.openModal(null, 'add')" type="button" class="btn btn-primary"><i class="fa fa-plus" aria-hidden="true"></i> Agregar Grupo</button>
+        <button id="addBtn" ng-click="vm.openModal(null, 'add')" type="button" class="btn btn-primary"><i class="fa fa-plus" aria-hidden="true"></i> Agregar Sensor</button>
         <br>
         <br>
         <div id="grid1" ui-grid="vm.gridOptions" ui-grid-selection ui-grid-exporter class="grid"></div>
@@ -23,19 +23,19 @@
             <div class="modal-body" id="modal-body">
                 <form class="form-horizontal" name="UpdateEmployeeForm" >
                     <fieldset ng-disabled="vm.isDisabled">
-                        <input class="form-control" readonly="readonly" name="groupId" ng-model="vm.group.groupId" type="hidden" placeholder="ID de Grupo" required />
+                        <input class="form-control" readonly="readonly" name="sensorId" ng-model="vm.sensor.sensorId" type="hidden" placeholder="ID de Grupo" required />
                         <div class="row">
                             <div class="col-md-4">
                                 <label class="control-label"> Nombre</label>
-                                <input class="form-control" name="name" ng-model="vm.group.name" type="text" placeholder="Nombre" required />
+                                <input class="form-control" name="name" ng-model="vm.sensor.name" type="text" placeholder="Nombre" required />
                             </div>
                             <div class="col-md-4">
                                 <label class="control-label"> Descripcion</label>
-                                <input class="form-control" name="description" ng-model="vm.group.description" type="text" placeholder="Descripcion" required />
+                                <input class="form-control" name="description" ng-model="vm.sensor.description" type="text" placeholder="Descripcion" required />
                             </div>
                             <div class="col-md-4">
                                 <label class="control-label"> Imagen</label>
-                                <input class="form-control" name="image" ng-model="vm.group.image" type="text" placeholder="URL Imagen" />
+                                <input class="form-control" name="image" ng-model="vm.sensor.image" type="text" placeholder="URL Imagen" />
                             </div>
                         </div>
                     </fieldset>

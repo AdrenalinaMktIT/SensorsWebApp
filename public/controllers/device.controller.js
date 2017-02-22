@@ -1,7 +1,7 @@
-angular.module('userController', [])
+angular.module('deviceController', [])
 
-// inject the User service factory into our controller
-    .controller('UserCtrl', function ($http, $uibModal, $log, Clients, Timezones, Users) {
+// inject the Device service factory into our controller
+    .controller('DeviceCtrl', function ($http, $uibModal, $log, Devices) {
 
         var vm = this;
 
@@ -12,15 +12,15 @@ angular.module('userController', [])
         vm.gridOptions = {
             enableSorting: true,
             /*paginationPageSizes: [25, 50, 75],
-            paginationPageSize: 25,*/
+             paginationPageSize: 25,*/
             gridMenuShowHideColumns: false,
             /*enableRowHeaderSelection: true,*/
             showGridFooter: true,
             columnDefs: [
                 { field: 'name', displayName: 'NOMBRE', enableHiding: false },
                 { field: 'description', displayName: 'DESCRIPCION', enableHiding: false },
-                { field: 'user_type', displayName: 'TIPO DE USUARIO', enableHiding: false },
-                { field: 'crud', displayName: 'VER / EDITAR / BORRAR', enableHiding: false, enableSorting: false,
+                { field: 'image', displayName: 'IMAGEN', enableHiding: false },
+                { field: 'crud', displayName: 'VER / EDITAR / BORRAR', enableHiding: false, enableSorting: false, exporterSuppressExport: true,
                     cellTemplate:
                     '<button id="readBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'read\')" type="button" class="btn btn-xs btn-info"><i class="fa fa-eye" aria-hidden="true"></i> Ver</button> ' +
                     '<button id="updateBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'update\')" type="button" class="btn btn-xs btn-success"><i class="fa fa-pencil" aria-hidden="true"></i> Editar</button> ' +
@@ -30,18 +30,16 @@ angular.module('userController', [])
         };
 
         // GET =====================================================================
-        // when landing on the page, get all users and show them
-        // use the service to get all the users
-        loadUsers();
-        loadClients();
-        loadTimezones();
+        // when landing on the page, get all devices and show them
+        // use the service to get all the devices
+        loadDevices();
 
-        function loadUsers() {
-            Users.getAll()
+        function loadDevices() {
+            Devices.getAll()
                 .then(function successCallback(response) {
                     // this callback will be called asynchronously
                     // when the response is available
-                    vm.users = response.data;
+                    vm.devices = response.data;
                     console.log(response.data);
                     vm.gridOptions.data = response.data;
                 }, function errorCallback(response) {
@@ -51,37 +49,9 @@ angular.module('userController', [])
                 });
         }
 
-        function loadClients() {
-            Clients.getAll()
-                .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.clients = response.data;
-                    console.log(response.data);
-                }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                    console.log('Error: ' + response);
-                });
-        }
-
-        function loadTimezones() {
-            Timezones.getAll()
-                .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.timezones = response.data;
-                    console.log(response.data);
-                }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                    console.log('Error: ' + response);
-                });
-        }
-
         // CREATE ==================================================================
         // when submitting the add form, send the text to the node API
-        vm.createUser = function() {
+        vm.createDevice = function() {
 
             // validate the formData to make sure that something is there
             // if form is empty, nothing will happen
@@ -89,14 +59,14 @@ angular.module('userController', [])
             if (!$.isEmptyObject(vm.formData)) {
 
                 // call the create function from our service (returns a promise object)
-                Users.create(vm.formData)
+                Devices.create(vm.formData)
 
-                // if successful creation, call our get function to get all the new users
+                // if successful creation, call our get function to get all the new devices
                     .then(function successCallback(response) {
                         // this callback will be called asynchronously
                         // when the response is available
-                        vm.formData = {}; // clear the form so our user is ready to enter another
-                        vm.users = response.data;
+                        vm.formData = {}; // clear the form so our device is ready to enter another
+                        vm.devices = response.data;
                         console.log(response.data);
                         vm.gridOptions.data = response.data;
                     }, function errorCallback(response) {
@@ -116,25 +86,25 @@ angular.module('userController', [])
 
             if (mode != 'add') {
 
-                //vm.getUser(id);
-                Users.get(id)
-                // if successful creation, call our get function to get all the new users
+                //vm.getDevice(id);
+                Devices.get(id)
+                // if successful creation, call our get function to get all the new devices
                     .then(function successCallback(response) {
                         // this callback will be called asynchronously
                         // when the response is available
-                        //vm.user = response.data[0];
+                        //vm.device = response.data[0];
 
                         vm.id = response.data[0]._id;
                         vm.name = response.data[0].name;
                         vm.password = response.data[0].password;
                         vm.description = response.data[0].description;
                         vm.client = response.data[0].client_id;
-                        vm.type = response.data[0].user_type;
+                        vm.type = response.data[0].device_type;
                         vm.timezone = response.data[0].timezone_id;
                         vm.active = response.data[0].active;
 
-                        var user = {
-                            userId: vm.id,
+                        var device = {
+                            deviceId: vm.id,
                             name: vm.name,
                             password: vm.password,
                             description: vm.description,
@@ -153,14 +123,8 @@ angular.module('userController', [])
                             size: 'lg',
                             //appendTo: parentElem,
                             resolve: {
-                                user: function () {
-                                    return user;
-                                },
-                                clients: function () {
-                                    return vm.clients;
-                                },
-                                timezones: function () {
-                                    return vm.timezones;
+                                device: function () {
+                                    return device;
                                 },
                                 mode: function () {
                                     return mode;
@@ -173,33 +137,33 @@ angular.module('userController', [])
                                 case 'read':
                                     break;
                                 case 'update':
-                                    var userData = {
-                                        userId: data.user.userId,
-                                        name: data.user.name,
-                                        password: data.user.password,
-                                        description: data.user.description,
-                                        client: data.user.client._id,
-                                        type: data.user.type,
-                                        timezone: data.user.timezone._id,
-                                        active: data.user.active !== 'No'
+                                    var deviceData = {
+                                        deviceId: data.device.deviceId,
+                                        name: data.device.name,
+                                        password: data.device.password,
+                                        description: data.device.description,
+                                        client: data.device.client._id,
+                                        type: data.device.type,
+                                        timezone: data.device.timezone._id,
+                                        active: data.device.active !== 'No'
                                     };
-                                    Users.update(data.user.userId, userData);
+                                    Devices.update(data.device.deviceId, deviceData);
                                     break;
                                 case 'delete':
-                                    Users.delete(data.user.userId);
+                                    Devices.delete(data.device.deviceId);
                                     break;
                                 case 'add':
-                                    var userData = {
-                                        //userId: data.user.userId,
-                                        name: data.user.name,
-                                        password: data.user.password,
-                                        description: data.user.description,
-                                        client: data.user.client._id,
-                                        type: data.user.type,
-                                        timezone: data.user.timezone._id,
-                                        active: data.user.active !== 'No'
+                                    var deviceData = {
+                                        //deviceId: data.device.deviceId,
+                                        name: data.device.name,
+                                        password: data.device.password,
+                                        description: data.device.description,
+                                        client: data.device.client._id,
+                                        type: data.device.type,
+                                        timezone: data.device.timezone._id,
+                                        active: data.device.active !== 'No'
                                     };
-                                    Users.add(userData);
+                                    Devices.add(deviceData);
                                     break;
                             }
                         }, function () {
@@ -219,14 +183,8 @@ angular.module('userController', [])
                     size: 'lg',
                     //appendTo: parentElem,
                     resolve: {
-                        user: function () {
+                        device: function () {
                             return null;
-                        },
-                        clients: function () {
-                            return vm.clients;
-                        },
-                        timezones: function () {
-                            return vm.timezones;
                         },
                         mode: function () {
                             return mode;
@@ -236,17 +194,17 @@ angular.module('userController', [])
 
                 modalInstance.result.then(function (data) {
 
-                    var userData = {
-                        //userId: data.user.userId,
-                        name: data.user.name,
-                        password: data.user.password,
-                        description: data.user.description,
-                        client: data.user.client._id,
-                        type: data.user.type,
-                        timezone: data.user.timezone._id,
-                        active: data.user.active !== 'No'
+                    var deviceData = {
+                        //deviceId: data.device.deviceId,
+                        name: data.device.name,
+                        password: data.device.password,
+                        description: data.device.description,
+                        client: data.device.client._id,
+                        type: data.device.type,
+                        timezone: data.device.timezone._id,
+                        active: data.device.active !== 'No'
                     };
-                    Users.create(userData);
+                    Devices.create(deviceData);
                 }, function () {
                     $log.info('modal-component dismissed at: ' + new Date());
                 });
@@ -254,14 +212,14 @@ angular.module('userController', [])
         };
 
         // DELETE ==================================================================
-        // delete a user after checking it
-        vm.deleteUser = function(id) {
-            Users.delete(id)
-            // if successful creation, call our get function to get all the new users
+        // delete a device after checking it
+        vm.deleteDevice = function(id) {
+            Devices.delete(id)
+            // if successful creation, call our get function to get all the new devices
                 .then(function successCallback(response) {
                     // this callback will be called asynchronously
                     // when the response is available
-                    vm.users = response.data;
+                    vm.devices = response.data;
                     console.log(response.data);
                     vm.gridOptions.data = response.data;
                 }, function errorCallback(response) {
@@ -272,16 +230,12 @@ angular.module('userController', [])
         };
     });
 
-angular.module('userController').controller('ModalInstanceCtrl', function ($uibModalInstance, user, clients, timezones, mode) {
+angular.module('deviceController').controller('ModalInstanceCtrl', function ($uibModalInstance, device, mode) {
     var vm = this;
 
     vm.isView = vm.isUpdate = vm.isDelete = vm.isAdd = false;
 
-    vm.user = user;
-
-    vm.clients = clients;
-
-    vm.timezones = timezones;
+    vm.device = device;
 
     vm.actives = ['Si', 'No'];
 
@@ -290,10 +244,8 @@ angular.module('userController').controller('ModalInstanceCtrl', function ($uibM
     vm.isDisabled = true;
 
     if (mode != 'add') {
-        vm.user.client = clients[user.client-1];
-        vm.user.timezone = _.find(timezones, function(val){ return val._id == user.timezone; });
-        vm.user.active = user.active ? 'Si' : 'No';
-        vm.user.type = user.type;
+        vm.device.active = device.active ? 'Si' : 'No';
+        vm.device.type = device.type;
     }
 
     switch (mode) {
@@ -324,15 +276,15 @@ angular.module('userController').controller('ModalInstanceCtrl', function ($uibM
     };
 
     vm.add = function () {
-        $uibModalInstance.close({mode: 'add', user: vm.user});
+        $uibModalInstance.close({mode: 'add', device: vm.device});
     };
 
     vm.update = function () {
-        $uibModalInstance.close({mode: 'update', user: vm.user});
+        $uibModalInstance.close({mode: 'update', device: vm.device});
     };
 
     vm.delete = function () {
-        $uibModalInstance.close({mode: 'delete', user: vm.user});
+        $uibModalInstance.close({mode: 'delete', device: vm.device});
     };
 
     vm.cancel = function () {
