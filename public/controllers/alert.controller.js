@@ -14,17 +14,21 @@ angular.module('alertController', [])
             /*paginationPageSizes: [25, 50, 75],
              paginationPageSize: 25,*/
             gridMenuShowHideColumns: false,
+            enableFiltering: true,
             /*enableRowHeaderSelection: true,*/
             showGridFooter: true,
             columnDefs: [
-                { field: 'name', displayName: 'NOMBRE', enableHiding: false },
-                { field: 'less_than', displayName: 'MENOR QUE', enableHiding: false },
-                { field: 'greater_than', displayName: 'MAYOR QUE', enableHiding: false },
+                { field: 'name', displayName: 'NOMBRE', enableHiding: false, width: '15%' },
+                { field: 'profile.name', displayName: 'PERFIL', enableHiding: false, width: '20%' },
+                { field: 'sensor.name', displayName: 'SENSOR', enableHiding: false, width: '25%' },
+                { field: 'less_than', displayName: 'MENOR QUE', enableHiding: false, width: '10%' },
+                { field: 'greater_than', displayName: 'MAYOR QUE', enableHiding: false, width: '10%' },
                 { field: 'crud', displayName: 'VER / EDITAR / BORRAR', enableHiding: false, enableSorting: false, exporterSuppressExport: true,
                     cellTemplate:
                     '<button id="readBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'read\')" type="button" class="btn btn-xs btn-info"><i class="fa fa-eye" aria-hidden="true"></i> Ver</button> ' +
                     '<button id="updateBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'update\')" type="button" class="btn btn-xs btn-success"><i class="fa fa-pencil" aria-hidden="true"></i> Editar</button> ' +
-                    '<button id="deleteBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'delete\')" type="button" class="btn btn-xs btn-danger"><i class="fa fa-trash" aria-hidden="true"></i> Borrar</button>' }
+                    '<button id="deleteBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'delete\')" type="button" class="btn btn-xs btn-danger"><i class="fa fa-trash" aria-hidden="true"></i> Borrar</button>',
+                width: '20%'}
             ],
             enableGridMenu: true
         };

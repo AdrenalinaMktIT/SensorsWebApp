@@ -14,12 +14,14 @@ angular.module('deviceController', [])
             /*paginationPageSizes: [25, 50, 75],
              paginationPageSize: 25,*/
             gridMenuShowHideColumns: false,
+            enableFiltering: true,
             /*enableRowHeaderSelection: true,*/
             showGridFooter: true,
             columnDefs: [
-                { field: 'name', displayName: 'NOMBRE', enableHiding: false },
+                { field: '_id', displayName: 'IMEI', enableHiding: false },
                 { field: 'description', displayName: 'DESCRIPCION', enableHiding: false },
-                { field: 'image', displayName: 'IMAGEN', enableHiding: false },
+                { field: 'model.name', displayName: 'MODELO', enableHiding: false },
+                { field: 'client_id.name', displayName: 'CLIENTE', enableHiding: false },
                 { field: 'crud', displayName: 'VER / EDITAR / BORRAR', enableHiding: false, enableSorting: false, exporterSuppressExport: true,
                     cellTemplate:
                     '<button id="readBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'read\')" type="button" class="btn btn-xs btn-info"><i class="fa fa-eye" aria-hidden="true"></i> Ver</button> ' +

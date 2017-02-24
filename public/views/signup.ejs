@@ -1,11 +1,16 @@
 <!-- views/signup.ejs -->
 <!doctype html>
-<html>
+<html class="no-js" ng-app="PasswordStrength">
 <head>
     <title>SensoresApp - SIGNUP - Adrenalina MKT&IT - 2017</title>
 
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
+    <link rel="stylesheet" href="../libs/bootstrap/dist/css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="../libs/bootstrap/dist/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="../libs/font-awesome/css/font-awesome.min.css">
+
+    <link rel="styleSheet" href="../assets/css/main.css"/>
+
     <style>
         body 		{ padding-top:80px; }
     </style>
@@ -13,9 +18,9 @@
 <body>
 <div class="container">
 
-    <div class="col-sm-6 col-sm-offset-3">
+    <% include header.html %>
 
-        <h1><span class="fa fa-sign-in"></span> Registrarse</h1>
+    <div class="col-sm-6 col-sm-offset-3">
 
         <!-- show any messages that come back with authentication -->
         <% if (message.length > 0) { %>
@@ -23,17 +28,35 @@
         <% } %>
 
         <!-- LOGIN FORM -->
-        <form action="/signup" method="post">
+        <form action="/signup" method="post" name="joinTeamForm" role="form" ng-controller="FormController">
+
+            <legend class="form-label">Registracion</legend>
+
             <div class="form-group">
-                <label>Usuario</label>
-                <input type="text" class="form-control" name="username">
-            </div>
-            <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" class="form-control" name="password">
+                <label for="usernameInput">Usuario</label>
+
+                <div class="error form-hint" ng-show="joinTeamForm.fullname.$dirty && joinTeamForm.fullname.$error.required" ng-cloak>{{"Este campo es requerido."}}</div>
+
+                <input type="text" class="form-control" ng-class="(joinTeamForm.username.$dirty &&
+        joinTeamForm.username.$invalid) ? 'error' : ''" name="username" id="usernameInput" placeholder="Ingresar nombre" ng-required="true" ng-model="username">
             </div>
 
-            <button type="submit" class="btn btn-warning btn-lg">Registrarse</button>
+            <div class="form-group">
+                <label for="passwordInput">Contraseña</label>
+                <div class="form-hint">
+                    Para cumplimentar con nuestra politica de Contraseña Segura, Ud. debe ingresar una contraseña
+                    suficientemente fuerte. Se requiere que al menos posea 7 caracteres.
+                </div>
+                <input type="password" class="form-control ok-password" ng-class="(joinTeamForm.password.$dirty && joinTeamForm.password.$invalid) ? 'error' : ''" name="password" id="passwordInput" placeholder="Ingresar Contraseña" ng-required="true" ng-model="password">
+
+                <div class="label password-count" ng-class="password.length > 7 ? 'label-success' : 'label-danger'" ng-cloak>{{ password | passwordCount:7 }}</div>
+
+                <div class="strength-meter">
+                    <div class="strength-meter-fill" data-strength="{{passwordStrength}}"></div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" ng-disabled="joinTeamForm.$invalid">Registrarse</button>
         </form>
 
         <hr>
@@ -44,5 +67,11 @@
     </div>
 
 </div>
+
+<% include footer.html %>
+
+<script src="../libs/angular/angular.min.js"></script>
+<script src="../assets/js/zxcvbn.loader.js"></script>
+
 </body>
 </html>

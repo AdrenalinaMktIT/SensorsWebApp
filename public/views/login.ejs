@@ -4,8 +4,11 @@
 <head>
     <title>SensoresApp - LOGIN - Adrenalina MKT&IT - 2017</title>
 
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
+    <link rel="stylesheet" href="../libs/bootstrap/dist/css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="../libs/bootstrap/dist/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="../libs/font-awesome/css/font-awesome.min.css">
+
     <style>
         body 		{ padding-top:80px; }
     </style>
@@ -13,9 +16,9 @@
 <body>
 <div class="container">
 
-    <div class="col-sm-6 col-sm-offset-3">
+    <% include header.html %>
 
-        <h1><span class="fa fa-sign-in"></span> Ingrese sus datos</h1>
+    <div class="col-sm-6 col-sm-offset-3">
 
         <!-- show any messages that come back with authentication -->
         <% if (message.length > 0) { %>
@@ -24,6 +27,9 @@
 
         <!-- LOGIN FORM -->
         <form action="/login" method="post">
+
+            <legend class="form-label">Ingrese sus datos</legend>
+
             <div class="form-group">
                 <label>Usuario</label>
                 <input type="text" class="form-control" name="username">
@@ -33,7 +39,7 @@
                 <input type="password" class="form-control" name="password">
             </div>
 
-            <button type="submit" class="btn btn-warning btn-lg">Ingresar</button>
+            <button type="submit" class="btn btn-primary">Ingresar</button>
         </form>
 
         <hr>
@@ -44,5 +50,8 @@
     </div>
 
 </div>
+
+<% include footer.html %>
+
 </body>
 </html>

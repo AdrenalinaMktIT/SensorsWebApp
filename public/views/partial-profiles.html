@@ -1,0 +1,76 @@
+<div class="container" ng-controller="ProfileCtrl as vm">
+
+    <div class="page-header text-center">
+        <h1><span class="fa fa-id-card-o"></span> Perfiles de Notificacion</h1>
+    </div>
+
+    <div class="well text-center">
+        <p>Esta pagina permite <span class="text-success">agregar</span>, <span class="text-warning">editar</span> y <span class="text-danger">eliminar</span> perfiles de notificacion.</p>
+    </div>
+
+    <div ui-i18n="{{vm.lang}}">
+        <button id="addBtn" ng-click="vm.openModal(null, 'add')" type="button" class="btn btn-primary"><i class="fa fa-plus" aria-hidden="true"></i> Agregar Perfil</button>
+        <br>
+        <br>
+        <div id="grid1" ui-grid="vm.gridOptions" ui-grid-selection ui-grid-exporter class="grid"></div>
+    </div>
+
+    <div class="modal-demo">
+        <script type="text/ng-template" id="myModalContent.html">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">{{vm.modalName}}</h3>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <form class="form-horizontal" name="UpdateEmployeeForm" >
+                    <fieldset ng-disabled="vm.isDisabled">
+                        <input class="form-control" readonly="readonly" name="profileId" ng-model="vm.profile.profileId" type="hidden" placeholder="ID de Usuario" required />
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="control-label"> Nombre</label>
+                                <input class="form-control" name="name" ng-model="vm.profile.name" type="text" placeholder="Nombre" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="control-label"> Contraseña</label>
+                                <input class="form-control" name="password" ng-model="vm.profile.password" type="password" placeholder="Contraseña" required />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="control-label"> Descripcion</label>
+                                <input class="form-control" name="description" ng-model="vm.profile.description" type="text" placeholder="Descripcion" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="control-label"> Pertenece a Cliente</label>
+                                <select class="form-control" name="client" ng-model="vm.profile.client" ng-options="client as client.name for client in vm.clients track by client._id" required ></select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="control-label"> Nivel de Acceso</label>
+                                <select class="form-control" name="type" ng-model="vm.profile.type" ng-options="type for type in vm.types" required ></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="control-label"> Zona Horaria</label>
+                                <select class="form-control" name="timezone" ng-model="vm.profile.timezone" ng-options="timezone as timezone.name for timezone in vm.timezones track by timezone._id" required ></select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="control-label"> Activo</label>
+                                <select class="form-control" name="active" ng-model="vm.profile.active" ng-options="active for active in vm.actives" required ></select>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="button" ng-show="vm.isAdd" ng-click="vm.add()">Guardar</button>
+                <button class="btn btn-primary" type="button" ng-show="vm.isView" ng-click="vm.back()">Volver</button>
+                <button class="btn btn-primary" type="button" ng-show="vm.isUpdate" ng-click="vm.update()">Actualizar</button>
+                <button class="btn btn-primary" type="button" ng-show="vm.isDelete" ng-click="vm.delete()">Eliminar</button>
+                <button class="btn btn-warning" type="button" ng-hide="vm.isView" ng-click="vm.cancel()">Cancelar</button>
+            </div>
+        </script>
+    </div>
+
+</div>

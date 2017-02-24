@@ -1,11 +1,11 @@
 var app = angular.module('sensorsWebApp', [
-    'deviceController', 'alertController', 'groupController', 'sensorController', 'userController',
-    'deviceService', 'alertService', 'clientService', 'groupService', 'sensorService', 'timezoneService', 'userService',
-    'ui.router', 'ui.bootstrap', 'ui.grid', 'ui.grid.pagination', 'ui.grid.selection', 'ui.grid.exporter']);
+    'alertController', 'deviceController', 'groupController', 'profileController', 'sensorController', 'userController',
+    'alertService', 'carrierService', 'clientService', 'deviceService', 'groupService', 'profileService', 'sensorService', 'timezoneService', 'userService',
+    'ui.router', 'ui.bootstrap', 'ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pagination', 'ui.grid.selection', 'ui.grid.exporter']);
 
 app.config(function($stateProvider, $urlRouterProvider) {
 
-    $urlRouterProvider.otherwise('/home');
+    $urlRouterProvider.otherwise('/devices');
 
     $stateProvider
 
@@ -31,9 +31,14 @@ app.config(function($stateProvider, $urlRouterProvider) {
             controller: 'DeviceCtrl'
         })
         .state('users', {
-                url: '/users',
-                templateUrl: '../views/partial-users.html',
-                controller: 'UserCtrl'
+            url: '/users',
+            templateUrl: '../views/partial-users.html',
+            controller: 'UserCtrl'
+        })
+        .state('profiles', {
+            url: '/profiles',
+            templateUrl: '../views/partial-profiles.html',
+            controller: 'ProfileCtrl'
         })
         // TODO ingresos a sistema
         .state('inputs', {

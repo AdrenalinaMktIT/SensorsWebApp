@@ -95,8 +95,11 @@ module.exports = function(app, passport) {
             if (err)
                 res.send(err);
 
-            res.json(alerts);
-        });
+        }).populate('sensor profile')
+            .exec(function (err, alerts) {
+                if (err) return handleError(err);
+                res.json(alerts);
+            });
     });
     
     // get all carriers
@@ -127,12 +130,14 @@ module.exports = function(app, passport) {
     app.get('/api/devices', function(req, res) {
 
         Device.find(function(err, devices) {
-
             if (err)
                 res.send(err);
-
-            res.json(devices);
-        });
+        })
+            .populate('model client_id')
+            .exec(function (err, devices) {
+                if (err) return handleError(err);
+                res.json(devices);
+            });
     });
 
     // get all groups
@@ -163,24 +168,28 @@ module.exports = function(app, passport) {
     app.get('/api/profiles', function(req, res) {
 
         Profile.find(function(err, profiles) {
-
             if (err)
                 res.send(err);
-
-            res.json(profiles);
-        });
+        })
+            .populate('carrier timezone_id')
+            .exec(function (err, profiles) {
+                if (err) return handleError(err);
+                res.json(profiles);
+            });
     });
 
     // get all sensors
     app.get('/api/sensors', function(req, res) {
 
         Sensor.find(function(err, sensors) {
-
             if (err)
                 res.send(err);
-
-            res.json(sensors);
-        });
+        })
+            .populate('type group')
+            .exec(function (err, sensors) {
+                if (err) return handleError(err);
+                res.json(sensors);
+            });
     });
 
     // get all timezones
@@ -318,6 +327,18 @@ module.exports = function(app, passport) {
                     res.send(err);
                 res.json(clients);
             });
+        });
+    });
+
+    // get a profile
+    app.get('/api/profiles/:profile_id', function(req, res) {
+        Profile.find({
+            _id : req.params.profile_id
+        }, function(err, profile) {
+            if (err)
+                res.send(err);
+
+            res.json(profile);
         });
     });
 

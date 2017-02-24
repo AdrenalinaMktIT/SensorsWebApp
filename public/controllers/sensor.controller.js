@@ -20,12 +20,13 @@ angular.module('sensorController', [])
             columnDefs: [
                 { field: 'name', displayName: 'NOMBRE', enableHiding: false },
                 { field: 'description', displayName: 'DESCRIPCION', enableHiding: false },
-                { field: 'image', displayName: 'TIPO', enableHiding: false },
+                { field: 'type.name', displayName: 'TIPO', enableHiding: false },
+                { field: 'group.name', displayName: 'GRUPO ASOC.', enableHiding: false, cellFilter: 'nullGroupFilter' },
                 { field: 'crud', displayName: 'VER / EDITAR / BORRAR', enableHiding: false, enableSorting: false,
-                    cellTemplate:
+                    cellTemplate: '<div class="ui-grid-cell-contents">'+
                     '<button id="readBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'read\')" type="button" class="btn btn-xs btn-info"><i class="fa fa-eye" aria-hidden="true"></i> Ver</button> ' +
                     '<button id="updateBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'update\')" type="button" class="btn btn-xs btn-success"><i class="fa fa-pencil" aria-hidden="true"></i> Editar</button> ' +
-                    '<button id="deleteBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'delete\')" type="button" class="btn btn-xs btn-danger"><i class="fa fa-trash" aria-hidden="true"></i> Borrar</button>' }
+                    '<button id="deleteBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'delete\')" type="button" class="btn btn-xs btn-danger"><i class="fa fa-trash" aria-hidden="true"></i> Borrar</button></div>' }
             ],
             enableGridMenu: true
         };
@@ -229,7 +230,13 @@ angular.module('sensorController', [])
                     console.log('Error: ' + response);
                 });
         };
-    });
+    })
+
+    .filter('nullGroupFilter', function() {
+        return function(input) {
+            return input == null ? 'Sin Grupo' : input;
+        };
+});
 
 angular.module('sensorController').controller('ModalInstanceCtrl', function ($uibModalInstance, sensor, mode) {
     var vm = this;

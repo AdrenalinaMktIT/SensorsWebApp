@@ -14,6 +14,7 @@ angular.module('groupController', [])
             /*paginationPageSizes: [25, 50, 75],
              paginationPageSize: 25,*/
             gridMenuShowHideColumns: false,
+            enableFiltering: true,
             /*enableRowHeaderSelection: true,*/
             showGridFooter: true,
             columnDefs: [
