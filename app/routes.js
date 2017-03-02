@@ -218,14 +218,13 @@ module.exports = function(app, passport) {
     
     // get all users
     app.get('/api/users', function(req, res) {
-
-        User.find(function(err, users) {
-
-            if (err)
-                res.send(err);
-
-            res.json(users);
-        });
+        User.find({})
+            .then(function(users) {
+            res.status(200).json(users);
+            })
+            .catch(function(err) {
+                res.status(500).send(err);
+            });
     });
 
     // create user and send back all users after creation
@@ -234,14 +233,11 @@ module.exports = function(app, passport) {
         // create a user, information comes from AJAX request from Angular
         // find a user whose name is the same as the forms username
         // we are checking to see if the user trying to login already exists
-        User.findOne({ 'name' :  req.body.name }, function(err, user) {
-            // if there are any errors, return the error
-            if (err)
-                return done(err);
-
+        User.findOne({ 'name' :  req.body.name })
+            .then(function(user) {
             // check to see if theres already a user with that email
             if (user) {
-                return done(null, false, req.flash('signupMessage', 'Ese usuario ya ha sido creado.'));
+                res.status(409).json('{"message": "Ese usuario ya ha sido creado.", "name": "ResourceError"}');
             } else {
 
                 // if there is no user with that email
@@ -252,26 +248,22 @@ module.exports = function(app, passport) {
                 newUser.name = req.body.name;
                 newUser.password = newUser.generateHash(req.body.password); // use the generateHash function in our user model
                 newUser.description = req.body.description;
-                newUser.client_id = req.body.client;
-                newUser.user_type = req.body.type;
-                newUser.timezone = req.body.timezone;
+                newUser.client_id = req.body.client_id;
+                newUser.user_type = req.body.user_type;
+                newUser.timezone_id = req.body.timezone_id;
                 newUser.active = req.body.active;
 
                 // save the user
-                newUser.save(function (err) {
-                    if (err)
-                        throw err;
-                }).then(function () {
-                    User.find(function (err, users) {
-
-                        if (err)
-                            res.send(err);
-
-                        res.json(users);
-                    });
-                })
-            }
-        });
+                newUser.save()
+                    .then(function(user) {
+                        res.status(201).json(user)
+                    })
+                    .catch(function (err) {
+                        res.status(500).json(err)
+                    })
+            }})
+            .catch(function(err) {
+            });
     });
 
     app.post('/api/clients', function(req, res) {
@@ -306,19 +298,17 @@ module.exports = function(app, passport) {
 
     // delete a user
     app.delete('/api/users/:user_id', function(req, res) {
-        User.remove({
-            _id : req.params.user_id
-        }, function(err, user) {
-            if (err)
-                res.send(err);
-
-            // get and return all the users after you create another
-            User.find(function(err, users) {
-                if (err)
-                    res.send(err);
-                res.json(users);
+        User.findByIdAndRemove(req.params.user_id)
+            .then(function(user) {
+                if (!user) {
+                    res.status(404).json('{"message": "Ese usuario no existe.", "name": "ResourceError"}');
+                } else {
+                    res.status(200).json(user);
+                }
+            })
+            .catch(function(err) {
+                res.status(500).json(err);
             });
-        });
     });
 
     // delete a client
@@ -387,37 +377,34 @@ module.exports = function(app, passport) {
 
     // update a user
     app.put('/api/users/:user_id', function(req, res) {
-        User.findOne({
-            _id : req.params.user_id
-        }, function(err, user) {
-            if (err)
-                res.send(err);
-            else {
-                // Update each attribute with any possible attribute that may have been submitted in the body of the request
-                // If that attribute isn't in the request body, default back to whatever it was before.
-                user.name = req.body.name || user.name;
-                user.password = user.generateHash(req.body.password) || user.password;
-                user.description = req.body.description || user.description;
-                user.client_id = req.body.client || user.client_id;
-                user.user_type = req.body.type || user.user_type;
-                user.timezone_id = req.body.timezone || user.timezone_id;
-                user.active = req.body.active;
+        User.findById(req.params.user_id)
+            .then(function(user) {
+                if (!user) {
+                    res.status(404).json('{"message": "Ese usuario no existe.", "name": "ResourceError"}');
+                } else {
+                    // Update each attribute with any possible attribute that may have been submitted in the body of the request
+                    // If that attribute isn't in the request body, default back to whatever it was before.
+                    user.name = req.body.name || user.name;
+                    user.password = user.generateHash(req.body.password) || user.password;
+                    user.description = req.body.description || user.description;
+                    user.client_id = req.body.client_id || user.client_id;
+                    user.user_type = req.body.user_type || user.user_type;
+                    user.timezone_id = req.body.timezone_id || user.timezone_id;
+                    user.active = req.body.active;
 
-                // Save the updated document back to the database
-                user.save(function(err) {
-                    if (err)
-                        throw err;
-                }).then(function() {
-                    User.find(function(err, users) {
-
-                        if (err)
-                            res.send(err);
-
-                        res.json(users);
-                    });
-                })
-            }
-        });
+                    // Save the updated document back to the database
+                    user.save()
+                        .then(function (user) {
+                            res.status(200).json(user);
+                        })
+                        .catch(function (err) {
+                            res.status(500).json(err);
+                        });
+                }
+            })
+            .catch(function(err) {
+                res.status(500).json(err);
+            })
     });
 
     // update a client
