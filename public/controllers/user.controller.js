@@ -27,7 +27,10 @@ angular.module('userController', [])
                     '<button id="updateBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'update\')" type="button" class="btn btn-xs btn-success"><i class="fa fa-pencil" aria-hidden="true"></i> Editar</button> ' +
                     '<button id="deleteBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'delete\')" type="button" class="btn btn-xs btn-danger"><i class="fa fa-trash" aria-hidden="true"></i> Borrar</button>' }
             ],
-            enableGridMenu: true
+            enableGridMenu: true,
+            onRegisterApi: function(gridApi) {
+                vm.gridApi = gridApi;
+            }
         };
 
         // GET =====================================================================
@@ -184,10 +187,14 @@ angular.module('userController', [])
                                         timezone: data.user.timezone._id,
                                         active: data.user.active !== 'No'
                                     };
-                                    Users.update(data.user.userId, userData);
+                                    Users.update(data.user.userId, userData).then(function success(response) {
+                                        vm.gridOptions.data = response.data;
+                                    });
                                     break;
                                 case 'delete':
-                                    Users.delete(data.user.userId);
+                                    Users.delete(data.user.userId).then(function success(response) {
+                                        vm.gridOptions.data = response.data;
+                                    });
                                     break;
                                 case 'add':
                                     var userData = {
@@ -200,7 +207,9 @@ angular.module('userController', [])
                                         timezone: data.user.timezone._id,
                                         active: data.user.active !== 'No'
                                     };
-                                    Users.add(userData);
+                                    Users.add(userData).then(function success(response) {
+                                        vm.gridOptions.data = response.data;
+                                    });
                                     break;
                             }
                         }, function () {

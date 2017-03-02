@@ -18,6 +18,7 @@ var configDB = require('./app/config/database.js');
 
 // configuration ===============================================================
 mongoose.connect(configDB.remoteUrl); // connect to our database
+mongoose.Promise = require('bluebird');
 
 require('./app/config/passport')(passport); // pass passport for configuration
 

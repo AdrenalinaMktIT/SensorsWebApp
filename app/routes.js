@@ -258,11 +258,18 @@ module.exports = function(app, passport) {
                 newUser.active = req.body.active;
 
                 // save the user
-                newUser.save(function(err) {
+                newUser.save(function (err) {
                     if (err)
                         throw err;
-                    return done(null, newUser);
-                });
+                }).then(function () {
+                    User.find(function (err, users) {
+
+                        if (err)
+                            res.send(err);
+
+                        res.json(users);
+                    });
+                })
             }
         });
     });
@@ -400,8 +407,15 @@ module.exports = function(app, passport) {
                 user.save(function(err) {
                     if (err)
                         throw err;
-                    res.send(user);
-                });
+                }).then(function() {
+                    User.find(function(err, users) {
+
+                        if (err)
+                            res.send(err);
+
+                        res.json(users);
+                    });
+                })
             }
         });
     });
