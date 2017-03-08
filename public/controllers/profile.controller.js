@@ -40,14 +40,9 @@ angular.module('profileController', [])
         function loadProfiles() {
             Profiles.getAll()
                 .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.profiles = response.data;
-                    console.log(response.data);
-                    vm.gridOptions.data = response.data;
+                    vm.profiles = response.data.profiles;
+                    vm.gridOptions.data = response.data.profiles;
                 }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
                     console.log('Error: ' + response);
                 });
         }
@@ -55,12 +50,8 @@ angular.module('profileController', [])
         function loadCarriers() {
             Carriers.getAll()
                 .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.carriers = response.data;
+                    vm.carriers = response.data.carriers;
                 }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
                     console.log('Error: ' + response);
                 });
         }
@@ -68,46 +59,12 @@ angular.module('profileController', [])
         function loadTimezones() {
             Timezones.getAll()
                 .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.timezones = response.data;
-                    console.log(response.data);
+                    vm.timezones = response.data.timezones;
                 }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
                     console.log('Error: ' + response);
                 });
         }
 
-        // CREATE ==================================================================
-        // when submitting the add form, send the text to the node API
-        vm.createProfile = function() {
-
-            // validate the formData to make sure that something is there
-            // if form is empty, nothing will happen
-            // people can't just hold enter to keep adding the same to-do anymore
-            if (!$.isEmptyObject(vm.formData)) {
-
-                // call the create function from our service (returns a promise object)
-                Profiles.create(vm.formData)
-
-                // if successful creation, call our get function to get all the new profiles
-                    .then(function successCallback(response) {
-                        // this callback will be called asynchronously
-                        // when the response is available
-                        vm.formData = {}; // clear the form so our profile is ready to enter another
-                        vm.profiles = response.data;
-                        console.log(response.data);
-                        vm.gridOptions.data = response.data;
-                    }, function errorCallback(response) {
-                        // called asynchronously if an error occurs
-                        // or server returns response with an error status.
-                        console.log('Error: ' + response);
-                    });
-            }
-        };
-
-        // UPDATE ==================================================================
         vm.openModal = function (id, mode) {
 
             var vm = this;
@@ -116,22 +73,17 @@ angular.module('profileController', [])
 
             if (mode != 'add') {
 
-                //vm.getProfile(id);
                 Profiles.get(id)
-                // if successful creation, call our get function to get all the new profiles
                     .then(function successCallback(response) {
-                        // this callback will be called asynchronously
-                        // when the response is available
-                        //vm.profile = response.data[0];
 
-                        vm.id = response.data[0]._id;
-                        vm.name = response.data[0].name;
-                        vm.password = response.data[0].password;
-                        vm.description = response.data[0].description;
-                        vm.client = response.data[0].client_id;
-                        vm.type = response.data[0].profile_type;
-                        vm.timezone = response.data[0].timezone_id;
-                        vm.active = response.data[0].active;
+                        vm.id = response.data.profile._id;
+                        vm.name = response.data.profile.name;
+                        vm.password = response.data.profile.password;
+                        vm.description = response.data.profile.description;
+                        vm.client = response.data.profile.client_id;
+                        vm.type = response.data.profile.profile_type;
+                        vm.timezone = response.data.profile.timezone_id;
+                        vm.active = response.data.profile.active;
 
                         var profile = {
                             profileId: vm.id,
@@ -223,7 +175,7 @@ angular.module('profileController', [])
                             return null;
                         },
                         carriers: function () {
-                            return vm.clients;
+                            return vm.carriers;
                         },
                         timezones: function () {
                             return vm.timezones;
@@ -253,23 +205,6 @@ angular.module('profileController', [])
             }
         };
 
-        // DELETE ==================================================================
-        // delete a profile after checking it
-        vm.deleteProfile = function(id) {
-            Profiles.delete(id)
-            // if successful creation, call our get function to get all the new profiles
-                .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.profiles = response.data;
-                    console.log(response.data);
-                    vm.gridOptions.data = response.data;
-                }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                    console.log('Error: ' + response);
-                });
-        };
     });
 
 angular.module('profileController').controller('ModalInstanceCtrl', function ($uibModalInstance, profile, carriers, timezones, mode) {

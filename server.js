@@ -61,8 +61,20 @@ app.use(express.static(__dirname + '/public'));
 
 //});
 
-// routes ======================================================================
-require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
+// APP routes ======================================================================
+require('./app/routes/app.routes')(app, passport); // load our routes and pass in our app and fully configured passport
+// APP routes ======================================================================
+require('./app/routes/alert.routes')(app);
+require('./app/routes/carrier.routes')(app);
+require('./app/routes/client.routes')(app);
+require('./app/routes/device.routes')(app);
+require('./app/routes/group.routes')(app);
+require('./app/routes/model.routes')(app);
+require('./app/routes/profile.routes')(app);
+require('./app/routes/sensor.routes')(app);
+require('./app/routes/timezone.routes')(app);
+require('./app/routes/type.routes')(app);
+require('./app/routes/user.routes')(app);
 
 // launch ======================================================================
 app.listen(port);

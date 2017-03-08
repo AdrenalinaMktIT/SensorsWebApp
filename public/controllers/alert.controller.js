@@ -43,9 +43,8 @@ angular.module('alertController', [])
                 .then(function successCallback(response) {
                     // this callback will be called asynchronously
                     // when the response is available
-                    vm.alerts = response.data;
-                    console.log(response.data);
-                    vm.gridOptions.data = response.data;
+                    vm.alerts = response.data.alerts;
+                    vm.gridOptions.data = response.data.alerts;
                 }, function errorCallback(response) {
                     // called asynchronously if an error occurs
                     // or server returns response with an error status.
@@ -53,35 +52,6 @@ angular.module('alertController', [])
                 });
         }
 
-        // CREATE ==================================================================
-        // when submitting the add form, send the text to the node API
-        vm.createAlert = function() {
-
-            // validate the formData to make sure that something is there
-            // if form is empty, nothing will happen
-            // people can't just hold enter to keep adding the same to-do anymore
-            if (!$.isEmptyObject(vm.formData)) {
-
-                // call the create function from our service (returns a promise object)
-                Alerts.create(vm.formData)
-
-                // if successful creation, call our get function to get all the new alerts
-                    .then(function successCallback(response) {
-                        // this callback will be called asynchronously
-                        // when the response is available
-                        vm.formData = {}; // clear the form so our alert is ready to enter another
-                        vm.alerts = response.data;
-                        console.log(response.data);
-                        vm.gridOptions.data = response.data;
-                    }, function errorCallback(response) {
-                        // called asynchronously if an error occurs
-                        // or server returns response with an error status.
-                        console.log('Error: ' + response);
-                    });
-            }
-        };
-
-        // UPDATE ==================================================================
         vm.openModal = function (id, mode) {
 
             var vm = this;
@@ -90,22 +60,17 @@ angular.module('alertController', [])
 
             if (mode != 'add') {
 
-                //vm.getAlert(id);
                 Alerts.get(id)
-                // if successful creation, call our get function to get all the new alerts
                     .then(function successCallback(response) {
-                        // this callback will be called asynchronously
-                        // when the response is available
-                        //vm.alert = response.data[0];
 
-                        vm.id = response.data[0]._id;
-                        vm.name = response.data[0].name;
-                        vm.password = response.data[0].password;
-                        vm.description = response.data[0].description;
-                        vm.client = response.data[0].client_id;
-                        vm.type = response.data[0].alert_type;
-                        vm.timezone = response.data[0].timezone_id;
-                        vm.active = response.data[0].active;
+                        vm.id = response.data.alert._id;
+                        vm.name = response.data.alert.name;
+                        vm.password = response.data.alert.password;
+                        vm.description = response.data.alert.description;
+                        vm.client = response.data.alert.client_id;
+                        vm.type = response.data.alert.alert_type;
+                        vm.timezone = response.data.alert.timezone_id;
+                        vm.active = response.data.alert.active;
 
                         var alert = {
                             alertId: vm.id,
@@ -213,24 +178,6 @@ angular.module('alertController', [])
                     $log.info('modal-component dismissed at: ' + new Date());
                 });
             }
-        };
-
-        // DELETE ==================================================================
-        // delete a alert after checking it
-        vm.deleteAlert = function(id) {
-            Alerts.delete(id)
-            // if successful creation, call our get function to get all the new alerts
-                .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.alerts = response.data;
-                    console.log(response.data);
-                    vm.gridOptions.data = response.data;
-                }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                    console.log('Error: ' + response);
-                });
         };
     });
 

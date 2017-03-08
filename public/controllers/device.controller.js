@@ -41,9 +41,8 @@ angular.module('deviceController', [])
                 .then(function successCallback(response) {
                     // this callback will be called asynchronously
                     // when the response is available
-                    vm.devices = response.data;
-                    console.log(response.data);
-                    vm.gridOptions.data = response.data;
+                    vm.devices = response.data.devices;
+                    vm.gridOptions.data = response.data.devices;
                 }, function errorCallback(response) {
                     // called asynchronously if an error occurs
                     // or server returns response with an error status.
@@ -51,35 +50,6 @@ angular.module('deviceController', [])
                 });
         }
 
-        // CREATE ==================================================================
-        // when submitting the add form, send the text to the node API
-        vm.createDevice = function() {
-
-            // validate the formData to make sure that something is there
-            // if form is empty, nothing will happen
-            // people can't just hold enter to keep adding the same to-do anymore
-            if (!$.isEmptyObject(vm.formData)) {
-
-                // call the create function from our service (returns a promise object)
-                Devices.create(vm.formData)
-
-                // if successful creation, call our get function to get all the new devices
-                    .then(function successCallback(response) {
-                        // this callback will be called asynchronously
-                        // when the response is available
-                        vm.formData = {}; // clear the form so our device is ready to enter another
-                        vm.devices = response.data;
-                        console.log(response.data);
-                        vm.gridOptions.data = response.data;
-                    }, function errorCallback(response) {
-                        // called asynchronously if an error occurs
-                        // or server returns response with an error status.
-                        console.log('Error: ' + response);
-                    });
-            }
-        };
-
-        // UPDATE ==================================================================
         vm.openModal = function (id, mode) {
 
             var vm = this;
@@ -88,22 +58,17 @@ angular.module('deviceController', [])
 
             if (mode != 'add') {
 
-                //vm.getDevice(id);
                 Devices.get(id)
-                // if successful creation, call our get function to get all the new devices
                     .then(function successCallback(response) {
-                        // this callback will be called asynchronously
-                        // when the response is available
-                        //vm.device = response.data[0];
 
-                        vm.id = response.data[0]._id;
-                        vm.name = response.data[0].name;
-                        vm.password = response.data[0].password;
-                        vm.description = response.data[0].description;
-                        vm.client = response.data[0].client_id;
-                        vm.type = response.data[0].device_type;
-                        vm.timezone = response.data[0].timezone_id;
-                        vm.active = response.data[0].active;
+                        vm.id = response.data.device._id;
+                        vm.name = response.data.device.name;
+                        vm.password = response.data.device.password;
+                        vm.description = response.data.device.description;
+                        vm.client = response.data.device.client_id;
+                        vm.type = response.data.device.device_type;
+                        vm.timezone = response.data.device.timezone_id;
+                        vm.active = response.data.device.active;
 
                         var device = {
                             deviceId: vm.id,
@@ -123,7 +88,6 @@ angular.module('deviceController', [])
                             controller: 'ModalInstanceCtrl',
                             controllerAs: 'vm',
                             size: 'lg',
-                            //appendTo: parentElem,
                             resolve: {
                                 device: function () {
                                     return device;
@@ -183,7 +147,6 @@ angular.module('deviceController', [])
                     controller: 'ModalInstanceCtrl',
                     controllerAs: 'vm',
                     size: 'lg',
-                    //appendTo: parentElem,
                     resolve: {
                         device: function () {
                             return null;
@@ -197,7 +160,6 @@ angular.module('deviceController', [])
                 modalInstance.result.then(function (data) {
 
                     var deviceData = {
-                        //deviceId: data.device.deviceId,
                         name: data.device.name,
                         password: data.device.password,
                         description: data.device.description,
@@ -213,23 +175,6 @@ angular.module('deviceController', [])
             }
         };
 
-        // DELETE ==================================================================
-        // delete a device after checking it
-        vm.deleteDevice = function(id) {
-            Devices.delete(id)
-            // if successful creation, call our get function to get all the new devices
-                .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.devices = response.data;
-                    console.log(response.data);
-                    vm.gridOptions.data = response.data;
-                }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                    console.log('Error: ' + response);
-                });
-        };
     });
 
 angular.module('deviceController').controller('ModalInstanceCtrl', function ($uibModalInstance, device, mode) {

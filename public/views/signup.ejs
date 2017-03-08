@@ -38,7 +38,7 @@
                 <div class="error form-hint" ng-show="joinTeamForm.fullname.$dirty && joinTeamForm.fullname.$error.required" ng-cloak>{{"Este campo es requerido."}}</div>
 
                 <input type="text" class="form-control" ng-class="(joinTeamForm.username.$dirty &&
-        joinTeamForm.username.$invalid) ? 'error' : ''" name="username" id="usernameInput" placeholder="Ingresar nombre" ng-required="true" ng-model="username">
+        joinTeamForm.username.$invalid) ? 'error' : ''" name="username" id="usernameInput" placeholder="Ingresar nombre" ng-required="true" ng-model="username" autofocus>
             </div>
 
             <div class="form-group">

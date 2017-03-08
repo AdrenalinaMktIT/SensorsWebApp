@@ -1,7 +1,7 @@
 var app = angular.module('sensorsWebApp', [
     'alertController', 'deviceController', 'groupController', 'historicalController', 'profileController', 'sensorController', 'userController',
-    'alertService', 'carrierService', 'clientService', 'deviceService', 'groupService', 'profileService', 'sensorService', 'timezoneService', 'userService',
-    'ui.router', 'ui.bootstrap', 'ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pagination', 'ui.grid.selection', 'ui.grid.exporter', 'chart.js']);
+    'appAlertService', 'alertService', 'carrierService', 'clientService', 'deviceService', 'groupService', 'profileService', 'sensorService', 'timezoneService', 'userService',
+    'ui.router', 'ui.bootstrap', 'ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pagination', 'ui.grid.selection', 'ui.grid.exporter', 'chart.js', 'ngMessages']);
 
 app.config(function($stateProvider, $urlRouterProvider) {
 

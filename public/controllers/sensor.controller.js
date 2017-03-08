@@ -41,9 +41,8 @@ angular.module('sensorController', [])
                 .then(function successCallback(response) {
                     // this callback will be called asynchronously
                     // when the response is available
-                    vm.sensors = response.data;
-                    console.log(response.data);
-                    vm.gridOptions.data = response.data;
+                    vm.sensors = response.data.sensors;
+                    vm.gridOptions.data = response.data.sensors;
                 }, function errorCallback(response) {
                     // called asynchronously if an error occurs
                     // or server returns response with an error status.
@@ -68,9 +67,8 @@ angular.module('sensorController', [])
                         // this callback will be called asynchronously
                         // when the response is available
                         vm.formData = {}; // clear the form so our sensor is ready to enter another
-                        vm.sensors = response.data;
-                        console.log(response.data);
-                        vm.gridOptions.data = response.data;
+                        vm.sensors = response.data.sensors;
+                        vm.gridOptions.data = response.data.sensors;
                     }, function errorCallback(response) {
                         // called asynchronously if an error occurs
                         // or server returns response with an error status.
@@ -88,22 +86,16 @@ angular.module('sensorController', [])
 
             if (mode != 'add') {
 
-                //vm.getSensor(id);
                 Sensors.get(id)
-                // if successful creation, call our get function to get all the new sensors
                     .then(function successCallback(response) {
-                        // this callback will be called asynchronously
-                        // when the response is available
-                        //vm.sensor = response.data[0];
-
-                        vm.id = response.data[0]._id;
-                        vm.name = response.data[0].name;
-                        vm.password = response.data[0].password;
-                        vm.description = response.data[0].description;
-                        vm.client = response.data[0].client_id;
-                        vm.type = response.data[0].sensor_type;
-                        vm.timezone = response.data[0].timezone_id;
-                        vm.active = response.data[0].active;
+                        vm.id = response.data.sensor._id;
+                        vm.name = response.data.sensor.name;
+                        vm.password = response.data.sensor.password;
+                        vm.description = response.data.sensor.description;
+                        vm.client = response.data.sensor.client_id;
+                        vm.type = response.data.sensor.sensor_type;
+                        vm.timezone = response.data.sensor.timezone_id;
+                        vm.active = response.data.sensor.active;
 
                         var sensor = {
                             sensorId: vm.id,
@@ -123,7 +115,6 @@ angular.module('sensorController', [])
                             controller: 'ModalInstanceCtrl',
                             controllerAs: 'vm',
                             size: 'lg',
-                            //appendTo: parentElem,
                             resolve: {
                                 sensor: function () {
                                     return sensor;
@@ -183,7 +174,6 @@ angular.module('sensorController', [])
                     controller: 'ModalInstanceCtrl',
                     controllerAs: 'vm',
                     size: 'lg',
-                    //appendTo: parentElem,
                     resolve: {
                         sensor: function () {
                             return null;
@@ -212,26 +202,7 @@ angular.module('sensorController', [])
                 });
             }
         };
-
-        // DELETE ==================================================================
-        // delete a sensor after checking it
-        vm.deleteSensor = function(id) {
-            Sensors.delete(id)
-            // if successful creation, call our get function to get all the new sensors
-                .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.sensors = response.data;
-                    console.log(response.data);
-                    vm.gridOptions.data = response.data;
-                }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                    console.log('Error: ' + response);
-                });
-        };
     })
-
     .filter('nullGroupFilter', function() {
         return function(input) {
             return input == null ? 'Sin Grupo' : input;
@@ -276,8 +247,6 @@ angular.module('sensorController').controller('ModalInstanceCtrl', function ($ui
             vm.isAdd = true;
             break;
     }
-
-    console.log(mode);
 
     vm.ok = function () {
         $uibModalInstance.dismiss('ok');

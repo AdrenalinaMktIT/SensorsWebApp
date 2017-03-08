@@ -1,7 +1,7 @@
 angular.module('userController', [])
 
 // inject the User service factory into our controller
-    .controller('UserCtrl', function ($http, $uibModal, $log, Clients, Timezones, Users) {
+    .controller('UserCtrl', function ($http, $uibModal, $log, Clients, Timezones, Users, AppAlert) {
 
         var vm = this;
 
@@ -43,14 +43,9 @@ angular.module('userController', [])
         function loadUsers() {
             Users.getAll()
                 .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.users = response.data;
-                    console.log(response.data);
-                    vm.gridOptions.data = response.data;
+                    vm.users = response.data.users;
+                    vm.gridOptions.data = response.data.users;
                 }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
                     console.log('Error: ' + response);
                 });
         }
@@ -58,13 +53,8 @@ angular.module('userController', [])
         function loadClients() {
             Clients.getAll()
                 .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.clients = response.data;
-                    console.log(response.data);
+                    vm.clients = response.data.clients;
                 }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
                     console.log('Error: ' + response);
                 });
         }
@@ -72,46 +62,12 @@ angular.module('userController', [])
         function loadTimezones() {
             Timezones.getAll()
                 .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.timezones = response.data;
-                    console.log(response.data);
+                    vm.timezones = response.data.timezones;
                 }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
                     console.log('Error: ' + response);
                 });
         }
 
-        // CREATE ==================================================================
-        // when submitting the add form, send the text to the node API
-        vm.createUser = function() {
-
-            // validate the formData to make sure that something is there
-            // if form is empty, nothing will happen
-            // people can't just hold enter to keep adding the same to-do anymore
-            if (!$.isEmptyObject(vm.formData)) {
-
-                // call the create function from our service (returns a promise object)
-                Users.create(vm.formData)
-
-                // if successful creation, call our get function to get all the new users
-                    .then(function successCallback(response) {
-                        // this callback will be called asynchronously
-                        // when the response is available
-                        vm.formData = {}; // clear the form so our user is ready to enter another
-                        vm.users = response.data;
-                        console.log(response.data);
-                        vm.gridOptions.data = response.data;
-                    }, function errorCallback(response) {
-                        // called asynchronously if an error occurs
-                        // or server returns response with an error status.
-                        console.log('Error: ' + response);
-                    });
-            }
-        };
-
-        // UPDATE ==================================================================
         vm.openModal = function (id, mode) {
 
             var vm = this;
@@ -120,22 +76,17 @@ angular.module('userController', [])
 
             if (mode != 'add') {
 
-                //vm.getUser(id);
                 Users.get(id)
-                // if successful creation, call our get function to get all the new users
                     .then(function successCallback(response) {
-                        // this callback will be called asynchronously
-                        // when the response is available
-                        //vm.user = response.data[0];
 
-                        vm.id = response.data[0]._id;
-                        vm.name = response.data[0].name;
-                        vm.password = response.data[0].password;
-                        vm.description = response.data[0].description;
-                        vm.client = response.data[0].client_id;
-                        vm.type = response.data[0].user_type;
-                        vm.timezone = response.data[0].timezone_id;
-                        vm.active = response.data[0].active;
+                        vm.id = response.data.user._id;
+                        vm.name = response.data.user.name;
+                        vm.password = response.data.user.password;
+                        vm.description = response.data.user.description;
+                        vm.client = response.data.user.client_id;
+                        vm.type = response.data.user.user_type;
+                        vm.timezone = response.data.user.timezone_id;
+                        vm.active = response.data.user.active;
 
                         var user = {
                             userId: vm.id,
@@ -155,7 +106,6 @@ angular.module('userController', [])
                             controller: 'ModalInstanceCtrl',
                             controllerAs: 'vm',
                             size: 'lg',
-                            //appendTo: parentElem,
                             resolve: {
                                 user: function () {
                                     return user;
@@ -187,29 +137,32 @@ angular.module('userController', [])
                                         timezone: data.user.timezone._id,
                                         active: data.user.active !== 'No'
                                     };
-                                    Users.update(data.user.userId, userData).then(function success(response) {
-                                        vm.gridOptions.data = response.data;
-                                    });
+                                    Users.update(data.user.userId, userData)
+                                        .then(function(response) {
+                                            if (response.statusCode() == 201) {
+                                                loadUsers();
+                                                AppAlert.add('success', response.message);
+                                            } else {
+                                                AppAlert.add('danger', response.message);
+                                            }
+                                        })
+                                        .catch(function(error) {
+                                            AppAlert.add('danger', error.message);
+                                        });
                                     break;
                                 case 'delete':
-                                    Users.delete(data.user.userId).then(function success(response) {
-                                        vm.gridOptions.data = response.data;
-                                    });
-                                    break;
-                                case 'add':
-                                    var userData = {
-                                        //userId: data.user.userId,
-                                        name: data.user.name,
-                                        password: data.user.password,
-                                        description: data.user.description,
-                                        client: data.user.client._id,
-                                        type: data.user.type,
-                                        timezone: data.user.timezone._id,
-                                        active: data.user.active !== 'No'
-                                    };
-                                    Users.add(userData).then(function success(response) {
-                                        vm.gridOptions.data = response.data;
-                                    });
+                                    Users.delete(data.user.userId)
+                                        .then(function(response) {
+                                            if (response.statusCode() == 200) {
+                                                loadUsers();
+                                                AppAlert.add('success', response.message);
+                                            } else {
+                                                AppAlert.add('danger', response.message);
+                                            }
+                                        })
+                                        .catch(function(error) {
+                                            AppAlert.add('danger', error.message);
+                                        });
                                     break;
                             }
                         }, function () {
@@ -227,7 +180,6 @@ angular.module('userController', [])
                     controller: 'ModalInstanceCtrl',
                     controllerAs: 'vm',
                     size: 'lg',
-                    //appendTo: parentElem,
                     resolve: {
                         user: function () {
                             return null;
@@ -247,7 +199,6 @@ angular.module('userController', [])
                 modalInstance.result.then(function (data) {
 
                     var userData = {
-                        //userId: data.user.userId,
                         name: data.user.name,
                         password: data.user.password,
                         description: data.user.description,
@@ -256,29 +207,23 @@ angular.module('userController', [])
                         timezone: data.user.timezone._id,
                         active: data.user.active !== 'No'
                     };
-                    Users.create(userData);
+
+                    Users.create(userData)
+                        .then(function(response) {
+                            if (response.statusCode() == 201) {
+                                loadUsers();
+                                AppAlert.add('success', response.message);
+                            } else {
+                                AppAlert.add('danger', response.message);
+                            }
+                        })
+                        .catch(function(error) {
+                            AppAlert.add('danger', error.message);
+                        });
                 }, function () {
                     $log.info('modal-component dismissed at: ' + new Date());
                 });
             }
-        };
-
-        // DELETE ==================================================================
-        // delete a user after checking it
-        vm.deleteUser = function(id) {
-            Users.delete(id)
-            // if successful creation, call our get function to get all the new users
-                .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.users = response.data;
-                    console.log(response.data);
-                    vm.gridOptions.data = response.data;
-                }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                    console.log('Error: ' + response);
-                });
         };
     });
 
@@ -327,18 +272,20 @@ angular.module('userController').controller('ModalInstanceCtrl', function ($uibM
             break;
     }
 
-    console.log(mode);
-
     vm.ok = function () {
         $uibModalInstance.dismiss('ok');
     };
 
-    vm.add = function () {
-        $uibModalInstance.close({mode: 'add', user: vm.user});
+    vm.add = function(userForm) {
+        if (userForm.$valid) {
+            $uibModalInstance.close({mode: 'add', user: vm.user});
+        }
     };
 
-    vm.update = function () {
-        $uibModalInstance.close({mode: 'update', user: vm.user});
+    vm.update = function (userForm) {
+        if (userForm.$valid) {
+            $uibModalInstance.close({mode: 'update', user: vm.user});
+        }
     };
 
     vm.delete = function () {

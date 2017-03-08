@@ -40,9 +40,8 @@ angular.module('groupController', [])
                 .then(function successCallback(response) {
                     // this callback will be called asynchronously
                     // when the response is available
-                    vm.groups = response.data;
-                    console.log(response.data);
-                    vm.gridOptions.data = response.data;
+                    vm.groups = response.data.groups;
+                    vm.gridOptions.data = response.data.groups;
                 }, function errorCallback(response) {
                     // called asynchronously if an error occurs
                     // or server returns response with an error status.
@@ -50,35 +49,6 @@ angular.module('groupController', [])
                 });
         }
 
-        // CREATE ==================================================================
-        // when submitting the add form, send the text to the node API
-        vm.createGroup = function() {
-
-            // validate the formData to make sure that something is there
-            // if form is empty, nothing will happen
-            // people can't just hold enter to keep adding the same to-do anymore
-            if (!$.isEmptyObject(vm.formData)) {
-
-                // call the create function from our service (returns a promise object)
-                Groups.create(vm.formData)
-
-                // if successful creation, call our get function to get all the new groups
-                    .then(function successCallback(response) {
-                        // this callback will be called asynchronously
-                        // when the response is available
-                        vm.formData = {}; // clear the form so our group is ready to enter another
-                        vm.groups = response.data;
-                        console.log(response.data);
-                        vm.gridOptions.data = response.data;
-                    }, function errorCallback(response) {
-                        // called asynchronously if an error occurs
-                        // or server returns response with an error status.
-                        console.log('Error: ' + response);
-                    });
-            }
-        };
-
-        // UPDATE ==================================================================
         vm.openModal = function (id, mode) {
 
             var vm = this;
@@ -93,16 +63,16 @@ angular.module('groupController', [])
                     .then(function successCallback(response) {
                         // this callback will be called asynchronously
                         // when the response is available
-                        //vm.group = response.data[0];
+                        //vm.group = response.data.group[0];
 
-                        vm.id = response.data[0]._id;
-                        vm.name = response.data[0].name;
-                        vm.password = response.data[0].password;
-                        vm.description = response.data[0].description;
-                        vm.client = response.data[0].client_id;
-                        vm.type = response.data[0].group_type;
-                        vm.timezone = response.data[0].timezone_id;
-                        vm.active = response.data[0].active;
+                        vm.id = response.data.group._id;
+                        vm.name = response.data.group.name;
+                        vm.password = response.data.group.password;
+                        vm.description = response.data.group.description;
+                        vm.client = response.data.group.client_id;
+                        vm.type = response.data.group.group_type;
+                        vm.timezone = response.data.group.timezone_id;
+                        vm.active = response.data.group.active;
 
                         var group = {
                             groupId: vm.id,
@@ -210,24 +180,6 @@ angular.module('groupController', [])
                     $log.info('modal-component dismissed at: ' + new Date());
                 });
             }
-        };
-
-        // DELETE ==================================================================
-        // delete a group after checking it
-        vm.deleteGroup = function(id) {
-            Groups.delete(id)
-            // if successful creation, call our get function to get all the new groups
-                .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
-                    vm.groups = response.data;
-                    console.log(response.data);
-                    vm.gridOptions.data = response.data;
-                }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                    console.log('Error: ' + response);
-                });
         };
     });
 

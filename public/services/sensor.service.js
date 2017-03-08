@@ -1,19 +1,19 @@
 angular.module('sensorService', []).factory('Sensors', function ($http) {
         return {
             get: function (id) {
-                return $http.get('/api/sensors/' + id);
+                return $http.get('/api/v1/sensors/' + id);
             },
             getAll: function () {
-                return $http.get('/api/sensors');
+                return $http.get('/api/v1/sensors');
             },
             create: function (sensorData) {
-                return $http.post('/api/sensors', sensorData);
+                return $http.post('/api/v1/sensors', sensorData);
             },
             delete: function (id) {
-                return $http.delete('/api/sensors/' + id);
+                return $http.delete('/api/v1/sensors/' + id);
             },
             update: function (id, sensorData) {
-                return $http.put('/api/sensors/' + id, sensorData);
+                return $http.put('/api/v1/sensors/' + id, sensorData);
             }
         }
     }
