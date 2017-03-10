@@ -10,8 +10,8 @@ var modelSchema = mongoose.Schema({
         required: true
     },
     sensors: [{
-        type: String,
-        ref: 'Type'
+        type: Number,
+        ref: 'Sensor'
     }]
 });
 

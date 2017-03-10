@@ -4,7 +4,7 @@ module.exports = function(app) {
 
     // Obtener todos los modelos.
     app.get('/api/v1/models', function (req, res) {
-        Model.find()
+        Model.find().populate('sensors').exec()
             .then(function (models) {
                 res.status(200).json({
                     message: 'OK!. Modelos obtenidos correctamente.',
