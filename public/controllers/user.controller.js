@@ -139,11 +139,11 @@ angular.module('userController', [])
                                     };
                                     Users.update(data.user.userId, userData)
                                         .then(function(response) {
-                                            if (response.statusCode() == 201) {
+                                            if (response.status == 200) {
                                                 loadUsers();
-                                                AppAlert.add('success', response.message);
+                                                AppAlert.add('success', response.data.message);
                                             } else {
-                                                AppAlert.add('danger', response.message);
+                                                AppAlert.add('danger', response.data.message);
                                             }
                                         })
                                         .catch(function(error) {
@@ -153,11 +153,11 @@ angular.module('userController', [])
                                 case 'delete':
                                     Users.delete(data.user.userId)
                                         .then(function(response) {
-                                            if (response.statusCode() == 200) {
+                                            if (response.status == 200) {
                                                 loadUsers();
-                                                AppAlert.add('success', response.message);
+                                                AppAlert.add('success', response.data.message);
                                             } else {
-                                                AppAlert.add('danger', response.message);
+                                                AppAlert.add('danger', response.data.message);
                                             }
                                         })
                                         .catch(function(error) {
@@ -210,11 +210,11 @@ angular.module('userController', [])
 
                     Users.create(userData)
                         .then(function(response) {
-                            if (response.statusCode() == 201) {
+                            if (response.status == 201) {
                                 loadUsers();
-                                AppAlert.add('success', response.message);
+                                AppAlert.add('success', response.data.message);
                             } else {
-                                AppAlert.add('danger', response.message);
+                                AppAlert.add('danger', response.data.message);
                             }
                         })
                         .catch(function(error) {
