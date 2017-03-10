@@ -103,7 +103,7 @@ angular.module('userController', [])
                             ariaLabelledBy: 'modal-title',
                             ariaDescribedBy: 'modal-body',
                             templateUrl: 'myModalContent.html',
-                            controller: 'ModalInstanceCtrl',
+                            controller: 'UserModalInstanceCtrl',
                             controllerAs: 'vm',
                             size: 'lg',
                             resolve: {
@@ -177,7 +177,7 @@ angular.module('userController', [])
                     ariaLabelledBy: 'modal-title',
                     ariaDescribedBy: 'modal-body',
                     templateUrl: 'myModalContent.html',
-                    controller: 'ModalInstanceCtrl',
+                    controller: 'UserModalInstanceCtrl',
                     controllerAs: 'vm',
                     size: 'lg',
                     resolve: {
@@ -227,7 +227,7 @@ angular.module('userController', [])
         };
     });
 
-angular.module('userController').controller('ModalInstanceCtrl', function ($uibModalInstance, user, clients, timezones, mode) {
+angular.module('userController').controller('UserModalInstanceCtrl', function ($uibModalInstance, user, clients, timezones, mode) {
     var vm = this;
 
     vm.isView = vm.isUpdate = vm.isDelete = vm.isAdd = false;

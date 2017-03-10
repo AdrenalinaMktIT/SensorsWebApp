@@ -85,7 +85,7 @@ angular.module('deviceController', [])
                             ariaLabelledBy: 'modal-title',
                             ariaDescribedBy: 'modal-body',
                             templateUrl: 'myModalContent.html',
-                            controller: 'ModalInstanceCtrl',
+                            controller: 'DeviceModalInstanceCtrl',
                             controllerAs: 'vm',
                             size: 'lg',
                             resolve: {
@@ -144,7 +144,7 @@ angular.module('deviceController', [])
                     ariaLabelledBy: 'modal-title',
                     ariaDescribedBy: 'modal-body',
                     templateUrl: 'myModalContent.html',
-                    controller: 'ModalInstanceCtrl',
+                    controller: 'DeviceModalInstanceCtrl',
                     controllerAs: 'vm',
                     size: 'lg',
                     resolve: {
@@ -177,7 +177,7 @@ angular.module('deviceController', [])
 
     });
 
-angular.module('deviceController').controller('ModalInstanceCtrl', function ($uibModalInstance, device, mode) {
+angular.module('deviceController').controller('DeviceModalInstanceCtrl', function ($uibModalInstance, device, mode) {
     var vm = this;
 
     vm.isView = vm.isUpdate = vm.isDelete = vm.isAdd = false;
@@ -197,20 +197,20 @@ angular.module('deviceController').controller('ModalInstanceCtrl', function ($ui
 
     switch (mode) {
         case 'read':
-            vm.modalName = "Detalle Usuario";
+            vm.modalName = "Detalle Equipo";
             vm.isView = true;
             break;
         case 'update':
-            vm.modalName = "Actualizar Usuario";
+            vm.modalName = "Actualizar Equipo";
             vm.isDisabled = false;
             vm.isUpdate = true;
             break;
         case 'delete':
-            vm.modalName = "Eliminar Usuario";
+            vm.modalName = "Eliminar Equipo";
             vm.isDelete = true;
             break;
         case 'add':
-            vm.modalName = "Nuevo Usuario";
+            vm.modalName = "Nuevo Equipo";
             vm.isDisabled = false;
             vm.isAdd = true;
             break;

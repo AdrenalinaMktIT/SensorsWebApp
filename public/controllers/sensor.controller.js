@@ -112,7 +112,7 @@ angular.module('sensorController', [])
                             ariaLabelledBy: 'modal-title',
                             ariaDescribedBy: 'modal-body',
                             templateUrl: 'myModalContent.html',
-                            controller: 'ModalInstanceCtrl',
+                            controller: 'SensorModalInstanceCtrl',
                             controllerAs: 'vm',
                             size: 'lg',
                             resolve: {
@@ -171,7 +171,7 @@ angular.module('sensorController', [])
                     ariaLabelledBy: 'modal-title',
                     ariaDescribedBy: 'modal-body',
                     templateUrl: 'myModalContent.html',
-                    controller: 'ModalInstanceCtrl',
+                    controller: 'SensorModalInstanceCtrl',
                     controllerAs: 'vm',
                     size: 'lg',
                     resolve: {
@@ -209,7 +209,7 @@ angular.module('sensorController', [])
         };
 });
 
-angular.module('sensorController').controller('ModalInstanceCtrl', function ($uibModalInstance, sensor, mode) {
+angular.module('sensorController').controller('SensorModalInstanceCtrl', function ($uibModalInstance, sensor, mode) {
     var vm = this;
 
     vm.isView = vm.isUpdate = vm.isDelete = vm.isAdd = false;
@@ -229,20 +229,20 @@ angular.module('sensorController').controller('ModalInstanceCtrl', function ($ui
 
     switch (mode) {
         case 'read':
-            vm.modalName = "Detalle Usuario";
+            vm.modalName = "Detalle Sensor";
             vm.isView = true;
             break;
         case 'update':
-            vm.modalName = "Actualizar Usuario";
+            vm.modalName = "Actualizar Sensor";
             vm.isDisabled = false;
             vm.isUpdate = true;
             break;
         case 'delete':
-            vm.modalName = "Eliminar Usuario";
+            vm.modalName = "Eliminar Sensor";
             vm.isDelete = true;
             break;
         case 'add':
-            vm.modalName = "Nuevo Usuario";
+            vm.modalName = "Nuevo Sensor";
             vm.isDisabled = false;
             vm.isAdd = true;
             break;

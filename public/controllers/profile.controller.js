@@ -100,7 +100,7 @@ angular.module('profileController', [])
                             ariaLabelledBy: 'modal-title',
                             ariaDescribedBy: 'modal-body',
                             templateUrl: 'myModalContent.html',
-                            controller: 'ModalInstanceCtrl',
+                            controller: 'ProfileModalInstanceCtrl',
                             controllerAs: 'vm',
                             size: 'lg',
                             //appendTo: parentElem,
@@ -166,7 +166,7 @@ angular.module('profileController', [])
                     ariaLabelledBy: 'modal-title',
                     ariaDescribedBy: 'modal-body',
                     templateUrl: 'myModalContent.html',
-                    controller: 'ModalInstanceCtrl',
+                    controller: 'ProfileModalInstanceCtrl',
                     controllerAs: 'vm',
                     size: 'lg',
                     //appendTo: parentElem,
@@ -207,7 +207,7 @@ angular.module('profileController', [])
 
     });
 
-angular.module('profileController').controller('ModalInstanceCtrl', function ($uibModalInstance, profile, carriers, timezones, mode) {
+angular.module('profileController').controller('ProfileModalInstanceCtrl', function ($uibModalInstance, profile, carriers, timezones, mode) {
     var vm = this;
 
     vm.isView = vm.isUpdate = vm.isDelete = vm.isAdd = false;

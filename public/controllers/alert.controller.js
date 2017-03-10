@@ -87,7 +87,7 @@ angular.module('alertController', [])
                             ariaLabelledBy: 'modal-title',
                             ariaDescribedBy: 'modal-body',
                             templateUrl: 'myModalContent.html',
-                            controller: 'ModalInstanceCtrl',
+                            controller: 'AlertModalInstanceCtrl',
                             controllerAs: 'vm',
                             size: 'lg',
                             //appendTo: parentElem,
@@ -147,7 +147,7 @@ angular.module('alertController', [])
                     ariaLabelledBy: 'modal-title',
                     ariaDescribedBy: 'modal-body',
                     templateUrl: 'myModalContent.html',
-                    controller: 'ModalInstanceCtrl',
+                    controller: 'AlertModalInstanceCtrl',
                     controllerAs: 'vm',
                     size: 'lg',
                     //appendTo: parentElem,
@@ -181,7 +181,7 @@ angular.module('alertController', [])
         };
     });
 
-angular.module('alertController').controller('ModalInstanceCtrl', function ($uibModalInstance, alert, mode) {
+angular.module('alertController').controller('AlertModalInstanceCtrl', function ($uibModalInstance, alert, mode) {
     var vm = this;
 
     vm.isView = vm.isUpdate = vm.isDelete = vm.isAdd = false;
@@ -201,20 +201,20 @@ angular.module('alertController').controller('ModalInstanceCtrl', function ($uib
 
     switch (mode) {
         case 'read':
-            vm.modalName = "Detalle Usuario";
+            vm.modalName = "Detalle Alerta";
             vm.isView = true;
             break;
         case 'update':
-            vm.modalName = "Actualizar Usuario";
+            vm.modalName = "Actualizar Alerta";
             vm.isDisabled = false;
             vm.isUpdate = true;
             break;
         case 'delete':
-            vm.modalName = "Eliminar Usuario";
+            vm.modalName = "Eliminar Alerta";
             vm.isDelete = true;
             break;
         case 'add':
-            vm.modalName = "Nuevo Usuario";
+            vm.modalName = "Nueva Alerta";
             vm.isDisabled = false;
             vm.isAdd = true;
             break;

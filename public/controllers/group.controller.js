@@ -89,7 +89,7 @@ angular.module('groupController', [])
                             ariaLabelledBy: 'modal-title',
                             ariaDescribedBy: 'modal-body',
                             templateUrl: 'myModalContent.html',
-                            controller: 'ModalInstanceCtrl',
+                            controller: 'GroupModalInstanceCtrl',
                             controllerAs: 'vm',
                             size: 'lg',
                             //appendTo: parentElem,
@@ -149,7 +149,7 @@ angular.module('groupController', [])
                     ariaLabelledBy: 'modal-title',
                     ariaDescribedBy: 'modal-body',
                     templateUrl: 'myModalContent.html',
-                    controller: 'ModalInstanceCtrl',
+                    controller: 'GroupModalInstanceCtrl',
                     controllerAs: 'vm',
                     size: 'lg',
                     //appendTo: parentElem,
@@ -183,7 +183,7 @@ angular.module('groupController', [])
         };
     });
 
-angular.module('groupController').controller('ModalInstanceCtrl', function ($uibModalInstance, group, mode) {
+angular.module('groupController').controller('GroupModalInstanceCtrl', function ($uibModalInstance, group, mode) {
     var vm = this;
 
     vm.isView = vm.isUpdate = vm.isDelete = vm.isAdd = false;
@@ -203,20 +203,20 @@ angular.module('groupController').controller('ModalInstanceCtrl', function ($uib
 
     switch (mode) {
         case 'read':
-            vm.modalName = "Detalle Usuario";
+            vm.modalName = "Detalle Grupo";
             vm.isView = true;
             break;
         case 'update':
-            vm.modalName = "Actualizar Usuario";
+            vm.modalName = "Actualizar Grupo";
             vm.isDisabled = false;
             vm.isUpdate = true;
             break;
         case 'delete':
-            vm.modalName = "Eliminar Usuario";
+            vm.modalName = "Eliminar Grupo";
             vm.isDelete = true;
             break;
         case 'add':
-            vm.modalName = "Nuevo Usuario";
+            vm.modalName = "Nuevo Grupo";
             vm.isDisabled = false;
             vm.isAdd = true;
             break;
