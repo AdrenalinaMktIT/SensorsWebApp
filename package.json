@@ -4,6 +4,12 @@
   "description": "SensorsWebApp.",
   "main": "server.js",
   "author": "Adrenalina MKT&IT",
+  "license": "UNLICENSED",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AdrenalinaMktIT/SensorsWebApp.git"
+  },
   "dependencies": {
     "bcrypt-nodejs": "latest",
     "bluebird": "^3.4.7",

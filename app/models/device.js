@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 var deviceSchema = mongoose.Schema({
 
     _id : {
-        type: Number,
+        type: String,
         required: true
     },
 

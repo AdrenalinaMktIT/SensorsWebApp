@@ -3,6 +3,9 @@ angular.module('sensorService', []).factory('Sensors', function ($http) {
             get: function (id) {
                 return $http.get('/api/v1/sensors/' + id);
             },
+            getByType: function (typeId) {
+                return $http.get('/api/v1/sensors/type/' + typeId);
+            },
             getAll: function () {
                 return $http.get('/api/v1/sensors');
             },

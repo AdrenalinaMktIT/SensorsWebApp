@@ -4,7 +4,24 @@ module.exports = function(app) {
 
     // Obtener todos los sensores.
     app.get('/api/v1/sensors', function (req, res) {
-        Sensor.find().populate('type group').exec()
+        Sensor.find().populate('type group').sort({'group.name': 1}).exec()
+            .then(function (sensors) {
+                res.status(200).json({
+                    message: 'OK!. Sensores obtenidos correctamente.',
+                    sensors: sensors
+                });
+            })
+            .catch(function () {
+                res.status(500).json({
+                    message: 'Error interno de servidor. Por favor, intente nuevamente.',
+                    sensors: null
+                });
+            });
+    });
+
+    // Obtener los sensores filtrando por tipo.
+    app.get('/api/v1/sensors/type/:type_id', function (req, res) {
+        Sensor.find({"type": req.params.type_id}).populate('group').exec()
             .then(function (sensors) {
                 res.status(200).json({
                     message: 'OK!. Sensores obtenidos correctamente.',

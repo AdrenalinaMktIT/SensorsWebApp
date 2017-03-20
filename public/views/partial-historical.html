@@ -1,6 +1,59 @@
 <div class="container" ng-controller="HistoricalCtrl as vm">
-<canvas id="line" class="chart chart-line" chart-data="data"
-        chart-labels="labels" chart-series="series" chart-options="options"
-        chart-dataset-override="datasetOverride" chart-click="onClick">
-</canvas>
+
+    <div class="page-header text-center">
+        <h1><span class="fa fa-area-chart"></span> Reporte Historico</h1>
+    </div>
+
+    <form name="historicalForm" class="form-horizontal">
+        <fieldset>
+            <legend>Filtrar por:</legend>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">Tipo de Sensor</label>
+                <div class="col-sm-6">
+                    <ui-select ng-model="vm.type.selected" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
+                        <ui-select-match placeholder="Seleccione o busque un tipo de sensor en la lista...">{{$select.selected.name}}</ui-select-match>
+                        <ui-select-choices group-by="vm.groupByType" repeat="item in vm.types | filter: $select.search">
+                            <div ng-bind-html="item.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+                <button ng-click="vm.report(historicalForm)" type="button" class="btn btn-primary"><i class="fa fa-pie-chart" aria-hidden="true"></i> Reporte</button>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                <label class="col-sm-3 control-label">Fecha Desde</label>
+                    <p class="input-group">
+                        <input type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" ng-model="dateFrom" is-open="popup1.opened" datepicker-options="dateOptionsFrom" ng-required="true" clear-text="Borrar" close-text="Cerrar" current-text="Hoy"/>
+                        <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="open1()"><i class="glyphicon glyphicon-calendar"></i></button>
+                         </span>
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="col-sm-3 control-label">Fecha Hasta</label>
+                    <p class="input-group">
+                        <input type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" ng-model="dateTo" is-open="popup2.opened" datepicker-options="dateOptionsTo" ng-required="true" clear-text="Borrar" close-text="Cerrar" current-text="Hoy"/>
+                        <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="open2()"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </fieldset>
+
+        <uib-accordion>
+        <div uib-accordion-group class="panel-default" heading="{{group.title}}" ng-repeat="group in groups">
+            <div ng-bind-html="group.content" compile-template></div>
+        </div>
+        </uib-accordion>
+
+    </form>
+
+    <!--<canvas id="line" class="chart chart-line" chart-data="data"
+            chart-labels="labels" chart-series="series" chart-options="options"
+            chart-dataset-override="datasetOverride" chart-click="onClick">
+    </canvas>-->
 </div>
