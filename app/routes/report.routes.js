@@ -4,13 +4,13 @@ module.exports = function(app) {
     var Measure = require('./../models/measure');
     var Model  = require('./../models/model');
     var Sensor  = require('./../models/sensor');
+    var moment = require('../../node_modules/moment/moment');
 
     // Calcular un nuevo reporte.
     app.post('/api/v1/reports', function(req, res) {
+        var sensorIds = req.body.sensors;
         Measure.find({
-            imei: 292207061990001,
-            /*timestamp: { '$gte': req.body.dateFrom, '$lte': req.body.dateTo }*/
-
+            timestamp: { '$gte': new Date(req.body.dateFrom), '$lte': new Date(req.body.dateTo) }
         })
             .populate({
                 path: 'imei',
@@ -20,13 +20,18 @@ module.exports = function(app) {
                     model: 'Model',
                     populate: {
                         path: 'sensors',
-                        model: 'Sensor'
+                        model: 'Sensor',
+                        match: {
+                            _id: { $in: sensorIds }
+                        }
                     }
                 }
             })
             .exec(function (err, measures) {
                 console.log(measures);
-                res.json(measures);
+                res.json(measures.filter(function(doc){
+                    return doc.imei.model.sensors.length;
+                }));
             });
     });
 };

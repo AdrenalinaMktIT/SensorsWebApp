@@ -44,53 +44,59 @@ angular.module('historicalController', [])
 
                 if (historicalForm.$valid) {
                     var sensorKeys = _.map(_.keys(selectedSensors), function (elem) {
-                        return elem.substr(1);
+                        return parseInt(elem.substr(1));
                     });
                     var reportRequest = {
-                        "dateFrom": moment(vm.dateFrom).format('YYYY-MM-DD'),
-                        "dateTo": moment(vm.dateFrom).format('YYYY-MM-DD'),
+                        "dateFrom": moment($scope.dateFrom).format('YYYY-MM-DD'),
+                        "dateTo": moment($scope.dateTo).format('YYYY-MM-DD'),
                         "sensors": sensorKeys
                     };
 
+                    $scope.labels = [];
+                    $scope.data = [];
+                    $scope.series = [];
+                    /*$scope.options = {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero:true
+                                }
+                            }]
+                        }
+                    };*/
                     Reports.calculate(reportRequest)
                         .then(function successCallback(response) {
                             // this callback will be called asynchronously
                             // when the response is available
                             // TODO DIBUJAR
+                            var seriesData = [];
+
+                            for (var i =0; i < sensorKeys.length; i++) {
+
+                                var sensorName = '';
+
+                                seriesData = [];
+
+                                response.data.forEach(function(measure, idx, arr) {
+
+                                    // busco el indice en el cual se encuentra el sensor en el modelo configurado para este imei.
+                                    var listOfSensorNames = _.pluck(measure.imei.model.sensors, '_id');
+                                    var sensorIdx = _.indexOf(listOfSensorNames, sensorKeys[i]);
+                                    sensorName = measure.imei.model.sensors[sensorIdx].name + ' (' + measure.imei.model.sensors[sensorIdx].type + ')';
+                                    $scope.labels.push(measure.timestamp);
+                                    $scope.labels = _.uniq($scope.labels);
+                                    seriesData.push(measure.data[sensorIdx]);
+
+                                });
+                                $scope.series.push(sensorName);
+                                $scope.data.push(seriesData);
+
+                            }
                         }, function errorCallback(response) {
                             // called asynchronously if an error occurs
                             // or server returns response with an error status.
                             console.log('Error: ' + response);
                         });
-
-                    $scope.labels = ["January", "February", "March", "April", "May", "June", "July"];
-                    $scope.series = ['Series A', 'Series B'];
-                    $scope.data = [
-                        [65, 59, 80, 81, 56, 55, 40],
-                        [28, 48, 40, 19, 86, 27, 90]
-                    ];
-                    $scope.onClick = function (points, evt) {
-                        console.log(points, evt);
-                    };
-                    $scope.datasetOverride = [{yAxisID: 'y-axis-1'}, {yAxisID: 'y-axis-2'}];
-                    $scope.options = {
-                        scales: {
-                            yAxes: [
-                                {
-                                    id: 'y-axis-1',
-                                    type: 'linear',
-                                    display: true,
-                                    position: 'left'
-                                },
-                                {
-                                    id: 'y-axis-2',
-                                    type: 'linear',
-                                    display: true,
-                                    position: 'right'
-                                }
-                            ]
-                        }
-                    };
                 }
             }
         };
