@@ -4,7 +4,6 @@ module.exports = function(app) {
     var Measure = require('./../models/measure');
     var Model  = require('./../models/model');
     var Sensor  = require('./../models/sensor');
-    var moment = require('../../node_modules/moment/moment');
 
     // Calcular un nuevo reporte.
     app.post('/api/v1/reports', function(req, res) {
