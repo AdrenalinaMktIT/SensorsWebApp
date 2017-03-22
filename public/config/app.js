@@ -1,11 +1,11 @@
 var app = angular.module('sensorsWebApp', [
-    'alertController', 'deviceController', 'groupController', 'historicalController', 'profileController', 'sensorController', 'userController',
+    'alertController', 'deviceController', 'groupController', 'historicalController', 'profileController', 'sensorController', 'statusController', 'userController',
     'appAlertService', 'alertService', 'carrierService', 'clientService', 'deviceService', 'groupService', 'profileService', 'reportService', 'sensorService', 'typeService', 'timezoneService', 'userService',
     'ui.router', 'ui.bootstrap', 'ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pagination', 'ui.grid.selection', 'ui.grid.exporter', 'chart.js', 'ngMessages', 'ui.select', 'ngAnimate', 'ngSanitize']);
 
 app.config(function($stateProvider, $urlRouterProvider) {
 
-    $urlRouterProvider.otherwise('/devices');
+    $urlRouterProvider.otherwise('/status');
 
     $stateProvider
 
@@ -50,5 +50,10 @@ app.config(function($stateProvider, $urlRouterProvider) {
         url: '/historical',
         templateUrl: '../views/partial-historical.html',
         controller: 'HistoricalCtrl'
+        })
+        .state('status', {
+            url: '/status',
+            templateUrl: '../views/partial-status.html',
+            controller: 'StatusCtrl'
         });
 });
