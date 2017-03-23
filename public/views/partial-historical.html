@@ -1,4 +1,4 @@
-<div class="container" ng-controller="HistoricalCtrl as vm">
+<div class="container">
 
     <div class="page-header text-center">
         <h1><span class="fa fa-area-chart"></span> Reporte Historico</h1>
@@ -45,7 +45,10 @@
         </fieldset>
 
         <uib-accordion>
-        <div uib-accordion-group class="panel-default" heading="{{group.title}}" ng-repeat="group in groups">
+        <div uib-accordion-group class="panel-default" ng-repeat="group in groups">
+            <uib-accordion-heading>
+                <div ng-bind-html="group.title" compile-template></div>
+            </uib-accordion-heading>
             <div ng-bind-html="group.content" compile-template></div>
         </div>
         </uib-accordion>

@@ -133,7 +133,7 @@
 <div class="container">
 
     <div>
-        <div uib-alert ng-repeat="alert in alerts" ng-class="alert.type" close="alert.close()">{{alert.msg}}</div>
+        <div uib-alert ng-repeat="alert in alerts" ng-class="alert.type" dismiss-on-timeout="5000" close="alert.close()">{{alert.msg}}</div>
     </div>
 
     <!--<% include header.html %>-->

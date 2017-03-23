@@ -13,47 +13,61 @@ app.config(function($stateProvider, $urlRouterProvider) {
         .state('groups', {
             url: '/groups',
             templateUrl: '../views/partial-groups.html',
-            controller: 'GroupCtrl'
+            controller: 'GroupCtrl',
+            controllerAs: 'vm'
         })
         .state('sensors', {
             url: '/sensors',
             templateUrl: '../views/partial-sensors.html',
-            controller: 'SensorCtrl'
+            controller: 'SensorCtrl',
+            controllerAs: 'vm'
         })
         .state('alerts', {
             url: '/alerts',
             templateUrl: '../views/partial-alerts.html',
-            controller: 'AlertCtrl'
+            controller: 'AlertCtrl',
+            controllerAs: 'vm'
         })
         .state('devices', {
             url: '/devices',
             templateUrl: '../views/partial-devices.html',
-            controller: 'DeviceCtrl'
+            controller: 'DeviceCtrl',
+            controllerAs: 'vm'
         })
         .state('users', {
             url: '/users',
             templateUrl: '../views/partial-users.html',
-            controller: 'UserCtrl'
+            controller: 'UserCtrl',
+            controllerAs: 'vm'
         })
         .state('profiles', {
             url: '/profiles',
             templateUrl: '../views/partial-profiles.html',
-            controller: 'ProfileCtrl'
+            controller: 'ProfileCtrl',
+            controllerAs: 'vm'
         })
-        // TODO ingresos a sistema
+        // TODO inputs
         .state('inputs', {
             url: '/inputs',
             templateUrl: '../views/partial-inputs.html',
-            controller: 'InputCtrl'
+            controller: 'InputCtrl',
+            controllerAs: 'vm'
         })
         .state('historical', {
-        url: '/historical',
-        templateUrl: '../views/partial-historical.html',
-        controller: 'HistoricalCtrl'
+            url: '/historical',
+            templateUrl: '../views/partial-historical.html',
+            controller: 'HistoricalCtrl',
+            controllerAs: 'vm'
         })
         .state('status', {
             url: '/status',
             templateUrl: '../views/partial-status.html',
-            controller: 'StatusCtrl'
+            controller: 'StatusCtrl',
+            controllerAs: 'vm'
         });
+    // TODO listing
+    // TODO calculations
+    // TODO messages
+    // TODO statuses
+    // TODO settings
 });

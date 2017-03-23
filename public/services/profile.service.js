@@ -1,6 +1,3 @@
-/**
- * Created by Sebastian on 24/02/2017.
- */
 angular.module('profileService', []).factory('Profiles', function ($http) {
         return {
             get: function (id) {

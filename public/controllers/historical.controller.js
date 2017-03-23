@@ -122,7 +122,7 @@ angular.module('historicalController', [])
                     sensor += '<div class="input-group"><span class="input-group-addon"><input type="checkbox" ng-model="vm.checkModel.s' + groupSensorsArray[j]._id + '" ></span><label class="form-control" >SENSOR ' + groupSensorsArray[j].name + '</div>';
                 }
                 $scope.groups.push({
-                    title: $sce.trustAsHtml('GRUPO ' + groupName),
+                    title: $sce.trustAsHtml('GRUPO ' + groupName + ' <span class="badge">' + groupSensorsArray.length + '</span>'),
                     content: $sce.trustAsHtml(sensor)
                 })
             }
@@ -131,7 +131,7 @@ angular.module('historicalController', [])
                 sensor += '<div class="input-group"><span class="input-group-addon"><input type="checkbox" ng-model="vm.checkModel.s' + withoutGroupSensors[k]._id + '" ></span><label class="form-control" >SENSOR ' + withoutGroupSensors[k].name + '</div>';
             }
             $scope.groups.push({
-                title: 'SENSORES SIN GRUPO',
+                title: $sce.trustAsHtml('SENSORES SIN GRUPO <span class="badge">' + withoutGroupSensors.length + '</span>'),
                 content: $sce.trustAsHtml(sensor)
             })
         }
