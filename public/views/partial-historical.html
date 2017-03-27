@@ -1,5 +1,27 @@
 <div class="container">
 
+    <script type="text/ng-template" id="myModalContent.html">
+        <button ng-show='closeable' type='button' class='close' ng-click='vm.cancel()'>Close</button>
+        <div class="modal-header">
+            <h3 class="modal-title" id="modal-title">Reporte Historico (Grafico)</h3>
+        </div>
+        <div class="modal-body" id="modal-body">
+            </ul>
+            <canvas id="bar" class="chart chart-bar"
+                    chart-data="vm.data" chart-labels="vm.labels" chart-series="vm.series" chart-options="options">
+            </canvas>
+
+            <!-- Reemplazar x este para grafico de lineas en lugar de barras.
+            <canvas id="line" class="chart chart-line"
+                    chart-data="data" chart-labels="labels" chart-series="series" chart-options="options">
+            </canvas>-->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="button" ng-click="vm.ok()">OK</button>
+            <button class="btn btn-warning" type="button" ng-click="vm.cancel()">Volver</button>
+        </div>
+    </script>
+
     <div class="page-header text-center">
         <h1><span class="fa fa-area-chart"></span> Reporte Historico</h1>
     </div>
@@ -55,13 +77,4 @@
 
     </form>
 
-
-    <canvas id="bar" class="chart chart-bar"
-            chart-data="data" chart-labels="labels" chart-series="series" chart-options="options">
-    </canvas>
-
-    <!-- Reemplazar x este para grafico de lineas en lugar de barras.
-    <canvas id="line" class="chart chart-line"
-            chart-data="data" chart-labels="labels" chart-series="series" chart-options="options">
-    </canvas>-->
 </div>
