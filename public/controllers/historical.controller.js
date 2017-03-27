@@ -12,7 +12,7 @@ angular.module('historicalController', [])
             }
         }
     })
-    .controller('HistoricalCtrl', function ($scope, $sce, Reports, Sensors, Types, AppAlert){
+    .controller('HistoricalCtrl', function ($scope, $sce, $uibModal, $log, Reports, Sensors, Types, AppAlert){
         var vm = this;
 
         vm.checkModel = {};
@@ -66,9 +66,6 @@ angular.module('historicalController', [])
                     };*/
                     Reports.calculate(reportRequest)
                         .then(function successCallback(response) {
-                            // this callback will be called asynchronously
-                            // when the response is available
-                            // TODO DIBUJAR
                             var seriesData = [];
 
                             for (var i =0; i < sensorKeys.length; i++) {
@@ -90,11 +87,11 @@ angular.module('historicalController', [])
                                 });
                                 $scope.series.push(sensorName);
                                 $scope.data.push(seriesData);
-
                             }
+
+                            vm.openReportModal('lg');
+
                         }, function errorCallback(response) {
-                            // called asynchronously if an error occurs
-                            // or server returns response with an error status.
                             console.log('Error: ' + response);
                         });
                 }
@@ -158,6 +155,33 @@ angular.module('historicalController', [])
                         });
                 }
             }
+        };
+
+        vm.openReportModal = function (size, parentSelector) {
+            var modalInstance = $uibModal.open({
+                ariaLabelledBy: 'modal-title',
+                ariaDescribedBy: 'modal-body',
+                templateUrl: 'myModalContent.html',
+                controller: 'ReportModalInstanceCtrl',
+                controllerAs: 'vm',
+                size: size,
+                resolve: {
+                    labels: function () {
+                        return $scope.labels;
+                    },
+                    series: function () {
+                        return $scope.series;
+                    },
+                    data: function () {
+                        return $scope.data;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (data) {
+            }, function () {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
         };
 
         vm.groupByType = function (item){
@@ -268,5 +292,19 @@ angular.module('historicalController', [])
 
         $scope.popup2 = {
             opened: false
+        };
+    })
+    .controller('ReportModalInstanceCtrl', function ($uibModalInstance, labels, series, data) {
+        var vm = this;
+        vm.labels = labels;
+        vm.series = series;
+        vm.data = data;
+
+        vm.ok = function () {
+            $uibModalInstance.close();
+        };
+
+        vm.cancel = function () {
+            $uibModalInstance.dismiss('cancel');
         };
     });
