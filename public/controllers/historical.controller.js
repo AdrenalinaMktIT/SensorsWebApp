@@ -80,7 +80,7 @@ angular.module('historicalController', [])
                                     var listOfSensorNames = _.pluck(measure.imei.model.sensors, '_id');
                                     var sensorIdx = _.indexOf(listOfSensorNames, sensorKeys[i]);
                                     sensorName = measure.imei.model.sensors[sensorIdx].name + ' (' + measure.imei.model.sensors[sensorIdx].type + ')';
-                                    $scope.labels.push(measure.timestamp);
+                                    $scope.labels.push(moment(measure.timestamp).format('DD-MM-YYYY HH:mm:ss'));
                                     $scope.labels = _.uniq($scope.labels);
                                     seriesData.push(measure.data[sensorIdx]);
 

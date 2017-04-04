@@ -1,3 +1,115 @@
+<script type="text/ng-template" id="statusModalContent.html">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="$statusModalCtrl.ok()"><i class="fa fa-window-close" aria-hidden="true"></i></button>
+        <h3 class="modal-title" id="modal-title">Resumen Estado de Sensor</h3>
+    </div>
+    <div class="modal-body" id="modal-body">
+        <uib-tabset active="active">
+            <uib-tab index="0" >
+                <uib-tab-heading>
+                    <i class="fa fa-thermometer-full" aria-hidden="true"></i> Ultima Lectura
+                </uib-tab-heading>
+                <br>
+                <div ng-class="{
+                'panel-success': $statusModalCtrl.sensorDetails.status === 'ok',
+                'panel-info': $statusModalCtrl.sensorDetails.status === 'unknown',
+                'panel-warning': $statusModalCtrl.sensorDetails.status === 'warning',
+                'panel-danger': $statusModalCtrl.sensorDetails.status === 'critical' }" class="panel">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Sensor {{$statusModalCtrl.sensorDetails.sensor.name}}</h3>
+                    </div>
+                    <div class="panel-body">
+                        <h1 class=" bg-primary">
+                            Estado Actual: {{$statusModalCtrl.sensorDetails.status | uppercase}}
+                        </h1>
+                        <p class="lead bg-primary">
+                            Ult. Valor Leido: {{$statusModalCtrl.sensorDetails.data}} ({{$statusModalCtrl.sensorDetails.timestamp}})
+                        </p>
+                    </div>
+                </div>
+            </uib-tab>
+            <uib-tab index="1">
+                <uib-tab-heading>
+                    <i class="fa fa-database" aria-hidden="true"></i> Datos
+                </uib-tab-heading>
+                <br>
+                <div class="panel panel-default">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">Equipo {{$statusModalCtrl.sensorDetails.imei}}</div>
+                    <div class="panel-body">
+                        <p>MODELO {{$statusModalCtrl.sensorDetails.model}}</p>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">Parametros del sensor {{$statusModalCtrl.sensorDetails.sensor.name}}</div>
+                    <div class="panel-body">
+
+                        <div class="panel panel-danger">
+                            <!-- Default panel contents -->
+                            <div class="panel-heading">RANGO CRITICO</div>
+                            <div class="panel-body">
+
+                                <!-- List group -->
+                                <div class="well ">
+                                    <ul class="list-group" ng-repeat="criticalParams in $statusModalCtrl.sensorDetails.sensor.params.critical">
+                                        <li class="list-group-item">
+                                            <strong>Mayor que: </strong>{{criticalParams.greather_than}} - <strong>Menor que: </strong>{{criticalParams.less_than}}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel panel-warning">
+                            <!-- Default panel contents -->
+                            <div class="panel-heading">RANGO ADVERTENCIA</div>
+                            <div class="panel-body">
+
+                                <!-- List group -->
+                                <div class="well ">
+                                    <ul class="list-group" ng-repeat="warningParams in $statusModalCtrl.sensorDetails.sensor.params.warning">
+                                        <li class="list-group-item"><strong>Mayor que: </strong>{{warningParams.greather_than}} - <strong>Menor que: </strong>{{warningParams.less_than}}</li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="panel panel-success">
+                            <!-- Default panel contents -->
+                            <div class="panel-heading">RANGO NORMAL</div>
+                            <div class="panel-body">
+
+                                <!-- List group -->
+                                <div class="well ">
+                                    <ul class="list-group" ng-repeat="okParams in $statusModalCtrl.sensorDetails.sensor.params.ok">
+                                        <li class="list-group-item"><strong>Mayor que: </strong>{{okParams.greather_than}} - <strong>Menor que: </strong>{{okParams.less_than}}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </uib-tab>
+            <uib-tab index="2" select="$statusModalCtrl.getSensorReport($statusModalCtrl.sensorDetails)">
+                <uib-tab-heading>
+                    <i class="fa fa-bar-chart" aria-hidden="true"></i> Grafico
+                </uib-tab-heading>
+                <br>
+                <span us-spinner spinner-key="sensorReportSpinner"></span>
+                <canvas id="bar" class="chart chart-bar"
+                        chart-data="$statusModalCtrl.data" chart-labels="$statusModalCtrl.labels" chart-series="$statusModalCtrl.series" chart-options="options">
+                </canvas>
+            </uib-tab>
+        </uib-tabset>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="$statusModalCtrl.ok()">Volver</button>
+    </div>
+</script>
+
 <div class="container">
 
     <div class="page-header text-center">
@@ -7,50 +119,23 @@
     <div class="well text-center">
         <p>Esta pagina permite <span class="text-success">ver</span> el estado de los sensores en tiempo real.</p>
     </div>
+
     <div class="bs-example" data-example-id="thumbnails-with-custom-content">
-            <div class="col-md-3" ng-repeat="x in vm.list">
-                <a href="#" style="border: solid red;" class="thumbnail" ng-if="x.status=='critical'">
-                    <img style="height: 25px; width: 25px; display: block;"  src="../assets/img/sensor_critical.png">
-                    <div class="caption">
-                        <h4>Sensor {{x.sensor}}</h4>
-                        <p>IMEI: {{x.imei}}</p>
-                        <p>MODELO: {{x.model}}</p>
-                        <p>{{x.timestamp}}</p>
-                        <p>{{x.data}}</p>
-                    </div>
-                </a>
-                <a href="#" style="border: solid orange;" class="thumbnail" ng-if="x.status=='warning'">
-                    <img style="height: 25px; width: 25px; display: block;" ng-if="x.status=='warning'" src="../assets/img/sensor_warning.png">
-                    <div class="caption">
-                        <h4>Sensor {{x.sensor}}</h4>
-                        <p>IMEI: {{x.imei}}</p>
-                        <p>MODELO: {{x.model}}</p>
-                        <p>{{x.timestamp}}</p>
-                        <p>{{x.data}}</p>
-                    </div>
-                </a>
-                <a href="#" style="border: solid green;" class="thumbnail" ng-if="x.status=='ok'">
-                    <img style="height: 25px; width: 25px; display: block;" ng-if="x.status=='ok'" src="../assets/img/sensor_ok.png">
-                    <div class="caption">
-                        <h4>Sensor {{x.sensor}}</h4>
-                        <p>IMEI: {{x.imei}}</p>
-                        <p>MODELO: {{x.model}}</p>
-                        <p>{{x.timestamp}}</p>
-                        <p>{{x.data}}</p>
-                    </div>
-                </a>
-                <a href="#" style="border: solid blue;" class="thumbnail" ng-if="x.status=='unknown'">
-                    <img style="height: 25px; width: 25px; display: block;" ng-if="x.status=='unknown'" src="../assets/img/sensor_unknown.png">
-                    <div class="caption">
-                        <h4>Sensor {{x.sensor}}</h4>
-                        <p>IMEI: {{x.imei}}</p>
-                        <p>MODELO: {{x.model}}</p>
-                        <p>{{x.timestamp}}</p>
-                        <p>{{x.data}}</p>
-                    </div>
-                </a>
-            </div>
+        <div class="col-md-3" ng-repeat="x in vm.list">
+            <a ng-href="#" class="thumbnail" ng-click="vm.open($index)"
+               ng-style="
+                  x.status=='critical' && {'height': '100px', 'border': 'solid red'} ||
+                  x.status=='warning' && {'height': '100px', 'border': 'solid orange'} ||
+                  x.status=='ok' && {'height': '100px', 'border': 'solid green'} ||
+                  x.status=='unknown' && {'height': '100px', 'border': 'solid blue'}">
+                <img style="height: 25px; width: 25px; display: block;" ng-if="x.status=='critical'" src="../assets/img/sensor_critical.png">
+                <img style="height: 25px; width: 25px; display: block;" ng-if="x.status=='warning'" src="../assets/img/sensor_warning.png">
+                <img style="height: 25px; width: 25px; display: block;" ng-if="x.status=='ok'" src="../assets/img/sensor_ok.png">
+                <img style="height: 25px; width: 25px; display: block;" ng-if="x.status=='unknown'" src="../assets/img/sensor_unknown.png">
+                <div class="caption">
+                    <h4>{{x.sensor.name}}</h4>
+                </div>
+            </a>
         </div>
     </div>
-
 </div>

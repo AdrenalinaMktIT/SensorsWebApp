@@ -15,6 +15,7 @@ var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var favicon = require('serve-favicon');
 var configDB = require('./app/config/database.js');
+var moment = require('./public/libs/moment/moment');
 
 // configuration ===============================================================
 
@@ -24,6 +25,10 @@ app.use(express.static(__dirname + '/public'));
 
 mongoose.connect(configDB.remoteUrl);
 mongoose.Promise = require('bluebird');
+// Server attempt to reconnect #times (default: 30)
+mongoose.reconnectTries = 100;
+// Server will wait # milliseconds between retries (default: 1000)
+mongoose.reconnectInterval = 2000;
 var db = mongoose.connection;
 
 // CONNECTION EVENTS
@@ -60,6 +65,8 @@ app.use(methodOverride('X-HTTP-Method-Override'));
 
 app.use(cookieParser());
 
+app.set('superSecret', 'adrenalinamktsensoreswebappnodejs'); // secret variable for webtokens.
+
 app.set('views', __dirname + '/public/views');
 
 app.set('view engine', 'ejs'); // set up ejs for templating
@@ -80,12 +87,29 @@ app.use(favicon(__dirname + '/public/assets/img/favicon.ico'));
 // Funcion Middleware que es llamada para cada request.
 // En este caso siempre hago un check para ver si la base de datos esta conectada.
 app.use(function (req, res, next) {
-    console.log('Request Time:', Date.now());
+    console.log('Request Time: ', moment().format("DD-MM-YYYY HH:mm:ss"));
     next();
 });
 
+// route middleware to make sure
+function isLoggedIn(req, res, next) {
+
+    // if user is authenticated in the session, carry on
+    if (req.isAuthenticated())
+        return next();
+
+    // if they aren't redirect them to the home page
+    res.status(401).render('401.ejs', {title:'401: No posee autorizacion.'});
+}
+
 // APP routes ======================================================================
 require('./app/routes/app.routes')(app, passport); // load our routes and pass in our app and fully configured passport
+
+// Funcion Middleware que es llamada para cada API request.
+app.use(function (req, res, next) {
+    isLoggedIn(req, res, next);
+});
+
 // API routes ======================================================================
 require('./app/routes/alert.routes')(app);
 require('./app/routes/carrier.routes')(app);
@@ -102,7 +126,7 @@ require('./app/routes/user.routes')(app);
 
 // Manejador error cod. HTTP 404.
 app.use(function(req, res) {
-    res.status(400).render('404.ejs', {title: '404: Recurso no encontrado'});
+    res.status(404).render('404.ejs', {title: '404: Recurso no encontrado'});
 });
 
 // Manejador error cod. HTTP 500.
