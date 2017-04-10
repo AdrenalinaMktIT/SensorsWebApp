@@ -1,6 +1,6 @@
 var app = angular.module('sensorsWebApp', [
-    'alertController', 'deviceController', 'groupController', 'historicalController', 'profileController', 'sensorController', 'statusController', 'userController',
-    'appAlertService', 'alertService', 'carrierService', 'clientService', 'deviceService', 'groupService', 'profileService', 'reportService', 'sensorService', 'typeService', 'timezoneService', 'userService',
+    'alertController', 'calculationController', 'deviceController', 'groupController', 'historicalController', 'profileController', 'sensorController', 'statusController', 'userController',
+    'appAlertService', 'alertService', 'calculationService', 'carrierService', 'clientService', 'deviceService', 'groupService', 'profileService', 'reportService', 'sensorService', 'typeService', 'timezoneService', 'userService',
     'ui.router', 'ui.bootstrap', 'ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pagination', 'ui.grid.selection', 'ui.grid.exporter', 'chart.js', 'ngMessages', 'ui.select', 'ngAnimate', 'ngSanitize', 'angularSpinner']);
 
 app.config(function($stateProvider, $urlRouterProvider) {
@@ -64,9 +64,14 @@ app.config(function($stateProvider, $urlRouterProvider) {
             templateUrl: '../views/partial-status.html',
             controller: 'StatusCtrl',
             controllerAs: 'vm'
-        });
+        })
     // TODO listing
-    // TODO calculations
+        .state('calculations', {
+        url: '/calculations',
+        templateUrl: '../views/partial-calculations.html',
+        controller: 'CalculationCtrl',
+        controllerAs: 'vm'
+    });
     // TODO messages
     // TODO statuses
     // TODO settings

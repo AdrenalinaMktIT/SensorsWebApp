@@ -1,38 +1,110 @@
-angular.module('historicalController', [])
-    .directive('compileTemplate', function($compile, $parse){
-        return {
-            link: function(scope, element, attr){
-                var parsed = $parse(attr.ngBindHtml);
-                function getStringValue() { return (parsed(scope) || '').toString(); }
-
-                //Recompile if the template changes
-                scope.$watch(getStringValue, function() {
-                    $compile(element, null, -9999)(scope);  //The -9999 makes it skip directives so that we do not recompile ourselves
-                });
-            }
-        }
-    })
-    .controller('HistoricalCtrl', function ($scope, $sce, $uibModal, $log, Reports, Sensors, Types, AppAlert, usSpinnerService){
+angular.module('calculationController', [])
+    .controller('CalculationCtrl', function ($scope, $sce, $uibModal, $log, Calculations, Sensors, Types, AppAlert, usSpinnerService){
         var vm = this;
 
         vm.checkModel = {};
 
-        Types.getAll()
+        Calculations.getAll()
             .then(function successCallback(response) {
-                vm.types = [];
-                vm.types.push({
-                    _id: 'all',
-                    name: 'Todos'
-                });
-                for (var i = 0; i < response.data.types.length; i++) {
-                    vm.types.push(response.data.types[i]);
+                vm.calculations = [];
+                for (var i = 0; i < response.data.calculations.length; i++) {
+                    vm.calculations.push(response.data.calculations[i]);
                 }
 
             }, function errorCallback(response) {
                 console.log('Error: ' + response);
             });
 
-        vm.report = function (historicalForm) {
+        vm.calculate = function (historicalForm) {
+                // 1 => Indice Termo Higrometrico.
+            if (vm.calculation.selected._id === 'ith') {
+                if (vm.devices.selected && vm.ithTempSensors.selected && vm.ithHumSensors.selected) {
+                    var thiData = {};
+                    thiData.dateFrom = moment(vm.dateFrom).format('YYYY-MM-DD');
+                    thiData.dateTo = moment(vm.dateTo).format('YYYY-MM-DD');
+                    thiData.deviceImei = vm.devices.selected._id;
+                    thiData.temperatureSensorIdx = vm.ithTempSensors.selected.idx;
+                    thiData.humiditySensorIdx = vm.ithHumSensors.selected.idx;
+
+                    $scope.labels = [];
+                    $scope.data = [];
+                    $scope.series = [];
+                    /*$scope.options = {
+                     scales: {
+                     yAxes: [{
+                     ticks: {
+                     beginAtZero:true
+                     }
+                     }]
+                     }
+                     };*/
+                    usSpinnerService.spin('calculationGraphSpinner');
+
+                    Calculations.thi(thiData)
+                        .then(function successCallback(response) {
+                        console.log(response.data.thiCalcs);
+                            usSpinnerService.stop('calculationGraphSpinner');
+
+                            response.data.thiCalcs.forEach(function(thiCalc, idx, arr) {
+
+                                $scope.labels.push(moment(thiCalc.timestamp).format('DD-MM-YYYY HH:mm:ss'));
+                                $scope.labels = _.uniq($scope.labels);
+                                $scope.data.push(thiCalc.thiCalc);
+
+                            });
+
+                            if (response.data.thiCalcs.length > 0) {
+                                vm.openCalculationModal('lg');
+                            } else {
+                                AppAlert.add('warning', 'No hay calculos disponibles.');
+                            }
+
+                    }, function errorCallback(response) {
+                            usSpinnerService.stop('calculationGraphSpinner');
+                        console.log('Error: ' + response);
+                    });
+                } else {
+                    AppAlert.add('danger', 'Error ! Debe seleccionar 1 equipo, 1 sensor de tipo temperatura y 1 sensor de tipo humedad.');
+                }
+
+                // 2 => Potencia Activa, Reactiva y Aparente.
+            } else if (vm.calculation.selected._id === 'para') {
+
+                vm.paraLapsus = ['Ultima Hora', 'Ultimos 7 Dias'];
+
+                Calculations.getAvailableDevices('para')
+                    .then(function successCallback(response) {
+                        vm.devices = response.data.devices;
+                    }, function errorCallback(response) {
+                        console.log('Error: ' + response);
+                    });
+
+                // 3 => Temperatura Cinetica Media x dias.
+            } else if (vm.calculation.selected._id === 'tcmd') {
+                Sensors.getByType('temp')
+                    .then(function successCallback(response) {
+                        usSpinnerService.stop('sensorTypeSpinner');
+                        vm.sensors = response.data.sensors;
+                        showCollapsibleSensors(vm.sensors);
+                    }, function errorCallback(response) {
+                        usSpinnerService.stop('sensorTypeSpinner');
+                        console.log('Error: ' + response);
+                    });
+                // 4 => Temperatura Cinetica Media x mediciones.
+            } else {
+                Sensors.getByType('temp')
+                    .then(function successCallback(response) {
+                        usSpinnerService.stop('sensorTypeSpinner');
+                        vm.sensors = response.data.sensors;
+                        showCollapsibleSensors(vm.sensors);
+                    }, function errorCallback(response) {
+                        usSpinnerService.stop('sensorTypeSpinner');
+                        console.log('Error: ' + response);
+                    });
+            }
+
+            /*
+
             // me quedo solo con los sensores que estan tildados ('true')
             var selectedSensors = _.pick(vm.checkModel, function(value, key, object) {
                 return _.isBoolean(value) && value === true;
@@ -55,19 +127,10 @@ angular.module('historicalController', [])
                     $scope.labels = [];
                     $scope.data = [];
                     $scope.series = [];
-                    /*$scope.options = {
-                        scales: {
-                            yAxes: [{
-                                ticks: {
-                                    beginAtZero:true
-                                }
-                            }]
-                        }
-                    };*/
-                    usSpinnerService.spin('historicalGraphSpinner');
+                    usSpinnerService.spin('calculationGraphSpinner');
                     Reports.calculate(reportRequest)
                         .then(function successCallback(response) {
-                            usSpinnerService.stop('historicalGraphSpinner');
+                            usSpinnerService.stop('calculationGraphSpinner');
 
                             var seriesData = [];
 
@@ -93,17 +156,18 @@ angular.module('historicalController', [])
                             }
 
                             if (response.data.length > 0) {
-                                vm.openReportModal('lg');
+                                vm.openCalculationModal('lg');
                             } else {
                                 AppAlert.add('warning', 'No hay datos para ese sensor.');
                             }
 
                         }, function errorCallback(response) {
-                            usSpinnerService.stop('historicalGraphSpinner');
+                            usSpinnerService.stop('calculationGraphSpinner');
                             console.log('Error: ' + response);
                         });
+
                 }
-            }
+            }*/
         };
 
         function showCollapsibleSensors(sensors) {
@@ -143,9 +207,31 @@ angular.module('historicalController', [])
 
         vm.onOpenClose = function (isOpen){
             if (!isOpen) {
-                usSpinnerService.spin('sensorTypeSpinner');
-                if (vm.type.selected._id === 'all') {
-                    Sensors.getAll()
+
+                // 1 => Indice Termo Higrometrico.
+                if (vm.calculation.selected._id === 'ith') {
+                    Calculations.getAvailableDevices('ith')
+                        .then(function successCallback(response) {
+                            vm.devices = response.data.devices;
+                        }, function errorCallback(response) {
+                            console.log('Error: ' + response);
+                        });
+
+                // 2 => Potencia Activa, Reactiva y Aparente.
+                } else if (vm.calculation.selected._id === 'para') {
+
+                    vm.paraLapsus = ['Ultima Hora', 'Ultimos 7 Dias'];
+
+                    Calculations.getAvailableDevices('para')
+                        .then(function successCallback(response) {
+                            vm.devices = response.data.devices;
+                        }, function errorCallback(response) {
+                            console.log('Error: ' + response);
+                        });
+
+                // 3 => Temperatura Cinetica Media x dias.
+                } else if (vm.calculation.selected._id === 'tcmd') {
+                    Sensors.getByType('temp')
                         .then(function successCallback(response) {
                             usSpinnerService.stop('sensorTypeSpinner');
                             vm.sensors = response.data.sensors;
@@ -154,8 +240,9 @@ angular.module('historicalController', [])
                             usSpinnerService.stop('sensorTypeSpinner');
                             console.log('Error: ' + response);
                         });
+                // 4 => Temperatura Cinetica Media x mediciones.
                 } else {
-                    Sensors.getByType(vm.type.selected._id)
+                    Sensors.getByType('temp')
                         .then(function successCallback(response) {
                             usSpinnerService.stop('sensorTypeSpinner');
                             vm.sensors = response.data.sensors;
@@ -168,15 +255,46 @@ angular.module('historicalController', [])
             }
         };
 
-        vm.openReportModal = function (size, parentSelector) {
+        vm.onOpenCloseDevice = function (isOpen, calcType) {
+            if (!isOpen) {
+                if (calcType === 'ith') {
+                    vm.ithTempSensors = _.filter(vm.devices.selected.model.sensors, function (sensor, index) {
+                        _.extend(sensor, {idx: index});
+                        return sensor.type === "temp";
+                    });
+                    vm.ithHumSensors = _.filter(vm.devices.selected.model.sensors, function (sensor, index) {
+                        _.extend(sensor, {idx: index});
+                        return sensor.type === "h";
+                    });
+                } else if (calcType === 'para') {
+                    vm.paraVoltSensors = _.filter(vm.devices.selected.model.sensors, function (sensor, index) {
+                        _.extend(sensor, {idx: index});
+                        return sensor.type === "volt";
+                    });
+                    vm.paraCurrSensors = _.filter(vm.devices.selected.model.sensors, function (sensor, index) {
+                        _.extend(sensor, {idx: index});
+                        return sensor.type === "current";
+                    });
+                    vm.paraPhaseSensors = _.filter(vm.devices.selected.model.sensors, function (sensor, index) {
+                        _.extend(sensor, {idx: index});
+                        return sensor.type === "angle";
+                    });
+                }
+            }
+        };
+
+        vm.openCalculationModal = function (size, parentSelector) {
             var modalInstance = $uibModal.open({
                 ariaLabelledBy: 'modal-title',
                 ariaDescribedBy: 'modal-body',
                 templateUrl: 'myModalContent.html',
-                controller: 'ReportModalInstanceCtrl',
+                controller: 'CalculationModalInstanceCtrl',
                 controllerAs: 'vm',
                 size: size,
                 resolve: {
+                    calculation: function () {
+                        return vm.calculation;
+                    },
                     labels: function () {
                         return $scope.labels;
                     },
@@ -265,11 +383,11 @@ angular.module('historicalController', [])
         };
 
         /*vm.inlineOptions = {
-            customClass: getDayClass,
-            minDate: new Date(),
-            showWeeks: true
-        };
-*/
+         customClass: getDayClass,
+         minDate: new Date(),
+         showWeeks: true
+         };
+         */
         $scope.dateOptionsFrom = {
             formatYear: 'yy',
             maxDate: $scope.dateTo,
@@ -283,11 +401,11 @@ angular.module('historicalController', [])
         };
 
         /*vm.toggleMin = function() {
-            vm.inlineOptions.minDate = vm.inlineOptions.minDate ? null : new Date();
-            vm.dateOptions.minDate = vm.inlineOptions.minDate;
-        };
+         vm.inlineOptions.minDate = vm.inlineOptions.minDate ? null : new Date();
+         vm.dateOptions.minDate = vm.inlineOptions.minDate;
+         };
 
-        vm.toggleMin();*/
+         vm.toggleMin();*/
 
         $scope.open1 = function() {
             $scope.popup1.opened = true;
@@ -305,8 +423,9 @@ angular.module('historicalController', [])
             opened: false
         };
     })
-    .controller('ReportModalInstanceCtrl', function ($uibModalInstance, labels, series, data) {
+    .controller('CalculationModalInstanceCtrl', function ($uibModalInstance, calculation, labels, series, data) {
         var vm = this;
+        vm.calculation = calculation;
         vm.labels = labels;
         vm.series = series;
         vm.data = data;

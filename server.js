@@ -15,7 +15,10 @@ var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var favicon = require('serve-favicon');
 var configDB = require('./app/config/database.js');
-var moment = require('./public/libs/moment/moment');
+var moment = require('moment');
+var _ = require('underscore');
+const chalk = require('chalk');
+const log = console.log;
 
 // configuration ===============================================================
 
@@ -34,21 +37,49 @@ var db = mongoose.connection;
 // CONNECTION EVENTS
 // Conexion con Mongo exitosa.
 db.on('connected', function () {
-    console.log('Mongoose abierto en: ' + configDB.remoteUrl);
+    log(chalk.blue.bgYellow.bold('Mongoose abierto en: ' + configDB.remoteUrl));
 });
 
 // Conexion con Mongo fallida.
 db.on('error',function (err) {
-    console.log('Mongoose default connection error: ' + err);
+    log(chalk.white.bgRed.bold('Mongoose default connection error: ' + err));
 });
 
 // // Conexion con Mongo desconectada.
 db.on('disconnected', function () {
-    console.log('Mongoose default connection disconnected');
+    log(chalk.white.bgBlue.bold('Mongoose default connection disconnected'));
 });
 
 // log every request to the console
-app.use(morgan('dev'));
+function developmentFormatLine(tokens, req, res) {
+    // get the status code if response written
+    var status = tokens.status(req, res);
+
+    // get status color
+    var statusColor = status >= 500
+        ? 'red' : status >= 400
+            ? 'yellow' : status >= 300
+                ? 'cyan' : 'green';
+
+    return chalk.reset(padRight(tokens.method(req, res) + ' ' + tokens.url(req, res), 30))
+        + ' ' + chalk[statusColor](status)
+        + ' ' + chalk.reset(padLeft(tokens['response-time'](req, res) + ' ms', 8))
+        + ' ' + chalk.reset('-')
+        + ' ' + chalk.reset(tokens.res(req, res, 'content-length') || '-');
+}
+
+app.use(morgan(developmentFormatLine));
+
+function padLeft(str, len) {
+    return len > str.length
+        ? (new Array(len - str.length + 1)).join(' ') + str
+        : str
+}
+function padRight(str, len) {
+    return len > str.length
+        ? str + (new Array(len - str.length + 1)).join(' ')
+        : str
+}
 
 // get all data/stuff of the body (POST) parameters
 // parse application/json
@@ -87,7 +118,7 @@ app.use(favicon(__dirname + '/public/assets/img/favicon.ico'));
 // Funcion Middleware que es llamada para cada request.
 // En este caso siempre hago un check para ver si la base de datos esta conectada.
 app.use(function (req, res, next) {
-    console.log('Request Time: ', moment().format("DD-MM-YYYY HH:mm:ss"));
+    log(chalk.white.bgBlue.bold('Request Time: ', moment().format("DD-MM-YYYY HH:mm:ss")));
     next();
 });
 
@@ -112,6 +143,7 @@ app.use(function (req, res, next) {
 
 // API routes ======================================================================
 require('./app/routes/alert.routes')(app);
+require('./app/routes/calculation.routes')(app);
 require('./app/routes/carrier.routes')(app);
 require('./app/routes/client.routes')(app);
 require('./app/routes/device.routes')(app);
@@ -136,4 +168,4 @@ app.use(function(error, req, res, next) {
 
 // launch ======================================================================
 app.listen(port);
-console.log('Sensores WebApp escuchando sobre puerto ' + port);
+log(chalk.white.underline.bgMagenta('Sensores WebApp escuchando sobre puerto ' + port));

@@ -1,0 +1,237 @@
+<div class="container">
+
+    <script type="text/ng-template" id="myModalContent.html">
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="vm.cancel()"><i class="fa fa-window-close" aria-hidden="true"></i></button>
+            <h3 class="modal-title" id="modal-title" ng-if="vm.calculation.selected._id === 'ith'">Indice Temperatura-Humedad (ITH)</h3>
+            <h3 class="modal-title" id="modal-title" ng-if="vm.calculation.selected._id === 'para'">Potencia Activa/Reactiva/Aparente</h3>
+            <h3 class="modal-title" id="modal-title" ng-if="vm.calculation.selected._id === 'tcmd'">Temperatura Cinetica Media x Dias</h3>
+            <h3 class="modal-title" id="modal-title" ng-if="vm.calculation.selected._id === 'tcmm'">Temperatura Cinetica Media x Mediciones</h3>
+        </div>
+        <div class="modal-body" id="modal-body">
+
+            <canvas id="bar" class="chart chart-bar"
+                    chart-data="vm.data" chart-labels="vm.labels" chart-series="vm.series" chart-options="options">
+            </canvas>
+
+            <!-- Reemplazar x este para grafico de lineas en lugar de barras.
+            <canvas id="line" class="chart chart-line"
+                    chart-data="data" chart-labels="labels" chart-series="series" chart-options="options">
+            </canvas>-->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="button" ng-click="vm.ok()">OK</button>
+            <button class="btn btn-warning" type="button" ng-click="vm.cancel()">Volver</button>
+        </div>
+    </script>
+
+    <div class="page-header text-center">
+        <h1><span class="fa fa-calculator"></span> C&aacute;lculos</h1>
+    </div>
+
+    <form name="calculationForm" class="form-horizontal">
+        <fieldset>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">Tipo de C&aacute;lculo</label>
+                <div class="col-sm-6">
+                    <ui-select ng-model="vm.calculation.selected" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
+                        <ui-select-match placeholder="Seleccione un tipo de calculo de la lista...">{{$select.selected.name}}</ui-select-match>
+                        <ui-select-choices group-by="vm.groupByType" repeat="item in vm.calculations | orderBy:'_id' | filter: $select.search">
+                            <div ng-bind-html="item.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+                <button ng-click="vm.calculate(calculationForm)" type="button" class="btn btn-primary"><i class="fa fa-calculator" aria-hidden="true"></i> Calcular</button>
+                <span us-spinner spinner-key="calculationGraphSpinner"></span>
+            </div>
+
+            <div class="row" ng-if="vm.calculation.selected._id != 'para'">
+                <div class="col-md-6">
+                    <label class="col-sm-3 control-label">Fecha Desde</label>
+                    <p class="input-group">
+                        <input type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" ng-model="vm.dateFrom" is-open="popup1.opened" datepicker-options="dateOptionsFrom" ng-required="true" clear-text="Borrar" close-text="Cerrar" current-text="Hoy"/>
+                        <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="open1()"><i class="glyphicon glyphicon-calendar"></i></button>
+                         </span>
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="col-sm-3 control-label">Fecha Hasta</label>
+                    <p class="input-group">
+                        <input type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" ng-model="vm.dateTo" is-open="popup2.opened" datepicker-options="dateOptionsTo" ng-required="true" clear-text="Borrar" close-text="Cerrar" current-text="Hoy"/>
+                        <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="open2()"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+
+        <div class="panel panel-default" ng-if="vm.calculation.selected._id === 'ith'">
+            <!-- Default panel contents -->
+            <div class="panel-heading text-center">Equipos / Sensores</div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Equipo</label>
+                    <div class="col-sm-6">
+                        <ui-select ng-model="vm.devices.selected" theme="bootstrap" uis-open-close="vm.onOpenCloseDevice(isOpen, 'ith')">
+                            <ui-select-match placeholder="Seleccione un Equipo...">{{$select.selected._id}} ({{$select.selected.model.name}})</ui-select-match>
+                            <ui-select-choices repeat="item in vm.devices | filter: $select.search">
+                                <div ng-bind-html="item._id + ' - ' + item.model.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Sensor Temperatura</label>
+                    <div class="col-sm-6">
+                        <ui-select ng-model="vm.ithTempSensors.selected" theme="bootstrap">
+                            <ui-select-match placeholder="Seleccione un Sensor de Temperatura...">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="item in vm.ithTempSensors | filter: $select.search">
+                                <div ng-bind-html="item.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Sensor Humedad</label>
+                    <div class="col-sm-6">
+                        <ui-select ng-model="vm.ithHumSensors.selected" theme="bootstrap">
+                            <ui-select-match placeholder="Seleccione un Sensor de Humedad...">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="item in vm.ithHumSensors | filter: $select.search">
+                                <div ng-bind-html="item.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default" ng-if="vm.calculation.selected._id === 'para'">
+            <!-- Default panel contents -->
+            <div class="panel-heading text-center">Lapso de Tiempo</div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Lapso</label>
+                    <div class="col-sm-6">
+                        <ui-select ng-model="vm.paraLapsus.selected" theme="bootstrap">
+                            <ui-select-match placeholder="Seleccione un Lapso de tiempo...">{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat="item in vm.paraLapsus | filter: $select.search">
+                                <div ng-bind-html="item | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-heading text-center">Equipos / Sensores</div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Equipo</label>
+                    <div class="col-sm-6">
+                        <ui-select ng-model="vm.devices.selected" theme="bootstrap" uis-open-close="vm.onOpenCloseDevice(isOpen, 'para')">
+                            <ui-select-match placeholder="Seleccione un Equipo...">{{$select.selected._id}} ({{$select.selected.model.name}})</ui-select-match>
+                            <ui-select-choices group-by="vm.groupByType" repeat="item in vm.devices | filter: $select.search">
+                                <div ng-bind-html="item._id + ' - ' + item.model.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Sensor Tension</label>
+                    <div class="col-sm-6">
+                        <ui-select ng-model="vm.paraVoltSensors.selected" theme="bootstrap">
+                            <ui-select-match placeholder="Seleccione un Sensor de Tension...">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="item in vm.paraVoltSensors | filter: $select.search">
+                                <div ng-bind-html="item.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Sensor Corriente</label>
+                    <div class="col-sm-6">
+                        <ui-select ng-model="vm.paraCurrSensors.selected" theme="bootstrap">
+                            <ui-select-match placeholder="Seleccione un Sensor de Corriente...">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="item in vm.paraCurrSensors | filter: $select.search">
+                                <div ng-bind-html="item.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Sensor &Aacute;ngulo</label>
+                    <div class="col-sm-6">
+                        <ui-select ng-model="vm.paraPhaseSensors.selected" theme="bootstrap">
+                            <ui-select-match placeholder="Seleccione un Sensor de &Aacute;...">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="item in vm.paraPhaseSensors | filter: $select.search">
+                                <div ng-bind-html="item.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default" ng-if="vm.calculation.selected._id === 'tcmd'">
+            <!-- Default panel contents -->
+            <div class="panel-heading text-center">AH (Energia de Activacion) entre 60–100 kJ/mol</div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">AH</label>
+                    <div class="col-sm-6">
+                        <input class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-heading text-center">Sensores</div>
+            <div class="panel-body">
+                <uib-accordion>
+                    <div uib-accordion-group class="panel-default" ng-repeat="group in groups">
+                        <uib-accordion-heading>
+                            <div ng-bind-html="group.title" compile-template></div>
+                        </uib-accordion-heading>
+                        <div ng-bind-html="group.content" compile-template></div>
+                    </div>
+                </uib-accordion>
+            </div>
+        </div>
+
+        <div class="panel panel-default" ng-if="vm.calculation.selected._id === 'tcmm'">
+            <!-- Default panel contents -->
+            <div class="panel-heading text-center">AH (Energia de Activacion) entre 60–100 kJ/mol</div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">AH</label>
+                    <div class="col-sm-6">
+                        <ui-select ng-model="vm.calculation.selected" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
+                            <ui-select-match placeholder="Seleccione un Lapso de tiempo...">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices group-by="vm.groupByType" repeat="item in vm.calculations | filter: $select.search">
+                                <div ng-bind-html="item.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-heading text-center">Sensores</div>
+            <div class="panel-body">
+                <uib-accordion>
+                    <div uib-accordion-group class="panel-default" ng-repeat="group in groups">
+                        <uib-accordion-heading>
+                            <div ng-bind-html="group.title" compile-template></div>
+                        </uib-accordion-heading>
+                        <div ng-bind-html="group.content" compile-template></div>
+                    </div>
+                </uib-accordion>
+            </div>
+        </div>
+
+        </fieldset>
+
+    </form>
+
+</div>

@@ -19,7 +19,7 @@ angular.module('deviceController', [])
             showGridFooter: true,
             columnDefs: [
                 { field: '_id', displayName: 'IMEI', enableHiding: false },
-                { field: 'description', displayName: 'DESCRIPCION', enableHiding: false },
+                { field: 'name', displayName: 'NOMBRE', enableHiding: false },
                 { field: 'model.name', displayName: 'MODELO', enableHiding: false },
                 { field: 'client_id.name', displayName: 'CLIENTE', enableHiding: false },
                 { field: 'crud', displayName: 'VER / EDITAR / BORRAR', enableHiding: false, enableSorting: false, exporterSuppressExport: true,

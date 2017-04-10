@@ -11,6 +11,7 @@ module.exports = function(app) {
         Measure.find({
             timestamp: { '$gte': new Date(req.body.dateFrom), '$lte': new Date(req.body.dateTo) }
         })
+            .sort({'timestamp': 1})
             .populate({
                 path: 'imei',
                 model: 'Device',

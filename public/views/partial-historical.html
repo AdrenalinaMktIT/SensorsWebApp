@@ -6,7 +6,7 @@
             <h3 class="modal-title" id="modal-title">Reporte Historico (Grafico)</h3>
         </div>
         <div class="modal-body" id="modal-body">
-            </ul>
+
             <canvas id="bar" class="chart chart-bar"
                     chart-data="vm.data" chart-labels="vm.labels" chart-series="vm.series" chart-options="options">
             </canvas>
@@ -33,6 +33,7 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label">Tipo de Sensor</label>
                 <div class="col-sm-6">
+                    <span us-spinner spinner-key="sensorTypeSpinner"></span>
                     <ui-select ng-model="vm.type.selected" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
                         <ui-select-match placeholder="Seleccione o busque un tipo de sensor en la lista...">{{$select.selected.name}}</ui-select-match>
                         <ui-select-choices group-by="vm.groupByType" repeat="item in vm.types | filter: $select.search">
@@ -41,6 +42,7 @@
                     </ui-select>
                 </div>
                 <button ng-click="vm.report(historicalForm)" type="button" class="btn btn-primary"><i class="fa fa-pie-chart" aria-hidden="true"></i> Reporte</button>
+                <span us-spinner spinner-key="historicalGraphSpinner"></span>
             </div>
 
             <div class="row">
