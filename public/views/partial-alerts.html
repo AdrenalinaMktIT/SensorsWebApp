@@ -27,20 +27,27 @@
                         <input class="form-control" readonly="readonly" name="alertId" ng-model="vm.alert.alertId" type="hidden" placeholder="ID de Grupo" required />
                         <div class="row">
                             <div class="col-md-4">
-                                <label class="control-label"> Nombre</label>
+                                <label class="control-label">Nombre</label>
                                 <input class="form-control" name="name" ng-model="vm.alert.name" type="text" placeholder="Nombre" required />
                             </div>
                             <div class="col-md-4">
-                                <label class="control-label"> Descripcion</label>
-                                <input class="form-control" name="description" ng-model="vm.alert.description" type="text" placeholder="Descripcion" required />
+                                <label class="control-label">Sensor</label>
+                                <select class="form-control" name="sensor" ng-model="vm.alert.sensor" ng-options="sensor as sensor.name for sensor in vm.sensors track by sensor._id" required ></select>
                             </div>
                             <div class="col-md-4">
-                                <label class="control-label"> Imagen</label>
-                                <input class="form-control" name="image" ng-model="vm.alert.image" type="text" placeholder="URL Imagen" />
+                                <label class="control-label">Perfil</label>
+                                <select class="form-control" name="profile" ng-model="vm.alert.profile" ng-options="profile as profile.name for profile in vm.profiles track by profile._id" required ></select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="control-label">Menor que</label>
+                                <input class="form-control" less_than="less_than" ng-model="vm.alert.less_than" type="text" placeholder="menor que" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="control-label">Mayor que</label>
+                                <input class="form-control" greater_than="greater_than" ng-model="vm.alert.greater_than" type="text" placeholder="mayor que" required />
                             </div>
                         </div>
-                    </fieldset>
-                </form>
+                    </fieldset>                </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" type="button" ng-show="vm.isAdd" ng-click="vm.add()">Guardar</button>

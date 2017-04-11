@@ -62,7 +62,7 @@ module.exports = function(app) {
 
     // Eliminar un cliente.
     app.delete('/api/v1/clients/:client_id', function(req, res) {
-        newClient.findByIdAndRemove(req.params.client_id)
+        Client.findByIdAndRemove(req.params.client_id)
             .then(function(client) {
                 if (!client) {
                     res.status(404).json({

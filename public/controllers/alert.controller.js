@@ -1,7 +1,7 @@
 angular.module('alertController', [])
 
 // inject the Alert service factory into our controller
-    .controller('AlertCtrl', function ($http, $uibModal, $log, Alerts) {
+    .controller('AlertCtrl', function ($http, $uibModal, $log, Alerts, Profiles, Sensors) {
 
         var vm = this;
 
@@ -37,6 +37,8 @@ angular.module('alertController', [])
         // when landing on the page, get all alerts and show them
         // use the service to get all the alerts
         loadAlerts();
+        loadProfiles();
+        loadSensors();
 
         function loadAlerts() {
             Alerts.getAll()
@@ -49,6 +51,24 @@ angular.module('alertController', [])
                     // called asynchronously if an error occurs
                     // or server returns response with an error status.
                     console.log('Error: ' + response);
+                });
+        }
+
+        function loadProfiles() {
+            Profiles.getAll()
+                .then(function successCallback(response) {
+                    vm.profiles = response.data.profiles;
+                }, function errorCallback(response) {
+                    console.log('Error: ' + response);
+                });
+        }
+
+        function loadSensors() {
+            Sensors.getAll()
+                .then(function successCallback(response) {
+                    vm.sensors = response.data.sensors;
+                }, function errorCallback(response) {
+                   console.log('Error: ' + response);
                 });
         }
 
@@ -65,22 +85,18 @@ angular.module('alertController', [])
 
                         vm.id = response.data.alert._id;
                         vm.name = response.data.alert.name;
-                        vm.password = response.data.alert.password;
-                        vm.description = response.data.alert.description;
-                        vm.client = response.data.alert.client_id;
-                        vm.type = response.data.alert.alert_type;
-                        vm.timezone = response.data.alert.timezone_id;
-                        vm.active = response.data.alert.active;
+                        vm.profile = response.data.profile;
+                        vm.sensor = response.data.sensor;
+                        vm.greater_than = response.data.greater_than;
+                        vm.less_than = response.data.less_than;
 
                         var alert = {
                             alertId: vm.id,
                             name: vm.name,
-                            password: vm.password,
-                            description: vm.description,
-                            client: vm.client,
-                            type: vm.type,
-                            timezone: vm.timezone,
-                            active: vm.active
+                            profile: vm.profile,
+                            sensor: vm.sensor,
+                            greater_than: vm.greater_than,
+                            less_than: vm.less_than
                         };
 
                         var modalInstance = $uibModal.open({
@@ -107,14 +123,12 @@ angular.module('alertController', [])
                                     break;
                                 case 'update':
                                     var alertData = {
-                                        alertId: data.alert.alertId,
+                                        alertId: data.alert.Id,
                                         name: data.alert.name,
-                                        password: data.alert.password,
-                                        description: data.alert.description,
-                                        client: data.alert.client._id,
-                                        type: data.alert.type,
-                                        timezone: data.alert.timezone._id,
-                                        active: data.alert.active !== 'No'
+                                        sensor: data.alert.sensor,
+                                        profile: data.alert.profile,
+                                        greater_than: data.alert.greater_than,
+                                        less_than: data.alert.less_than
                                     };
                                     Alerts.update(data.alert.alertId, alertData);
                                     break;
@@ -125,12 +139,10 @@ angular.module('alertController', [])
                                     var alertData = {
                                         //alertId: data.alert.alertId,
                                         name: data.alert.name,
-                                        password: data.alert.password,
-                                        description: data.alert.description,
-                                        client: data.alert.client._id,
-                                        type: data.alert.type,
-                                        timezone: data.alert.timezone._id,
-                                        active: data.alert.active !== 'No'
+                                        sensor: data.alert.sensor,
+                                        profile: data.alert.profile,
+                                        greater_than: data.alert.greater_than,
+                                        less_than: data.alert.less_than
                                     };
                                     Alerts.add(alertData);
                                     break;
@@ -155,6 +167,12 @@ angular.module('alertController', [])
                         alert: function () {
                             return null;
                         },
+                        sensors: function(){
+                              return vm.sensors;
+                        },
+                        profiles: function() {
+                            return vm.profiles;
+                        },
                         mode: function () {
                             return mode;
                         }
@@ -166,12 +184,10 @@ angular.module('alertController', [])
                     var alertData = {
                         //alertId: data.alert.alertId,
                         name: data.alert.name,
-                        password: data.alert.password,
-                        description: data.alert.description,
-                        client: data.alert.client._id,
-                        type: data.alert.type,
-                        timezone: data.alert.timezone._id,
-                        active: data.alert.active !== 'No'
+                        sensor: data.alert.sensor,
+                        profile: data.alert.profile,
+                        greater_than: data.alert.greater_than,
+                        less_than: data.alert.less_than
                     };
                     Alerts.create(alertData);
                 }, function () {
@@ -181,23 +197,16 @@ angular.module('alertController', [])
         };
     });
 
-angular.module('alertController').controller('AlertModalInstanceCtrl', function ($uibModalInstance, alert, mode) {
+angular.module('alertController').controller('AlertModalInstanceCtrl', function ($uibModalInstance, alert, mode, sensors, profiles) {
     var vm = this;
 
     vm.isView = vm.isUpdate = vm.isDelete = vm.isAdd = false;
 
     vm.alert = alert;
 
-    vm.actives = ['Si', 'No'];
+    vm.sensors = sensors;
 
-    vm.types = ['Admin', 'Monitoreo'];
-
-    vm.isDisabled = true;
-
-    if (mode != 'add') {
-        vm.alert.active = alert.active ? 'Si' : 'No';
-        vm.alert.type = alert.type;
-    }
+    vm.profiles = profiles;
 
     switch (mode) {
         case 'read':
