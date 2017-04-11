@@ -20,6 +20,7 @@
     "ejs": "~0.8.5",
     "express": "~4.14.0",
     "express-session": "*",
+    "mathjs": "^3.11.5",
     "method-override": "^2.3.7",
     "moment": "^2.18.1",
     "mongoose": "~4.7.4",

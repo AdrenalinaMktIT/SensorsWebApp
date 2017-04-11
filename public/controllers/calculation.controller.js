@@ -27,7 +27,7 @@ angular.module('calculationController', [])
                     thiData.humiditySensorIdx = vm.ithHumSensors.selected.idx;
 
                     $scope.labels = [];
-                    $scope.data = [];
+                    $scope.chartData = [];
                     $scope.series = [];
                     /*$scope.options = {
                      scales: {
@@ -49,12 +49,12 @@ angular.module('calculationController', [])
 
                                 $scope.labels.push(moment(thiCalc.timestamp).format('DD-MM-YYYY HH:mm:ss'));
                                 $scope.labels = _.uniq($scope.labels);
-                                $scope.data.push(thiCalc.thiCalc);
+                                $scope.chartData.push(thiCalc.thiCalc);
 
                             });
 
                             if (response.data.thiCalcs.length > 0) {
-                                vm.openCalculationModal('lg');
+                                vm.openCalculationModal();
                             } else {
                                 AppAlert.add('warning', 'No hay calculos disponibles.');
                             }
@@ -64,43 +64,69 @@ angular.module('calculationController', [])
                         console.log('Error: ' + response);
                     });
                 } else {
-                    AppAlert.add('danger', 'Error ! Debe seleccionar 1 equipo, 1 sensor de tipo temperatura y 1 sensor de tipo humedad.');
+                    AppAlert.add('warning', 'Debe seleccionar 1 equipo, 1 sensor de tipo temperatura y 1 sensor de tipo humedad.');
                 }
 
                 // 2 => Potencia Activa, Reactiva y Aparente.
             } else if (vm.calculation.selected._id === 'para') {
 
-                vm.paraLapsus = ['Ultima Hora', 'Ultimos 7 Dias'];
+                if (vm.devices.selected && vm.paraLapsus.selected && vm.paraVoltSensors.selected && vm.paraCurrSensors.selected && vm.paraPhaseSensors.selected) {
+                    var paraData = {};
 
-                Calculations.getAvailableDevices('para')
-                    .then(function successCallback(response) {
-                        vm.devices = response.data.devices;
-                    }, function errorCallback(response) {
-                        console.log('Error: ' + response);
-                    });
+                    // TODO setear en produccion la ult. hora. (en vez de 1 anio atras a modo de prueba)
+                    if (vm.paraLapsus.selected === 'Ultima Hora') {
+                        paraData.dateFrom = vm.dateFrom = moment().subtract(1, 'years').format('YYYY-MM-DD HH:mm:ss');
+                    } else if (vm.paraLapsus.selected === 'Ultimos 7 Dias') {
+                        paraData.dateFrom = vm.dateFrom = moment().subtract(7, 'days').format('YYYY-MM-DD HH:mm:ss');
+                    }
+
+                    paraData.dateTo = vm.dateTo = moment().format('YYYY-MM-DD HH:mm:ss');
+
+                    paraData.deviceImei = vm.devices.selected._id;
+                    paraData.voltageSensorIdx = vm.paraVoltSensors.selected.idx;
+                    paraData.currentSensorIdx = vm.paraCurrSensors.selected.idx;
+                    paraData.phaseAngleSensorIdx = vm.paraPhaseSensors.selected.idx;
+
+                    $scope.labels = [];
+                    $scope.chartData = [];
+                    $scope.series = [];
+                    /*$scope.options = {
+                     scales: {
+                     yAxes: [{
+                     ticks: {
+                     beginAtZero:true
+                     }
+                     }]
+                     }
+                     };*/
+                    usSpinnerService.spin('calculationGraphSpinner');
+
+                    Calculations.para(paraData)
+                        .then(function successCallback(response) {
+                            console.log(response.data.paraCalcs);
+                            vm.responseData = response.data;
+                            usSpinnerService.stop('calculationGraphSpinner');
+
+                            if (response.data.paraCalcs) {
+                                vm.openCalculationModal();
+                            } else {
+                                AppAlert.add('warning', 'No hay calculos disponibles.');
+                            }
+
+                        }, function errorCallback(response) {
+                            usSpinnerService.stop('calculationGraphSpinner');
+                            console.log('Error: ' + response);
+                        });
+                } else {
+                    AppAlert.add('warning', 'Debe seleccionar 1 equipo, 1 sensor de tipo voltaje, 1 sensor de tipo corriente y 1 sensor de tipo angulo.');
+                }
 
                 // 3 => Temperatura Cinetica Media x dias.
             } else if (vm.calculation.selected._id === 'tcmd') {
-                Sensors.getByType('temp')
-                    .then(function successCallback(response) {
-                        usSpinnerService.stop('sensorTypeSpinner');
-                        vm.sensors = response.data.sensors;
-                        showCollapsibleSensors(vm.sensors);
-                    }, function errorCallback(response) {
-                        usSpinnerService.stop('sensorTypeSpinner');
-                        console.log('Error: ' + response);
-                    });
+                // TODO tcmd
                 // 4 => Temperatura Cinetica Media x mediciones.
             } else {
-                Sensors.getByType('temp')
-                    .then(function successCallback(response) {
-                        usSpinnerService.stop('sensorTypeSpinner');
-                        vm.sensors = response.data.sensors;
-                        showCollapsibleSensors(vm.sensors);
-                    }, function errorCallback(response) {
-                        usSpinnerService.stop('sensorTypeSpinner');
-                        console.log('Error: ' + response);
-                    });
+                // TODO tcmm
             }
 
             /*
@@ -125,7 +151,7 @@ angular.module('calculationController', [])
                     };
 
                     $scope.labels = [];
-                    $scope.data = [];
+                    $scope.chartData = [];
                     $scope.series = [];
                     usSpinnerService.spin('calculationGraphSpinner');
                     Reports.calculate(reportRequest)
@@ -152,11 +178,11 @@ angular.module('calculationController', [])
 
                                 });
                                 $scope.series.push(sensorName);
-                                $scope.data.push(seriesData);
+                                $scope.chartData.push(seriesData);
                             }
 
                             if (response.data.length > 0) {
-                                vm.openCalculationModal('lg');
+                                vm.openCalculationModal();
                             } else {
                                 AppAlert.add('warning', 'No hay datos para ese sensor.');
                             }
@@ -283,14 +309,14 @@ angular.module('calculationController', [])
             }
         };
 
-        vm.openCalculationModal = function (size, parentSelector) {
+        vm.openCalculationModal = function () {
             var modalInstance = $uibModal.open({
                 ariaLabelledBy: 'modal-title',
                 ariaDescribedBy: 'modal-body',
                 templateUrl: 'myModalContent.html',
                 controller: 'CalculationModalInstanceCtrl',
                 controllerAs: 'vm',
-                size: size,
+                size: 'lg',
                 resolve: {
                     calculation: function () {
                         return vm.calculation;
@@ -301,8 +327,17 @@ angular.module('calculationController', [])
                     series: function () {
                         return $scope.series;
                     },
-                    data: function () {
-                        return $scope.data;
+                    chartData: function () {
+                        return $scope.chartData;
+                    },
+                    responseData: function () {
+                        return vm.responseData;
+                    },
+                    dateFrom: function () {
+                        return vm.dateFrom;
+                    },
+                    dateTo: function () {
+                        return vm.dateTo;
                     }
                 }
             });
@@ -423,12 +458,15 @@ angular.module('calculationController', [])
             opened: false
         };
     })
-    .controller('CalculationModalInstanceCtrl', function ($uibModalInstance, calculation, labels, series, data) {
+    .controller('CalculationModalInstanceCtrl', function ($uibModalInstance, calculation, labels, series, chartData, responseData, dateFrom, dateTo) {
         var vm = this;
         vm.calculation = calculation;
         vm.labels = labels;
         vm.series = series;
-        vm.data = data;
+        vm.data = chartData;
+        vm.responseData = responseData;
+        vm.dateFrom = dateFrom;
+        vm.dateTo = dateTo;
 
         vm.ok = function () {
             $uibModalInstance.close();
