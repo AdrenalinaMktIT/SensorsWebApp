@@ -8,6 +8,9 @@ angular.module('calculationService', []).factory('Calculations', function ($http
             },
             thi: function (thiData) {
                  return $http.post('/api/v1/calculations/thi', thiData);
+            },
+            para: function (paraData) {
+                return $http.post('/api/v1/calculations/para', paraData);
             }
         }
     }
