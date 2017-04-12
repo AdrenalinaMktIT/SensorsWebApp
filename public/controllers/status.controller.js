@@ -12,7 +12,7 @@ angular.module('statusController', [])
                 ariaDescribedBy: 'modal-body',
                 templateUrl: 'statusModalContent.html',
                 controller: 'StatusModalInstanceCtrl',
-                controllerAs: '$statusModalCtrl',
+                controllerAs: 'vm',
                 size: 'lg',
                 resolve: {
                     sensorDetails: function () {
@@ -21,9 +21,9 @@ angular.module('statusController', [])
                 }
             });
 
-            modalInstance.result.then(function () {
+            modalInstance.result.then(function (data) {
             }, function () {
-                $log.info('Modal dismissed at: ' + new Date());
+                //vm.chartConfig.getChartObj().reflow();
             });
         };
 
@@ -101,69 +101,114 @@ angular.module('statusController', [])
             });
     })
     .controller('StatusModalInstanceCtrl', function ($uibModalInstance, Reports, sensorDetails, usSpinnerService) {
-        var statusModalCtrl = this;
+        var vm = this;
 
-        statusModalCtrl.sensorDetails = sensorDetails;
+        vm.selectedGraphTab = false;
 
-        statusModalCtrl.ok = function () {
+        vm.sensorDetails = sensorDetails;
+
+        vm.ok = function () {
             $uibModalInstance.close();
         };
 
-        statusModalCtrl.cancel = function () {
+        vm.cancel = function () {
             $uibModalInstance.dismiss('cancel');
         };
 
-        statusModalCtrl.startSpin = function() {
+        vm.startSpin = function() {
             usSpinnerService.spin('sensorReportSpinner');
         };
 
-        statusModalCtrl.stopSpin = function() {
+        vm.stopSpin = function() {
             usSpinnerService.stop('sensorReportSpinner');
         };
 
-        statusModalCtrl.getSensorReport = function () {
+        vm.getSensorReport = function () {
 
-            statusModalCtrl.startSpin();
-            // TODO dateFrom hay q poner 1 semana para atras por ejemplo.
+            vm.startSpin();
+            // TODO dateFrom hay que poner 7 dias (1 sem) para atras por ejemplo. '77' es para probar y que haya mas data.
             var reportRequest = {
                 "dateFrom": moment().subtract(77, 'days').format('YYYY-MM-DD'),
                 "dateTo": moment().format('YYYY-MM-DD'),
                 "sensors": sensorDetails.sensor._id
             };
 
-            statusModalCtrl.labels = [];
-            statusModalCtrl.data = [];
-            statusModalCtrl.series = [];
-            /*$scope.options = {
-             scales: {
-             yAxes: [{
-             ticks: {
-             beginAtZero:true
-             }
-             }]
-             }
-             };*/
+            var labels = [], chartData = [];
+
             var sensorName = sensorDetails.sensor.name + ' (' + sensorDetails.sensor.type + ')';
             Reports.calculate(reportRequest)
                 .then(function successCallback(response) {
-                    statusModalCtrl.stopSpin();
-                    var seriesData = [];
+                    vm.stopSpin();
 
                     response.data.forEach(function(measure, idx, arr) {
 
                         // busco el indice en el cual se encuentra el sensor en el modelo configurado para este imei.
                         var listOfSensorNames = _.pluck(measure.imei.model.sensors, '_id');
                         var sensorIdx = _.indexOf(listOfSensorNames, sensorDetails.sensor._id);
-                        statusModalCtrl.labels.push(moment(measure.timestamp).format('DD-MM-YYYY HH:mm:ss'));
-                        statusModalCtrl.labels = _.uniq(statusModalCtrl.labels);
-                        seriesData.push(measure.data[sensorIdx]);
-
+                        labels.push(moment(measure.timestamp).format('DD-MM-YYYY HH:mm:ss'));
+                        labels = _.uniq(labels);
+                        chartData.push(measure.data[sensorIdx]);
                     });
-                    statusModalCtrl.series.push(sensorName);
-                    statusModalCtrl.data.push(seriesData);
+
+                    vm.chartConfig = {
+                        chart: {
+                            zoomType: ' x'
+                        },
+                        title: {
+                            text: 'Ultimas Lecturas ' + sensorName
+                        },
+                        subtitle: {
+                            text: 'Hacer clic y arrastrar en el area para hacer zoom.'
+                        },
+                        xAxis: {
+                            type: 'datetime',
+                            categories: labels
+                        },
+                        legend: {
+                            enabled: false
+                        },
+                        plotOptions: {
+                            area: {
+                                fillColor: {
+                                    linearGradient: {
+                                        x1: 0,
+                                        y1: 0,
+                                        x2: 0,
+                                        y2: 1
+                                    },
+                                    stops: [
+                                        [0, Highcharts.getOptions().colors[0]],
+                                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                                    ]
+                                },
+                                marker: {
+                                    radius: 2
+                                },
+                                lineWidth: 1,
+                                states: {
+                                    hover: {
+                                        lineWidth: 1
+                                    }
+                                },
+                                threshold: null
+                            }
+                        },
+                        yAxis: {
+                            title: {
+                                text: 'Ult. Lecturas'
+                            }
+                        },
+                        series: [{
+                            type: 'area',
+                            name: sensorName,
+                            data: chartData
+                        }]
+                    };
+
+                    vm.selectedGraphTab = true;
 
                 }, function errorCallback(response) {
-                    statusModalCtrl.stopSpin();
+                    vm.stopSpin();
                     console.log('Error: ' + response);
                 });
         }

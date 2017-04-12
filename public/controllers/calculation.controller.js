@@ -1,5 +1,5 @@
 angular.module('calculationController', [])
-    .controller('CalculationCtrl', function ($scope, $sce, $uibModal, $log, Calculations, Sensors, Types, AppAlert, usSpinnerService){
+    .controller('CalculationCtrl', function ($scope, $sce, $uibModal, Calculations, Sensors, AppAlert, usSpinnerService){
         var vm = this;
 
         vm.checkModel = {};
@@ -26,32 +26,78 @@ angular.module('calculationController', [])
                     thiData.temperatureSensorIdx = vm.ithTempSensors.selected.idx;
                     thiData.humiditySensorIdx = vm.ithHumSensors.selected.idx;
 
-                    $scope.labels = [];
-                    $scope.chartData = [];
-                    $scope.series = [];
-                    /*$scope.options = {
-                     scales: {
-                     yAxes: [{
-                     ticks: {
-                     beginAtZero:true
-                     }
-                     }]
-                     }
-                     };*/
                     usSpinnerService.spin('calculationGraphSpinner');
 
                     Calculations.thi(thiData)
                         .then(function successCallback(response) {
                         console.log(response.data.thiCalcs);
+                            vm.responseData = response.data;
+
+                            var labels = [], chartData = [];
+
                             usSpinnerService.stop('calculationGraphSpinner');
 
                             response.data.thiCalcs.forEach(function(thiCalc, idx, arr) {
 
-                                $scope.labels.push(moment(thiCalc.timestamp).format('DD-MM-YYYY HH:mm:ss'));
-                                $scope.labels = _.uniq($scope.labels);
-                                $scope.chartData.push(thiCalc.thiCalc);
-
+                                labels.push(moment(thiCalc.timestamp).format('DD-MM-YYYY HH:mm:ss'));
+                                labels = _.uniq(labels);
+                                chartData.push(thiCalc.thiCalc);
                             });
+
+                            vm.chartConfig = {
+                                chart: {
+                                    zoomType: ' x'
+                                },
+                                title: {
+                                    text: vm.calculation.selected.name
+                                },
+                                subtitle: {
+                                    text: 'Hacer clic y arrastrar en el area para hacer zoom.'
+                                },
+                                xAxis: {
+                                    type: 'datetime',
+                                    categories: labels
+                                },
+                                legend: {
+                                    enabled: false
+                                },
+                                plotOptions: {
+                                    area: {
+                                        fillColor: {
+                                            linearGradient: {
+                                                x1: 0,
+                                                y1: 0,
+                                                x2: 0,
+                                                y2: 1
+                                            },
+                                            stops: [
+                                                [0, Highcharts.getOptions().colors[0]],
+                                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                                            ]
+                                        },
+                                        marker: {
+                                            radius: 2
+                                        },
+                                        lineWidth: 1,
+                                        states: {
+                                            hover: {
+                                                lineWidth: 1
+                                            }
+                                        },
+                                        threshold: null
+                                    }
+                                },
+                                yAxis: {
+                                    title: {
+                                        text: 'ITH'
+                                    }
+                                },
+                                series: [{
+                                    type: 'area',
+                                    name: 'Medidas',
+                                    data: chartData
+                                }]
+                            };
 
                             if (response.data.thiCalcs.length > 0) {
                                 vm.openCalculationModal();
@@ -87,18 +133,6 @@ angular.module('calculationController', [])
                     paraData.currentSensorIdx = vm.paraCurrSensors.selected.idx;
                     paraData.phaseAngleSensorIdx = vm.paraPhaseSensors.selected.idx;
 
-                    $scope.labels = [];
-                    $scope.chartData = [];
-                    $scope.series = [];
-                    /*$scope.options = {
-                     scales: {
-                     yAxes: [{
-                     ticks: {
-                     beginAtZero:true
-                     }
-                     }]
-                     }
-                     };*/
                     usSpinnerService.spin('calculationGraphSpinner');
 
                     Calculations.para(paraData)
@@ -128,72 +162,6 @@ angular.module('calculationController', [])
             } else {
                 // TODO tcmm
             }
-
-            /*
-
-            // me quedo solo con los sensores que estan tildados ('true')
-            var selectedSensors = _.pick(vm.checkModel, function(value, key, object) {
-                return _.isBoolean(value) && value === true;
-            });
-
-            if (_.size(selectedSensors) == 0) {
-                AppAlert.add('danger', 'Error ! Debe seleccionar al menos 1 sensor.');
-            } else {
-
-                if (historicalForm.$valid) {
-                    var sensorKeys = _.map(_.keys(selectedSensors), function (elem) {
-                        return parseInt(elem.substr(1));
-                    });
-                    var reportRequest = {
-                        "dateFrom": moment($scope.dateFrom).format('YYYY-MM-DD'),
-                        "dateTo": moment($scope.dateTo).format('YYYY-MM-DD'),
-                        "sensors": sensorKeys
-                    };
-
-                    $scope.labels = [];
-                    $scope.chartData = [];
-                    $scope.series = [];
-                    usSpinnerService.spin('calculationGraphSpinner');
-                    Reports.calculate(reportRequest)
-                        .then(function successCallback(response) {
-                            usSpinnerService.stop('calculationGraphSpinner');
-
-                            var seriesData = [];
-
-                            for (var i =0; i < sensorKeys.length; i++) {
-
-                                var sensorName = '';
-
-                                seriesData = [];
-
-                                response.data.forEach(function(measure, idx, arr) {
-
-                                    // busco el indice en el cual se encuentra el sensor en el modelo configurado para este imei.
-                                    var listOfSensorNames = _.pluck(measure.imei.model.sensors, '_id');
-                                    var sensorIdx = _.indexOf(listOfSensorNames, sensorKeys[i]);
-                                    sensorName = measure.imei.model.sensors[sensorIdx].name + ' (' + measure.imei.model.sensors[sensorIdx].type + ')';
-                                    $scope.labels.push(moment(measure.timestamp).format('DD-MM-YYYY HH:mm:ss'));
-                                    $scope.labels = _.uniq($scope.labels);
-                                    seriesData.push(measure.data[sensorIdx]);
-
-                                });
-                                $scope.series.push(sensorName);
-                                $scope.chartData.push(seriesData);
-                            }
-
-                            if (response.data.length > 0) {
-                                vm.openCalculationModal();
-                            } else {
-                                AppAlert.add('warning', 'No hay datos para ese sensor.');
-                            }
-
-                        }, function errorCallback(response) {
-                            usSpinnerService.stop('calculationGraphSpinner');
-                            console.log('Error: ' + response);
-                        });
-
-                }
-            }*/
         };
 
         function showCollapsibleSensors(sensors) {
@@ -321,14 +289,8 @@ angular.module('calculationController', [])
                     calculation: function () {
                         return vm.calculation;
                     },
-                    labels: function () {
-                        return $scope.labels;
-                    },
-                    series: function () {
-                        return $scope.series;
-                    },
-                    chartData: function () {
-                        return $scope.chartData;
+                    chartConfig: function () {
+                        return vm.chartConfig;
                     },
                     responseData: function () {
                         return vm.responseData;
@@ -344,7 +306,7 @@ angular.module('calculationController', [])
 
             modalInstance.result.then(function (data) {
             }, function () {
-                $log.info('Modal dismissed at: ' + new Date());
+                vm.chartConfig.getChartObj().reflow();
             });
         };
 
@@ -458,12 +420,10 @@ angular.module('calculationController', [])
             opened: false
         };
     })
-    .controller('CalculationModalInstanceCtrl', function ($uibModalInstance, calculation, labels, series, chartData, responseData, dateFrom, dateTo) {
+    .controller('CalculationModalInstanceCtrl', function ($uibModalInstance, calculation, chartConfig, responseData, dateFrom, dateTo) {
         var vm = this;
         vm.calculation = calculation;
-        vm.labels = labels;
-        vm.series = series;
-        vm.data = chartData;
+        vm.chartConfig = chartConfig;
         vm.responseData = responseData;
         vm.dateFrom = dateFrom;
         vm.dateTo = dateTo;

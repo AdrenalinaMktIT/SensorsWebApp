@@ -7,14 +7,8 @@
         </div>
         <div class="modal-body" id="modal-body">
 
-            <canvas id="bar" class="chart chart-bar"
-                    chart-data="vm.data" chart-labels="vm.labels" chart-series="vm.series" chart-options="options">
-            </canvas>
+            <highchart id="chart1" config="vm.chartConfig" class="span10"></highchart>
 
-            <!-- Reemplazar x este para grafico de lineas en lugar de barras.
-            <canvas id="line" class="chart chart-line"
-                    chart-data="data" chart-labels="labels" chart-series="series" chart-options="options">
-            </canvas>-->
         </div>
         <div class="modal-footer">
             <button class="btn btn-primary" type="button" ng-click="vm.ok()">OK</button>

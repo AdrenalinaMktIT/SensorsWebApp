@@ -1,6 +1,6 @@
 <script type="text/ng-template" id="statusModalContent.html">
     <div class="modal-header">
-        <button type="button" class="close" ng-click="$statusModalCtrl.ok()"><i class="fa fa-window-close" aria-hidden="true"></i></button>
+        <button type="button" class="close" ng-click="vm.ok()"><i class="fa fa-window-close" aria-hidden="true"></i></button>
         <h3 class="modal-title" id="modal-title">Resumen Estado de Sensor</h3>
     </div>
     <div class="modal-body" id="modal-body">
@@ -11,19 +11,19 @@
                 </uib-tab-heading>
                 <br>
                 <div ng-class="{
-                'panel-success': $statusModalCtrl.sensorDetails.status === 'ok',
-                'panel-info': $statusModalCtrl.sensorDetails.status === 'unknown',
-                'panel-warning': $statusModalCtrl.sensorDetails.status === 'warning',
-                'panel-danger': $statusModalCtrl.sensorDetails.status === 'critical' }" class="panel">
+                'panel-success': vm.sensorDetails.status === 'ok',
+                'panel-info': vm.sensorDetails.status === 'unknown',
+                'panel-warning': vm.sensorDetails.status === 'warning',
+                'panel-danger': vm.sensorDetails.status === 'critical' }" class="panel">
                     <div class="panel-heading">
-                        <h3 class="panel-title">Sensor {{$statusModalCtrl.sensorDetails.sensor.name}}</h3>
+                        <h3 class="panel-title">Sensor {{vm.sensorDetails.sensor.name}}</h3>
                     </div>
                     <div class="panel-body">
                         <h1 class=" bg-primary">
-                            Estado Actual: {{$statusModalCtrl.sensorDetails.status | uppercase}}
+                            Estado Actual: {{vm.sensorDetails.status | uppercase}}
                         </h1>
                         <p class="lead bg-primary">
-                            Ult. Valor Leido: {{$statusModalCtrl.sensorDetails.data}} ({{$statusModalCtrl.sensorDetails.timestamp}})
+                            Ult. Valor Leido: {{vm.sensorDetails.data}} ({{vm.sensorDetails.timestamp}})
                         </p>
                     </div>
                 </div>
@@ -35,15 +35,15 @@
                 <br>
                 <div class="panel panel-default">
                     <!-- Default panel contents -->
-                    <div class="panel-heading">Equipo {{$statusModalCtrl.sensorDetails.imei}}</div>
+                    <div class="panel-heading">Equipo {{vm.sensorDetails.imei}}</div>
                     <div class="panel-body">
-                        <p>MODELO {{$statusModalCtrl.sensorDetails.model}}</p>
+                        <p>MODELO {{vm.sensorDetails.model}}</p>
                     </div>
                 </div>
 
                 <div class="panel panel-default">
                     <!-- Default panel contents -->
-                    <div class="panel-heading">Parametros del sensor {{$statusModalCtrl.sensorDetails.sensor.name}}</div>
+                    <div class="panel-heading">Parametros del sensor {{vm.sensorDetails.sensor.name}}</div>
                     <div class="panel-body">
 
                         <div class="panel panel-danger">
@@ -53,7 +53,7 @@
 
                                 <!-- List group -->
                                 <div class="well ">
-                                    <ul class="list-group" ng-repeat="criticalParams in $statusModalCtrl.sensorDetails.sensor.params.critical">
+                                    <ul class="list-group" ng-repeat="criticalParams in vm.sensorDetails.sensor.params.critical">
                                         <li class="list-group-item">
                                             <strong>Mayor que: </strong>{{criticalParams.greather_than}} - <strong>Menor que: </strong>{{criticalParams.less_than}}
                                         </li>
@@ -69,7 +69,7 @@
 
                                 <!-- List group -->
                                 <div class="well ">
-                                    <ul class="list-group" ng-repeat="warningParams in $statusModalCtrl.sensorDetails.sensor.params.warning">
+                                    <ul class="list-group" ng-repeat="warningParams in vm.sensorDetails.sensor.params.warning">
                                         <li class="list-group-item"><strong>Mayor que: </strong>{{warningParams.greather_than}} - <strong>Menor que: </strong>{{warningParams.less_than}}</li>
                                     </ul>
                                 </div>
@@ -84,7 +84,7 @@
 
                                 <!-- List group -->
                                 <div class="well ">
-                                    <ul class="list-group" ng-repeat="okParams in $statusModalCtrl.sensorDetails.sensor.params.ok">
+                                    <ul class="list-group" ng-repeat="okParams in vm.sensorDetails.sensor.params.ok">
                                         <li class="list-group-item"><strong>Mayor que: </strong>{{okParams.greather_than}} - <strong>Menor que: </strong>{{okParams.less_than}}</li>
                                     </ul>
                                 </div>
@@ -93,20 +93,18 @@
                     </div>
                 </div>
             </uib-tab>
-            <uib-tab index="2" select="$statusModalCtrl.getSensorReport($statusModalCtrl.sensorDetails)">
+            <uib-tab index="2" select="vm.getSensorReport(vm.sensorDetails)">
                 <uib-tab-heading>
                     <i class="fa fa-bar-chart" aria-hidden="true"></i> Grafico
                 </uib-tab-heading>
                 <br>
                 <span us-spinner spinner-key="sensorReportSpinner"></span>
-                <canvas id="bar" class="chart chart-bar"
-                        chart-data="$statusModalCtrl.data" chart-labels="$statusModalCtrl.labels" chart-series="$statusModalCtrl.series" chart-options="options">
-                </canvas>
+                <highchart id="chart1" config="vm.chartConfig" class="span10" ng-if="vm.selectedGraphTab === true"></highchart>
             </uib-tab>
         </uib-tabset>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary" type="button" ng-click="$statusModalCtrl.ok()">Volver</button>
+        <button class="btn btn-primary" type="button" ng-click="vm.ok()">Volver</button>
     </div>
 </script>
 

@@ -52,24 +52,13 @@ angular.module('historicalController', [])
                         "sensors": sensorKeys
                     };
 
-                    $scope.labels = [];
-                    $scope.data = [];
-                    $scope.series = [];
-                    /*$scope.options = {
-                        scales: {
-                            yAxes: [{
-                                ticks: {
-                                    beginAtZero:true
-                                }
-                            }]
-                        }
-                    };*/
                     usSpinnerService.spin('historicalGraphSpinner');
                     Reports.calculate(reportRequest)
                         .then(function successCallback(response) {
                             usSpinnerService.stop('historicalGraphSpinner');
 
                             var seriesData = [];
+                            var labels = [], series = [], chartData = [];
 
                             for (var i =0; i < sensorKeys.length; i++) {
 
@@ -83,17 +72,72 @@ angular.module('historicalController', [])
                                     var listOfSensorNames = _.pluck(measure.imei.model.sensors, '_id');
                                     var sensorIdx = _.indexOf(listOfSensorNames, sensorKeys[i]);
                                     sensorName = measure.imei.model.sensors[sensorIdx].name + ' (' + measure.imei.model.sensors[sensorIdx].type + ')';
-                                    $scope.labels.push(moment(measure.timestamp).format('DD-MM-YYYY HH:mm:ss'));
-                                    $scope.labels = _.uniq($scope.labels);
+                                    labels.push(moment(measure.timestamp).format('DD-MM-YYYY HH:mm:ss'));
+                                    labels = _.uniq(labels);
                                     seriesData.push(measure.data[sensorIdx]);
 
                                 });
-                                $scope.series.push(sensorName);
-                                $scope.data.push(seriesData);
+                                series.push(sensorName);
+                                chartData.push(seriesData);
                             }
 
+                            vm.chartConfig = {
+                                chart: {
+                                    zoomType: ' x'
+                                },
+                                title: {
+                                    text: 'Sensores Selec.'
+                                },
+                                subtitle: {
+                                    text: 'Hacer clic y arrastrar en el area para hacer zoom.'
+                                },
+                                xAxis: {
+                                    type: 'datetime',
+                                    categories: labels
+                                },
+                                legend: {
+                                    enabled: false
+                                },
+                                plotOptions: {
+                                    area: {
+                                        fillColor: {
+                                            linearGradient: {
+                                                x1: 0,
+                                                y1: 0,
+                                                x2: 0,
+                                                y2: 1
+                                            },
+                                            stops: [
+                                                [0, Highcharts.getOptions().colors[0]],
+                                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                                            ]
+                                        },
+                                        marker: {
+                                            radius: 2
+                                        },
+                                        lineWidth: 1,
+                                        states: {
+                                            hover: {
+                                                lineWidth: 1
+                                            }
+                                        },
+                                        threshold: null
+                                    }
+                                },
+                                yAxis: {
+                                    title: {
+                                        text: 'Lecturas'
+                                    }
+                                },
+                                series: [{
+                                    type: 'area',
+                                    name: 'Medidas',
+                                    data: chartData[0]
+                                }]
+                            };
+
                             if (response.data.length > 0) {
-                                vm.openReportModal('lg');
+                                vm.openReportModal();
                             } else {
                                 AppAlert.add('warning', 'No hay datos para ese sensor.');
                             }
@@ -168,30 +212,24 @@ angular.module('historicalController', [])
             }
         };
 
-        vm.openReportModal = function (size, parentSelector) {
+        vm.openReportModal = function () {
             var modalInstance = $uibModal.open({
                 ariaLabelledBy: 'modal-title',
                 ariaDescribedBy: 'modal-body',
                 templateUrl: 'myModalContent.html',
                 controller: 'ReportModalInstanceCtrl',
                 controllerAs: 'vm',
-                size: size,
+                size: 'lg',
                 resolve: {
-                    labels: function () {
-                        return $scope.labels;
-                    },
-                    series: function () {
-                        return $scope.series;
-                    },
-                    data: function () {
-                        return $scope.data;
+                    chartConfig: function () {
+                        return vm.chartConfig;
                     }
                 }
             });
 
             modalInstance.result.then(function (data) {
             }, function () {
-                $log.info('Modal dismissed at: ' + new Date());
+                vm.chartConfig.getChartObj().reflow();
             });
         };
 
@@ -305,11 +343,9 @@ angular.module('historicalController', [])
             opened: false
         };
     })
-    .controller('ReportModalInstanceCtrl', function ($uibModalInstance, labels, series, data) {
+    .controller('ReportModalInstanceCtrl', function ($uibModalInstance, chartConfig) {
         var vm = this;
-        vm.labels = labels;
-        vm.series = series;
-        vm.data = data;
+        vm.chartConfig = chartConfig;
 
         vm.ok = function () {
             $uibModalInstance.close();

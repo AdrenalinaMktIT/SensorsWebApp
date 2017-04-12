@@ -3,23 +3,11 @@
     <script type="text/ng-template" id="myModalContent.html">
         <div class="modal-header">
             <button type="button" class="close" ng-click="vm.cancel()"><i class="fa fa-window-close" aria-hidden="true"></i></button>
-            <h3 class="modal-title" id="modal-title">
-                <span ng-if="vm.calculation.selected._id === 'ith'">Indice Temperatura-Humedad (ITH)</span>
-                <span ng-if="vm.calculation.selected._id === 'para'">Potencia Activa, Reactiva y Aparente</span>
-                <span ng-if="vm.calculation.selected._id === 'tcmd'">Temperatura Cinetica Media x Dias</span>
-                <span ng-if="vm.calculation.selected._id === 'tcmm'">Temperatura Cinetica Media x Mediciones</span>
-            </h3>
+            <h3 class="modal-title" id="modal-title">{{vm.calculation.selected.name}}</h3>
         </div>
         <div class="modal-body" id="modal-body">
 
-            <canvas id="bar" class="chart chart-bar" ng-if="vm.calculation.selected._id === 'ith'"
-                    chart-data="vm.data" chart-labels="vm.labels" chart-series="vm.series" chart-options="options">
-            </canvas>
-
-            <!-- Reemplazar x este para grafico de lineas en lugar de barras.
-            <canvas id="line" class="chart chart-line"
-                    chart-data="data" chart-labels="labels" chart-series="series" chart-options="options">
-            </canvas>-->
+            <highchart id="chart1" config="vm.chartConfig" class="span10" ng-if="vm.calculation.selected._id === 'ith'"></highchart>
 
             <div class="panel panel-primary" ng-if="vm.calculation.selected._id === 'para'">
                 <!-- Default panel contents -->
