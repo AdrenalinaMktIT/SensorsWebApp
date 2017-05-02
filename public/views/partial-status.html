@@ -23,7 +23,7 @@
                             Estado Actual: {{vm.sensorDetails.status | uppercase}}
                         </h1>
                         <p class="lead bg-primary">
-                            Ult. Valor Leido: {{vm.sensorDetails.data}} ({{vm.sensorDetails.timestamp}})
+                            Ult. Valor Leido: {{vm.sensorDetails.data}} {{vm.sensorDetails.sensor.type.units}} ({{vm.sensorDetails.timestamp}})
                         </p>
                     </div>
                 </div>

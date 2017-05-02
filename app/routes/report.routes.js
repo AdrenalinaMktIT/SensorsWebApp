@@ -135,6 +135,17 @@ module.exports = function(app) {
             },
             {
                 $unwind: "$sensor"
+            },
+            {
+                $lookup: {
+                    from: 'types',
+                    localField: 'sensor.type',
+                    foreignField: '_id',
+                    as: 'sensor.type'
+                }
+            },
+            {
+                $unwind: "$sensor.type"
             }], function (err, result) {
             if (err) {
                 next(err);
