@@ -19,6 +19,23 @@ module.exports = function(app) {
             });
     });
 
+    // Obtener los usuarios filtrando por cliente.
+    app.get('/api/v1/users/client/:clientId', function (req, res) {
+        User.find({"client_id": req.params.clientId}).populate('client_id').exec()
+            .then(function (users) {
+                res.status(200).json({
+                    message: 'OK!. Usuarios obtenidos correctamente.',
+                    users: users
+                });
+            })
+            .catch(function (err) {
+                res.status(500).json({
+                    message: 'Error interno de servidor. Por favor, intente nuevamente.',
+                    users: null
+                });
+            });
+    });
+
     // Crear un nuevo usuario.
     app.post('/api/v1/users', function(req, res) {
         User.findOne({ 'name' :  req.body.name })

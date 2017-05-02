@@ -51,9 +51,17 @@ angular.module('userController', [])
         }
 
         function loadClients() {
+            vm.clients = [];
+            vm.clients.push({
+                _id: 'all',
+                name: 'Todos'
+            });
             Clients.getAll()
                 .then(function successCallback(response) {
-                    vm.clients = response.data.clients;
+                    //vm.clients = response.data.clients;
+                    for (var i = 0; i < response.data.clients.length; i++) {
+                        vm.clients.push(response.data.clients[i]);
+                    }
                 }, function errorCallback(response) {
                     console.log('Error: ' + response);
                 });
@@ -223,6 +231,28 @@ angular.module('userController', [])
                 }, function () {
                     $log.info('modal-component dismissed at: ' + new Date());
                 });
+            }
+        };
+
+        vm.onOpenClose = function (isOpen){
+            if (!isOpen) {
+                if (vm.client.selected._id === 'all') {
+                    Users.getAll()
+                        .then(function successCallback(response) {
+                            vm.users = response.data.users;
+                            vm.gridOptions.data = response.data.users;
+                        }, function errorCallback(response) {
+                            console.log('Error: ' + response);
+                        });
+                } else {
+                    Users.getByClient(vm.client.selected._id)
+                        .then(function successCallback(response) {
+                            vm.users = response.data.users;
+                            vm.gridOptions.data = response.data.users;
+                        }, function errorCallback(response) {
+                            console.log('Error: ' + response);
+                        });
+                }
             }
         };
     });

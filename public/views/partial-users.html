@@ -7,6 +7,22 @@
         <p>Esta pagina permite <span class="text-success">agregar</span>, <span class="text-warning">editar</span> y <span class="text-danger">eliminar</span> usuarios.</p>
     </div>
 
+    <legend>Filtrar por:</legend>
+
+    <div class="row">
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Cliente</label>
+        <div class="col-sm-6">
+            <ui-select ng-model="vm.client.selected" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
+                <ui-select-match placeholder="Seleccione o busque un cliente en la lista...">{{$select.selected.name}}</ui-select-match>
+                <ui-select-choices repeat="item in vm.clients | filter: $select.search">
+                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </div>
+    </div>
+
     <div ui-i18n="{{vm.lang}}">
         <button id="addBtn" ng-click="vm.openModal(null, 'add')" type="button" class="btn btn-primary"><i class="fa fa-plus" aria-hidden="true"></i> Agregar Usuario</button>
         <br>

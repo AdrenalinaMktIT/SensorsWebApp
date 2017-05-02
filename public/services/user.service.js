@@ -3,6 +3,9 @@ angular.module('userService', []).factory('Users', function ($http) {
             get: function (id) {
                 return $http.get('/api/v1/users/' + id);
             },
+            getByClient: function (clientId) {
+                return $http.get('/api/v1/users/client/' + clientId);
+            },
             getAll: function () {
                 return $http.get('/api/v1/users');
             },
