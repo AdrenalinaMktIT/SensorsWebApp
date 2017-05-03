@@ -51,14 +51,14 @@ angular.module('userController', [])
         }
 
         function loadClients() {
-            vm.clients = [];
-            vm.clients.push({
-                _id: 'all',
-                name: 'Todos'
-            });
             Clients.getAll()
                 .then(function successCallback(response) {
                     //vm.clients = response.data.clients;
+                    vm.clients = [];
+                    vm.clients.push({
+                        _id: -99,
+                        name: 'Todos'
+                    });
                     for (var i = 0; i < response.data.clients.length; i++) {
                         vm.clients.push(response.data.clients[i]);
                     }
@@ -236,7 +236,7 @@ angular.module('userController', [])
 
         vm.onOpenClose = function (isOpen){
             if (!isOpen) {
-                if (vm.client.selected._id === 'all') {
+                if (vm.selectedClient._id === -99) {
                     Users.getAll()
                         .then(function successCallback(response) {
                             vm.users = response.data.users;
@@ -245,7 +245,7 @@ angular.module('userController', [])
                             console.log('Error: ' + response);
                         });
                 } else {
-                    Users.getByClient(vm.client.selected._id)
+                    Users.getByClient(vm.selectedClient._id)
                         .then(function successCallback(response) {
                             vm.users = response.data.users;
                             vm.gridOptions.data = response.data.users;
@@ -275,7 +275,7 @@ angular.module('userController').controller('UserModalInstanceCtrl', function ($
     vm.isDisabled = true;
 
     if (mode != 'add') {
-        vm.user.client = clients[user.client-1];
+        vm.user.client = clients[user.client];
         vm.user.timezone = _.find(timezones, function(val){ return val._id == user.timezone; });
         vm.user.active = user.active ? 'Si' : 'No';
         vm.user.type = user.type;
