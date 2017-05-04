@@ -92,6 +92,7 @@ module.exports = function(app) {
                         message: 'OK!. Usuario eliminado correctamente.',
                         user: user
                     });
+                    user.remove();
                 }
             })
             .catch(function () {

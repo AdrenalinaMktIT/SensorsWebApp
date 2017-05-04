@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var auditLog = require('audit-log');
 var bcrypt   = require('bcrypt-nodejs');
 
 // define the schema for our user model
@@ -40,6 +41,9 @@ var userSchema = mongoose.Schema({
         default: true
     }
 });
+
+var pluginFn = auditLog.getPlugin('mongoose', {modelName:'User', namePath:'name'}); // setup occurs here
+userSchema.plugin(pluginFn.handler); // .handler is the pluggable function for mongoose in this case
 
 // generating a hash
 userSchema.methods.generateHash = function(password) {

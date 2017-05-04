@@ -17,12 +17,15 @@ var favicon = require('serve-favicon');
 var configDB = require('./app/config/database.js');
 var moment = require('moment');
 var _ = require('underscore');
+var auditLog = require('audit-log');
 const chalk = require('chalk');
 const log = console.log;
 
 // configuration ===============================================================
 
-require('./app/config/passport')(passport); // pass passport for configuration
+auditLog.addTransport("mongoose", {connectionString: configDB.remoteUrl});
+
+require('./app/config/passport')(passport, auditLog); // pass passport for configuration
 
 app.use(express.static(__dirname + '/public'));
 
@@ -33,6 +36,45 @@ mongoose.reconnectTries = 100;
 // Server will wait # milliseconds between retries (default: 1000)
 mongoose.reconnectInterval = 2000;
 var db = mongoose.connection;
+
+// setup the plugin
+var auditLogExpress = auditLog.getPlugin('express', {
+    userIdPath:['user','_id'],
+    blackListPaths:[/^\/$/, /^\/login$/]
+});
+
+// redefino la funcion middleware del plugin express de audit-log ya que quiero que loguee datos adicionales al plugin.
+auditLogExpress.middleware = function(req, res, next) {
+    var self = auditLogExpress;
+
+    var method = req.method,
+        path = req.url;
+
+    var headersObj = JSON.stringify(_.pick(req.headers, 'host', 'user-agent'));
+
+    // verify the path being requested is to be logged.
+    if(!self.pathAllowed(path, method)) return next();
+
+    if(typeof self._options.userIdPath == 'string' && self._options.userIdPath.length) {
+        // if the id path was a string, convert it to an array
+        self._options.userIdPath = [self._options.userIdPath];
+    }
+    if(self._options.userIdPath.length) {
+        // loop through the user id path as long as the path exists
+        self._userId = req;
+        for(var keyIndex in self._options.userIdPath) {
+            var key = self._options.userIdPath[keyIndex];
+            self._userId = self._userId[key] || false;
+            if(!self._userId) break;
+        }
+        // pass the user id back to AuditLog for usage across other internal resources.
+        if(self._userId) self._options.auditLog._userId = self._userId;
+    }
+
+    self._options.auditLog.logEvent(self._userId, 'express', method, path, headersObj); // no object or description currently
+
+    return next();
+};
 
 // CONNECTION EVENTS
 // Conexion con Mongo exitosa.
@@ -132,6 +174,9 @@ function isLoggedIn(req, res, next) {
     // if they aren't redirect them to the home page
     res.status(401).render('401.ejs', {title:'401: No posee autorizacion.'});
 }
+
+// log in mongodb access.
+app.use(auditLogExpress.middleware);
 
 // APP routes ======================================================================
 require('./app/routes/app.routes')(app, passport); // load our routes and pass in our app and fully configured passport
