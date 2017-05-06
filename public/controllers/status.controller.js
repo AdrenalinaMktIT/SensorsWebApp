@@ -126,16 +126,15 @@ angular.module('statusController', [])
         vm.getSensorReport = function () {
 
             vm.startSpin();
-            // TODO dateFrom hay que poner 7 dias (1 sem) para atras por ejemplo. '77' es para probar y que haya mas data.
             var reportRequest = {
-                "dateFrom": moment().subtract(77, 'days').format('YYYY-MM-DD'),
-                "dateTo": moment().format('YYYY-MM-DD'),
+                "dateFrom": moment().format('YYYY-MM-DD'),
+                "dateTo": moment().add(1, 'days').format('YYYY-MM-DD'),
                 "sensors": sensorDetails.sensor._id
             };
 
             var labels = [], chartData = [];
 
-            var sensorName = sensorDetails.sensor.name + ' (' + sensorDetails.sensor.type + ')';
+            var sensorName = sensorDetails.sensor.name + ' (' + sensorDetails.sensor.type.name + ' [' + sensorDetails.sensor.type.units + '])';
             Reports.calculate(reportRequest)
                 .then(function successCallback(response) {
                     vm.stopSpin();

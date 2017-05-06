@@ -11,7 +11,8 @@ module.exports = function(app) {
         Measure.find({
             timestamp: { '$gte': new Date(req.body.dateFrom), '$lte': new Date(req.body.dateTo) }
         })
-            .sort({'timestamp': 1})
+            .sort({'timestamp': -1})
+            .limit(20)
             .populate({
                 path: 'imei',
                 model: 'Device',
@@ -28,7 +29,7 @@ module.exports = function(app) {
                 }
             })
             .exec(function (err, measures) {
-                console.log(measures);
+                measures.reverse();
                 res.json(measures.filter(function(doc){
                     return doc.imei.model.sensors.length;
                 }));
