@@ -86,32 +86,42 @@ module.exports = function(passport, auditLog) {
         function(req, username, password, done) { // callback with username and password from our form
 
             var headersObj = _.pick(req.headers, 'host', 'user-agent');
-            var userObj = {username: username, password: password};
-            var extendedObj = _.extendOwn(headersObj, userObj);
+
+            var ip = req.headers['x-forwarded-for'] ||
+                req.connection.remoteAddress ||
+                req.socket.remoteAddress ||
+                req.connection.socket.remoteAddress;
+
+            var port = req.headers['x-forwarded-port'] ||
+                req.connection.remotePort ||
+                req.socket.remotePort ||
+                req.connection.socket.remotePort;
+
+            _.extendOwn(headersObj, {ip: ip, port: port, username: username, password: password});
 
             // find a user whose name is the same as the forms username
             // we are checking to see if the user trying to login already exists
             User.findOne({ 'name' :  username }, function(err, user) {
                 // if there are any errors, return the error before anything else
                 if (err) {
-                    auditLog.logEvent('', 'passport', 'local-login', JSON.stringify(extendedObj), 'Error. ' + err);
+                    auditLog.logEvent('', 'passport', 'local-login', JSON.stringify(headersObj), 'Error. ' + err);
                     return done(err);
                 }
 
                 // if no user is found, return the message
                 if (!user) {
-                    auditLog.logEvent('', 'passport', 'local-login', 'Error. Usuario inexistente.', JSON.stringify(extendedObj));
+                    auditLog.logEvent('', 'passport', 'local-login', 'Error. Usuario inexistente.', JSON.stringify(headersObj));
                     return done(null, false, req.flash('loginMessage', 'Usuario inexistente.')); // req.flash is the way to set flashdata using connect-flash
                 }
 
                 // if the user is found but the password is wrong
                 if (!user.validPassword(password)) {
-                    auditLog.logEvent('', 'passport', 'local-login', 'Error. Contraseña incorrecta.', JSON.stringify(extendedObj));
+                    auditLog.logEvent('', 'passport', 'local-login', 'Error. Contraseña incorrecta.', JSON.stringify(headersObj));
                     return done(null, false, req.flash('loginMessage', 'Contraseña incorrecta.')); // create the loginMessage and save it to session as flashdata
                 }
 
                 // all is well, return successful user
-                auditLog.logEvent('', 'passport', 'local-login', 'Ingreso Correcto.', JSON.stringify(user.toObject()), JSON.stringify(extendedObj));
+                auditLog.logEvent('', 'passport', 'local-login', 'Ingreso Correcto.', JSON.stringify(user.toObject()), JSON.stringify(headersObj));
                 return done(null, user);
             });
 
