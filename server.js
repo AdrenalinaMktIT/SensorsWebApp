@@ -29,13 +29,55 @@ require('./app/config/passport')(passport, auditLog); // pass passport for confi
 
 app.use(express.static(__dirname + '/public'));
 
-mongoose.connect(configDB.remoteUrl);
+var opts = {
+    db: { native_parser: true },
+    server: {
+        reconnectTries: Number.MAX_VALUE,   // Good way to make sure mongoose never stops trying to reconnect.
+        socketOptions: {
+            keepAlive: 1000,
+            connectTimeoutMS: 30000,
+            socketTimeoutMS: 10000
+        }
+    },
+    promiseLibrary: Promise
+};
 mongoose.Promise = require('bluebird');
+mongoose.connect(configDB.remoteUrl, opts);
+
+/*
 // Server attempt to reconnect #times (default: 30)
 mongoose.reconnectTries = 100;
+
 // Server will wait # milliseconds between retries (default: 1000)
-mongoose.reconnectInterval = 2000;
-var db = mongoose.connection;
+mongoose.reconnectInterval = 2000;*/
+var Connection = mongoose.connection;
+
+// CONNECTION EVENTS
+// Conexion con Mongo exitosa.
+Connection.on('connected', function () {
+    log(chalk.blue.bgYellow.bold('Mongoose abierto en: ' + configDB.remoteUrl));
+});
+
+// Conexion con Mongo fallida.
+Connection.on('error',function (err) {
+    log(chalk.white.bgRed.bold('Mongoose default connection error: ' + err));
+    if (Connection.readyState === 0) {
+        mongoose.connect(configDB.remoteUrl, opts);
+    }
+});
+
+Connection.on('timeout', function(err) {
+    log(chalk.white.bgRed.bold('Mongoose default connection timeout: ' + err));
+});
+
+// // Conexion con Mongo desconectada.
+Connection.on('disconnected', function () {
+    log(chalk.white.bgBlue.bold('Mongoose default connection disconnected'));
+});
+
+Connection.on('reconnect', function () {
+    log(chalk.white.bgRed.bold('Mongoose default connection reconnect.'));
+});
 
 // setup the plugin
 var auditLogExpress = auditLog.getPlugin('express', {
@@ -50,7 +92,19 @@ auditLogExpress.middleware = function(req, res, next) {
     var method = req.method,
         path = req.url;
 
-    var headersObj = JSON.stringify(_.pick(req.headers, 'host', 'user-agent'));
+    var headersObj = _.pick(req.headers, 'host', 'user-agent');
+
+    var ip = req.headers['x-forwarded-for'] ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.connection.socket.remoteAddress;
+
+    var port = req.headers['x-forwarded-port'] ||
+        req.connection.remotePort ||
+        req.socket.remotePort ||
+        req.connection.socket.remotePort;
+
+    _.extendOwn(headersObj, {ip: ip, port: port});
 
     // verify the path being requested is to be logged.
     if(!self.pathAllowed(path, method)) return next();
@@ -71,26 +125,10 @@ auditLogExpress.middleware = function(req, res, next) {
         if(self._userId) self._options.auditLog._userId = self._userId;
     }
 
-    self._options.auditLog.logEvent(self._userId, 'express', method, path, headersObj); // no object or description currently
+    self._options.auditLog.logEvent(self._userId, 'express', method, path, JSON.stringify(headersObj)); // no object or description currently
 
     return next();
 };
-
-// CONNECTION EVENTS
-// Conexion con Mongo exitosa.
-db.on('connected', function () {
-    log(chalk.blue.bgYellow.bold('Mongoose abierto en: ' + configDB.remoteUrl));
-});
-
-// Conexion con Mongo fallida.
-db.on('error',function (err) {
-    log(chalk.white.bgRed.bold('Mongoose default connection error: ' + err));
-});
-
-// // Conexion con Mongo desconectada.
-db.on('disconnected', function () {
-    log(chalk.white.bgBlue.bold('Mongoose default connection disconnected'));
-});
 
 // log every request to the console
 function developmentFormatLine(tokens, req, res) {
