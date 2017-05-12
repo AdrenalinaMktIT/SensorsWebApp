@@ -21,10 +21,10 @@ module.exports = function(app) {
                     model: 'Model',
                     populate: {
                         path: 'sensors',
-                        model: 'Sensor',
+                        model: 'Sensor'/*,
                         match: {
                             _id: { $in: sensorIds }
-                        }
+                        }*/
                     }
                 }
             })

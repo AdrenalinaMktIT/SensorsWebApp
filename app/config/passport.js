@@ -97,31 +97,31 @@ module.exports = function(passport, auditLog) {
                 req.socket.remotePort ||
                 req.connection.socket.remotePort;
 
-            _.extendOwn(headersObj, {ip: ip, port: port, username: username, password: password});
+            _.extendOwn(headersObj, {ip: ip, port: port});
 
             // find a user whose name is the same as the forms username
             // we are checking to see if the user trying to login already exists
             User.findOne({ 'name' :  username }, function(err, user) {
                 // if there are any errors, return the error before anything else
                 if (err) {
-                    auditLog.logEvent('', 'passport', 'local-login', JSON.stringify(headersObj), 'Error. ' + err);
+                    auditLog.logEvent(null, JSON.stringify(headersObj), 'local-login', 'passport', null, 'Error. ' + err);
                     return done(err);
                 }
 
                 // if no user is found, return the message
                 if (!user) {
-                    auditLog.logEvent('', 'passport', 'local-login', 'Error. Usuario inexistente.', JSON.stringify(headersObj));
+                    auditLog.logEvent(null, JSON.stringify(headersObj), 'local-login', 'passport', null, 'Error. Usuario inexistente.');
                     return done(null, false, req.flash('loginMessage', 'Usuario inexistente.')); // req.flash is the way to set flashdata using connect-flash
                 }
 
                 // if the user is found but the password is wrong
                 if (!user.validPassword(password)) {
-                    auditLog.logEvent('', 'passport', 'local-login', 'Error. Contraseña incorrecta.', JSON.stringify(headersObj));
+                    auditLog.logEvent(null, JSON.stringify(headersObj), 'local-login', 'passport', null, 'Error. Contraseña incorrecta.');
                     return done(null, false, req.flash('loginMessage', 'Contraseña incorrecta.')); // create the loginMessage and save it to session as flashdata
                 }
 
                 // all is well, return successful user
-                auditLog.logEvent('', 'passport', 'local-login', 'Ingreso Correcto.', JSON.stringify(user.toObject()), JSON.stringify(headersObj));
+                auditLog.logEvent(null, JSON.stringify(headersObj), 'local-login', 'passport', JSON.stringify(user.toObject()), 'Ingreso Correcto.');
                 return done(null, user);
             });
 
