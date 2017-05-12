@@ -1,6 +1,6 @@
 var app = angular.module('sensorsWebApp', [
-    'alertController', 'calculationController', 'deviceController', 'groupController', 'historicalController', 'profileController', 'sensorController', 'statusController', 'userController',
-    'appAlertService', 'alertService', 'calculationService', 'carrierService', 'clientService', 'deviceService', 'groupService', 'profileService', 'reportService', 'sensorService', 'typeService', 'timezoneService', 'userService',
+    'alertController', 'calculationController', 'deviceController', 'groupController', 'historicalController', 'inputController', 'profileController', 'sensorController', 'statusController', 'userController',
+    'appAlertService', 'alertService', 'calculationService', 'carrierService', 'clientService', 'deviceService', 'groupService', 'inputService', 'profileService', 'reportService', 'sensorService', 'typeService', 'timezoneService', 'userService',
     'ui.router', 'ui.bootstrap', 'ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pagination', 'ui.grid.selection', 'ui.grid.exporter', 'highcharts-ng', 'ngMessages', 'ui.select', 'ngAnimate', 'ngSanitize', 'angularSpinner']);
 
 app.config(function($stateProvider, $urlRouterProvider) {
@@ -14,65 +14,116 @@ app.config(function($stateProvider, $urlRouterProvider) {
             url: '/groups',
             templateUrl: '../views/partial-groups.html',
             controller: 'GroupCtrl',
-            controllerAs: 'vm'
+            controllerAs: 'vm',
+            data: {
+                roles: ['Admin']
+            }
+            /*resolve: {
+                security: ['$q', function($q){
+                    if(true){
+                        return $q.reject("Not Authorized");
+                    }
+                }]
+            }*/
         })
         .state('sensors', {
             url: '/sensors',
             templateUrl: '../views/partial-sensors.html',
             controller: 'SensorCtrl',
-            controllerAs: 'vm'
+            controllerAs: 'vm',
+            data: {
+                roles: ['Admin']
+            }
         })
         .state('alerts', {
             url: '/alerts',
             templateUrl: '../views/partial-alerts.html',
             controller: 'AlertCtrl',
-            controllerAs: 'vm'
+            controllerAs: 'vm',
+            data: {
+                roles: ['Admin']
+            }
         })
         .state('devices', {
             url: '/devices',
             templateUrl: '../views/partial-devices.html',
             controller: 'DeviceCtrl',
-            controllerAs: 'vm'
+            controllerAs: 'vm',
+            data: {
+                roles: ['Admin']
+            }
         })
         .state('users', {
             url: '/users',
             templateUrl: '../views/partial-users.html',
             controller: 'UserCtrl',
-            controllerAs: 'vm'
+            controllerAs: 'vm',
+            data: {
+                roles: ['Admin']
+            }
         })
         .state('profiles', {
             url: '/profiles',
             templateUrl: '../views/partial-profiles.html',
             controller: 'ProfileCtrl',
-            controllerAs: 'vm'
-        })
-        // TODO inputs
-        .state('inputs', {
-            url: '/inputs',
-            templateUrl: '../views/partial-inputs.html',
-            controller: 'InputCtrl',
-            controllerAs: 'vm'
+            controllerAs: 'vm',
+            data: {
+                roles: ['Admin']
+            }
         })
         .state('historical', {
             url: '/historical',
             templateUrl: '../views/partial-historical.html',
             controller: 'HistoricalCtrl',
-            controllerAs: 'vm'
+            controllerAs: 'vm',
+            data: {
+                roles: ['Admin', 'Monitoreo']
+            }
         })
         .state('status', {
             url: '/status',
             templateUrl: '../views/partial-status.html',
             controller: 'StatusCtrl',
-            controllerAs: 'vm'
+            controllerAs: 'vm',
+            data: {
+                roles: ['Admin', 'Monitoreo']
+            }
         })
-    // TODO listing
+        // TODO listing
         .state('calculations', {
         url: '/calculations',
         templateUrl: '../views/partial-calculations.html',
         controller: 'CalculationCtrl',
-        controllerAs: 'vm'
-    });
+        controllerAs: 'vm',
+            data: {
+                roles: ['Admin', 'Monitoreo']
+            }
+        })
+        .state('inputs', {
+            url: '/inputs',
+            templateUrl: '../views/partial-inputs.html',
+            controller: 'InputCtrl',
+            controllerAs: 'vm',
+            data: {
+                roles: ['Admin']
+            }
+        });
     // TODO messages
     // TODO statuses
     // TODO settings
+});
+
+app.controller('MainCtrl', function($scope, $transitions, $state) {
+
+    $scope.init = function(stringifiedArray) {
+        $scope.userType = stringifiedArray;
+    };
+
+    $transitions.onStart({}, function($transition) {
+        var requiredRoles = $transition.$to().data.roles;
+        var userRole = $scope.userType;
+        if (!_.contains(requiredRoles, userRole)) {
+            return $state.target("status");
+        }
+    });
 });

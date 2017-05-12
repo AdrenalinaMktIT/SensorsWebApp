@@ -68,8 +68,6 @@ angular.module('statusController', [])
 
         Reports.status()
             .then(function successCallback(response) {
-                console.log('Success: ' + response);
-
                 _.each(response.data, function(value) {
                     imei = value._id;
                     model = value.model.name;

@@ -4,7 +4,7 @@
 // get all the tools we need
 var express  = require('express');
 var session = require('express-session');
-var app      = express();
+var http = require('http');
 var port     = process.env.PORT || 8080;
 var mongoose = require('mongoose').set('debug', true);
 var passport = require('passport');
@@ -21,62 +21,134 @@ var auditLog = require('audit-log');
 const chalk = require('chalk');
 const log = console.log;
 
+var connectedFirstTime = false;
+
 // configuration ===============================================================
-
-auditLog.addTransport("mongoose", {connectionString: configDB.remoteUrl});
-
 require('./app/config/passport')(passport, auditLog); // pass passport for configuration
 
-app.use(express.static(__dirname + '/public'));
-
-var opts = {
-    db: { native_parser: true },
-    server: {
-        reconnectTries: Number.MAX_VALUE,   // Good way to make sure mongoose never stops trying to reconnect.
-        socketOptions: {
-            keepAlive: 1000,
-            connectTimeoutMS: 30000,
-            socketTimeoutMS: 10000
-        }
-    },
-    promiseLibrary: Promise
-};
-mongoose.Promise = require('bluebird');
-mongoose.connect(configDB.remoteUrl, opts);
-
 /*
-// Server attempt to reconnect #times (default: 30)
-mongoose.reconnectTries = 100;
+ * Mongoose by default sets the auto_reconnect option to true.
+ * We recommend setting socket options at both the server and replica set level.
+ * We recommend a 30 second connection timeout because it allows for
+ * plenty of time in most operating environments.
+ */
+var uri = configDB.remoteUrl;
 
-// Server will wait # milliseconds between retries (default: 1000)
-mongoose.reconnectInterval = 2000;*/
-var Connection = mongoose.connection;
+var connOptions = {};
+connOptions.server = {
+    auto_reconnect: true,
+    poolSize: 10,
+    socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 },
+    reconnectTries: Number.MAX_VALUE   // Good way to make sure mongoose never stops trying to reconnect.
+};
 
-// CONNECTION EVENTS
-// Conexion con Mongo exitosa.
-Connection.on('connected', function () {
-    log(chalk.blue.bgYellow.bold('Mongoose abierto en: ' + configDB.remoteUrl));
+connOptions.replset = {
+    auto_reconnect: true,
+    poolSize: 10,
+    socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 },
+    reconnectTries: Number.MAX_VALUE   // Good way to make sure mongoose never stops trying to reconnect.
+};
+
+mongoose.connect(uri, connOptions);
+
+mongoose.connection.on('connecting', function() {
+    log(chalk.blue.bgYellow.bold(uri + ' conectando...'));
 });
 
-// Conexion con Mongo fallida.
-Connection.on('error',function (err) {
-    log(chalk.white.bgRed.bold('Mongoose default connection error: ' + err));
-    if (Connection.readyState === 0) {
-        mongoose.connect(configDB.remoteUrl, opts);
+mongoose.connection.on('error', function(error) {
+    log(chalk.bgRed.bold(error));
+    // si el status era 'connected', desconecto.
+    if (mongoose.connection.readyState == 1) {
+        mongoose.disconnect();
     }
 });
 
-Connection.on('timeout', function(err) {
-    log(chalk.white.bgRed.bold('Mongoose default connection timeout: ' + err));
+mongoose.connection.on('timeout', function(error) {
+    log(chalk.bgRed.bold(error));
+    // si el status era 'connected', desconecto.
+    if (mongoose.connection.readyState == 1) {
+        mongoose.disconnect();
+    }
 });
 
-// // Conexion con Mongo desconectada.
-Connection.on('disconnected', function () {
-    log(chalk.white.bgBlue.bold('Mongoose default connection disconnected'));
+mongoose.connection.on('connected', function() {
+    log(chalk.bgGreen.bold(uri + ' conectado!'));
+    if (!connectedFirstTime) {
+        auditLog._debug = true;
+        //auditLog.addTransport("mongoose", {connectionString: uri+'?connectTimeoutMS=56000&reconnectWait=1000&retries='+Number.MAX_VALUE});
+        auditLog.addTransport("mongoose", {connectionString: uri, debug: true});
+        auditLog._transports[0]._connection.options.server = connOptions.server;
+    }
+    connectedFirstTime = true;
 });
 
-Connection.on('reconnect', function () {
-    log(chalk.white.bgRed.bold('Mongoose default connection reconnect.'));
+mongoose.connection.once('open', function() {
+    log(chalk.green.bold(uri + ' conexion abierta.'));
+});
+
+mongoose.connection.on('close', function() {
+    log(chalk.blue.bgBlack.bold(uri + ' conexion cerrada.'));
+});
+
+mongoose.connection.on('reconnected', function () {
+    log(chalk.blue.bgBlue.bold(uri + ' reconectado!'));
+});
+
+mongoose.connection.on('disconnected', function() {
+    log(chalk.white.bgRed.bold(uri + ' desconectado!'));
+    // si el status era 'disconnected', conecto.
+    if (mongoose.connection.readyState == 0) {
+        mongoose.connect(uri, connOptions);
+    }
+});
+
+var app = express();
+
+var server = http.createServer(app);
+
+app.use(express.static(__dirname + '/public'));
+
+app.use(morgan(developmentFormatLine));
+
+// get all data/stuff of the body (POST) parameters
+// parse application/json
+app.use(bodyParser.json());
+
+// parse application/vnd.api+json as json
+app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// override with the X-HTTP-Method-Override header in the request. simulate DELETE/PUT
+app.use(methodOverride('X-HTTP-Method-Override'));
+
+app.use(cookieParser());
+
+app.set('superSecret', 'adrenalinamktsensoreswebappnodejs'); // secret variable for webtokens.
+
+app.set('views', __dirname + '/public/views');
+
+app.set('view engine', 'ejs'); // set up ejs for templating
+
+// required for passport
+app.use(session({
+    secret: 'adrenalinamktsensoreswebappnodejs',
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session()); // persistent login sessions
+
+app.use(flash()); // use connect-flash for flash messages stored in session
+
+app.use(favicon(__dirname + '/public/assets/img/favicon.ico'));
+
+// Funcion Middleware que es llamada para cada request.
+// En este caso siempre hago un check para ver si la base de datos esta conectada.
+app.use(function (req, res, next) {
+    log(chalk.white.bgBlue.bold('Request Time: ', moment().format("DD-MM-YYYY HH:mm:ss")));
+    next();
 });
 
 // setup the plugin
@@ -125,93 +197,10 @@ auditLogExpress.middleware = function(req, res, next) {
         if(self._userId) self._options.auditLog._userId = self._userId;
     }
 
-    self._options.auditLog.logEvent(self._userId, 'express', method, path, JSON.stringify(headersObj)); // no object or description currently
+    self._options.auditLog.logEvent(self._userId, JSON.stringify(headersObj), method + ' ' + path, 'express', null);
 
     return next();
 };
-
-// log every request to the console
-function developmentFormatLine(tokens, req, res) {
-    // get the status code if response written
-    var status = tokens.status(req, res);
-
-    // get status color
-    var statusColor = status >= 500
-        ? 'red' : status >= 400
-            ? 'yellow' : status >= 300
-                ? 'cyan' : 'green';
-
-    return chalk.reset(padRight(tokens.method(req, res) + ' ' + tokens.url(req, res), 30))
-        + ' ' + chalk[statusColor](status)
-        + ' ' + chalk.reset(padLeft(tokens['response-time'](req, res) + ' ms', 8))
-        + ' ' + chalk.reset('-')
-        + ' ' + chalk.reset(tokens.res(req, res, 'content-length') || '-');
-}
-
-app.use(morgan(developmentFormatLine));
-
-function padLeft(str, len) {
-    return len > str.length
-        ? (new Array(len - str.length + 1)).join(' ') + str
-        : str
-}
-function padRight(str, len) {
-    return len > str.length
-        ? str + (new Array(len - str.length + 1)).join(' ')
-        : str
-}
-
-// get all data/stuff of the body (POST) parameters
-// parse application/json
-app.use(bodyParser.json());
-
-// parse application/vnd.api+json as json
-app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
-
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// override with the X-HTTP-Method-Override header in the request. simulate DELETE/PUT
-app.use(methodOverride('X-HTTP-Method-Override'));
-
-app.use(cookieParser());
-
-app.set('superSecret', 'adrenalinamktsensoreswebappnodejs'); // secret variable for webtokens.
-
-app.set('views', __dirname + '/public/views');
-
-app.set('view engine', 'ejs'); // set up ejs for templating
-
-// required for passport
-app.use(session({
-    secret: 'adrenalinamktsensoreswebappnodejs',
-    resave: false,
-    saveUninitialized: false
-}));
-app.use(passport.initialize());
-app.use(passport.session()); // persistent login sessions
-
-app.use(flash()); // use connect-flash for flash messages stored in session
-
-app.use(favicon(__dirname + '/public/assets/img/favicon.ico'));
-
-// Funcion Middleware que es llamada para cada request.
-// En este caso siempre hago un check para ver si la base de datos esta conectada.
-app.use(function (req, res, next) {
-    log(chalk.white.bgBlue.bold('Request Time: ', moment().format("DD-MM-YYYY HH:mm:ss")));
-    next();
-});
-
-// route middleware to make sure
-function isLoggedIn(req, res, next) {
-
-    // if user is authenticated in the session, carry on
-    if (req.isAuthenticated())
-        return next();
-
-    // if they aren't redirect them to the home page
-    res.status(401).render('401.ejs', {title:'401: No posee autorizacion.'});
-}
 
 // log in mongodb access.
 app.use(auditLogExpress.middleware);
@@ -231,6 +220,7 @@ require('./app/routes/carrier.routes')(app);
 require('./app/routes/client.routes')(app);
 require('./app/routes/device.routes')(app);
 require('./app/routes/group.routes')(app);
+require('./app/routes/input.routes')(app);
 require('./app/routes/model.routes')(app);
 require('./app/routes/profile.routes')(app);
 require('./app/routes/report.routes')(app);
@@ -249,6 +239,57 @@ app.use(function(error, req, res, next) {
     res.status(500).render('500.ejs', {title:'500: Error interno de servidor.', error: error});
 });
 
-// launch ======================================================================
-app.listen(port);
+// launch ==    ====================================================================
+//app.listen(port);
+server.listen(port);
 log(chalk.white.underline.bgMagenta('Sensores WebApp escuchando sobre puerto ' + port));
+
+var gracefulExit = function() {
+    mongoose.connection.close(function () {
+        log(chalk.blue.bgYellow.bold(uri + ' disconnected through app termination...'));
+        process.exit(0);
+    });
+};
+
+// If the Node process ends, close the Mongoose connection
+process.on('SIGINT', gracefulExit).on('SIGTERM', gracefulExit);
+
+// log every request to the console
+function developmentFormatLine(tokens, req, res) {
+    // get the status code if response written
+    var status = tokens.status(req, res);
+
+    // get status color
+    var statusColor = status >= 500
+        ? 'red' : status >= 400
+            ? 'yellow' : status >= 300
+                ? 'cyan' : 'green';
+
+    return chalk.reset(padRight(tokens.method(req, res) + ' ' + tokens.url(req, res), 30))
+        + ' ' + chalk[statusColor](status)
+        + ' ' + chalk.reset(padLeft(tokens['response-time'](req, res) + ' ms', 8))
+        + ' ' + chalk.reset('-')
+        + ' ' + chalk.reset(tokens.res(req, res, 'content-length') || '-');
+}
+
+function padLeft(str, len) {
+    return len > str.length
+        ? (new Array(len - str.length + 1)).join(' ') + str
+        : str
+}
+function padRight(str, len) {
+    return len > str.length
+        ? str + (new Array(len - str.length + 1)).join(' ')
+        : str
+}
+
+// route middleware to make sure
+function isLoggedIn(req, res, next) {
+
+    // if user is authenticated in the session, carry on
+    if (req.isAuthenticated())
+        return next();
+
+    // if they aren't redirect them to the home page
+    res.status(401).render('401.ejs', {title:'401: No posee autorizacion.'});
+}
