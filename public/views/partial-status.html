@@ -5,11 +5,12 @@
     </div>
     <div class="modal-body" id="modal-body">
         <uib-tabset active="active">
-            <uib-tab index="0" >
+            <uib-tab index="0" select="vm.getSensorReport()">
                 <uib-tab-heading>
                     <i class="fa fa-thermometer-full" aria-hidden="true"></i> Ultima Lectura
                 </uib-tab-heading>
                 <br>
+                <span us-spinner spinner-key="sensorReportSpinner"></span>
                 <div ng-class="{
                 'panel-success': vm.sensorDetails.status === 'ok',
                 'panel-info': vm.sensorDetails.status === 'unknown',
@@ -18,10 +19,10 @@
                     <div class="panel-heading">
                         <h3 class="panel-title">Sensor {{vm.sensorDetails.sensor.name}}</h3>
                     </div>
-                    <div class="panel-body">
-                        <h1 class=" bg-primary">
+                    <div class="panel-body text-center">
+                        <h4 class="bg-info">
                             Estado Actual: {{vm.sensorDetails.status | uppercase}}
-                        </h1>
+                        </h4>
                         <p class="lead bg-primary">
                             Ult. Valor Leido: {{vm.sensorDetails.data}} {{vm.sensorDetails.sensor.type.units}} ({{vm.sensorDetails.timestamp}})
                         </p>
@@ -93,7 +94,7 @@
                     </div>
                 </div>
             </uib-tab>
-            <uib-tab index="2" select="vm.getSensorReport(vm.sensorDetails)">
+            <uib-tab index="2" select="vm.getSensorReport()">
                 <uib-tab-heading>
                     <i class="fa fa-bar-chart" aria-hidden="true"></i> Grafico
                 </uib-tab-heading>
@@ -118,22 +119,59 @@
         <p>Esta pagina permite <span class="text-success">ver</span> el estado de los sensores en tiempo real.</p>
     </div>
 
+    <fieldset>
+        <legend>Filtrar por:</legend>
+
+        <div class="row">
+            <div class="col-md-6">
+                <label class="col-sm-3 control-label">Grupo</label>
+                <ui-select ng-model="vm.group.selected" theme="bootstrap" uis-open-close="vm.onOpenCloseSelectGroup(isOpen)">
+                    <ui-select-match placeholder="Seleccione o busque un grupo en la lista...">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="group in vm.groups | filter: $select.search">
+                        <div ng-bind-html="group.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="col-sm-3 control-label">Estado</label>
+                <ui-select ng-model="vm.status.selected" theme="bootstrap" uis-open-close="vm.onOpenCloseSelectStatus(isOpen)">
+                    <ui-select-match placeholder="Seleccione o busque un estado en la lista...">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="status in vm.statuses | filter: $select.search">
+                        <div ng-bind-html="status.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+    </fieldset>
+
+    <br>
+
     <div class="bs-example" data-example-id="thumbnails-with-custom-content">
-        <div class="col-md-3" ng-repeat="x in vm.list">
-            <a ng-href="#" class="thumbnail" ng-click="vm.open($index)"
-               ng-style="
-                  x.status=='critical' && {'height': '100px', 'border': 'solid red'} ||
-                  x.status=='warning' && {'height': '100px', 'border': 'solid orange'} ||
-                  x.status=='ok' && {'height': '100px', 'border': 'solid green'} ||
-                  x.status=='unknown' && {'height': '100px', 'border': 'solid blue'}">
-                <img style="height: 25px; width: 25px; display: block;" ng-if="x.status=='critical'" src="../assets/img/sensor_critical.png">
-                <img style="height: 25px; width: 25px; display: block;" ng-if="x.status=='warning'" src="../assets/img/sensor_warning.png">
-                <img style="height: 25px; width: 25px; display: block;" ng-if="x.status=='ok'" src="../assets/img/sensor_ok.png">
-                <img style="height: 25px; width: 25px; display: block;" ng-if="x.status=='unknown'" src="../assets/img/sensor_unknown.png">
+        <div class="col-sm-6 col-md-3" ng-repeat="x in vm.sensorList">
+            <div class="thumbnail" style="background-color: #c8c8c8; min-height: 250px" ng-click="vm.open($index)">
+                <img style="border: 5px solid; height: 25%; width: 25%; display: block;" src="../assets/img/node.png" class="img-responsive img-circle"
+                     ng-style="
+                     x.status == 'critical' && {'border-color': '#f2dede'} ||
+                     x.status == 'warning' && {'border-color': '#fcf8e3'} ||
+                     x.status == 'ok' && {'border-color': '#dff0d8'} ||
+                     x.status == 'unknown' && {'border-color': '#337ab7'}">
+
                 <div class="caption">
-                    <h4>{{x.sensor.name}}</h4>
+                    <h4 class="text-center"
+                        ng-class="{ 'bg-danger'   : x.status == 'critical',
+                          'bg-warning' : x.status == 'warning',
+                          'bg-success'    : x.status == 'ok',
+                          'bg-primary'   : x.status == 'unknown' }">{{x.sensor.name}}</h4>
+                    <dl>
+                        <dt>Ult. Valor Leido</dt>
+                        <dd>{{x.data}} {{x.sensor.type.units}}</dd>
+
+                        <dt>Fecha</dt>
+                        <dd>{{x.timestamp}}</dd>
+                    </dl>
                 </div>
-            </a>
+            </div>
         </div>
     </div>
 </div>

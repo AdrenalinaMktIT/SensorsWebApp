@@ -49,6 +49,8 @@ connOptions.replset = {
     reconnectTries: Number.MAX_VALUE   // Good way to make sure mongoose never stops trying to reconnect.
 };
 
+mongoose.Promise = require('bluebird');
+
 mongoose.connect(uri, connOptions);
 
 mongoose.connection.on('connecting', function() {

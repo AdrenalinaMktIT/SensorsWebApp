@@ -1,10 +1,78 @@
 angular.module('statusController', [])
-    .controller('StatusCtrl', function ($uibModal, $log, Reports) {
+    .controller('StatusCtrl', function ($uibModal, $log, Groups, Reports) {
         var vm = this, imei, model, sensor, data, timestamp, status;
 
-        vm.list = [];
+        vm.sensorList = [];
+        vm.sensorListCopy = [];
 
         vm.animationsEnabled = true;
+
+        // use the service to get all the groups and statuses.
+        loadGroups();
+        loadStatuses();
+
+        function loadGroups() {
+            Groups.getAll()
+                .then(function successCallback(response) {
+                    vm.groups = [];
+                    vm.groups.push({
+                        _id: 'all',
+                        name: 'Todos'
+                    });
+                    for (var i = 0; i < response.data.groups.length; i++) {
+                        vm.groups.push(response.data.groups[i]);
+                    }
+                }, function errorCallback(response) {
+                    // called asynchronously if an error occurs
+                    // or server returns response with an error status.
+                    console.log('Error: ' + response);
+                });
+        }
+
+        function loadStatuses() {
+            vm.statuses  = [];
+            vm.statuses .push(
+                {
+                    _id: 'all',
+                    name: 'Todos'
+                },
+                {
+                    _id: 'critical',
+                    name: 'Critico'
+                },
+                {
+                    _id: 'warning',
+                    name: 'Advertencia'
+                },
+                {
+                    _id: 'ok',
+                    name: 'Normal'
+                },
+                {
+                    _id: 'unknown',
+                    name: 'Desconocido'
+                });
+        }
+
+        vm.onOpenCloseSelectGroup = function (isOpen){
+            if (!isOpen) {
+                if (vm.group.selected._id === 'all') {
+                    vm.sensorList = vm.sensorListCopy;
+                } else {
+                    vm.sensorList = _.filter(vm.sensorListCopy, function(item){ return item.sensor.group === vm.group.selected._id; });
+                }
+            }
+        };
+
+        vm.onOpenCloseSelectStatus = function (isOpen){
+            if (!isOpen) {
+                if (vm.status.selected._id === 'all') {
+                    vm.sensorList = vm.sensorListCopy;
+                } else {
+                    vm.sensorList = _.filter(vm.sensorListCopy, function(item){ return item.status === vm.status.selected._id; });
+                }
+            }
+        };
 
         vm.open = function (idx) {
             var modalInstance = $uibModal.open({
@@ -16,7 +84,7 @@ angular.module('statusController', [])
                 size: 'lg',
                 resolve: {
                     sensorDetails: function () {
-                        return vm.list[idx];
+                        return vm.sensorList[idx];
                     }
                 }
             });
@@ -73,7 +141,7 @@ angular.module('statusController', [])
                     model = value.model.name;
                     sensor = value.sensor;
                     data = value.data;
-                    timestamp = moment(value.timestamp).format("DD/MM/YYYY hh:mm:ss");
+                    timestamp = moment(value.timestamp).format("DD/MM/YYYY HH:mm:ss");
                     if (checkCritical(data, value.sensor.params.critical)) {
                         status = "critical";
                     } else if (checkWarning(data, value.sensor.params.warning)) {
@@ -83,7 +151,7 @@ angular.module('statusController', [])
                     } else {
                         status = "unknown";
                     }
-                    vm.list.push({
+                    vm.sensorList.push({
                         imei: imei,
                         model: model,
                         sensor: sensor,
@@ -92,7 +160,7 @@ angular.module('statusController', [])
                         status: status
                     });
                 });
-
+                vm.sensorListCopy = vm.sensorList;
 
             }, function errorCallback(response) {
                 console.log('Error: ' + response);
@@ -127,13 +195,13 @@ angular.module('statusController', [])
             var reportRequest = {
                 "dateFrom": moment().format('YYYY-MM-DD'),
                 "dateTo": moment().add(1, 'days').format('YYYY-MM-DD'),
-                "sensors": sensorDetails.sensor._id
+                "sensorId": sensorDetails.sensor._id
             };
 
             var labels = [], chartData = [];
 
             var sensorName = sensorDetails.sensor.name + ' (' + sensorDetails.sensor.type.name + ' [' + sensorDetails.sensor.type.units + '])';
-            Reports.calculate(reportRequest)
+            Reports.lastSensorMeasures(reportRequest)
                 .then(function successCallback(response) {
                     vm.stopSpin();
 
@@ -146,6 +214,9 @@ angular.module('statusController', [])
                         labels = _.uniq(labels);
                         chartData.push(measure.data[sensorIdx]);
                     });
+
+                    vm.sensorDetails.data = _.last(chartData);
+                    vm.sensorDetails.timestamp = _.last(labels);
 
                     vm.chartConfig = {
                         chart: {
