@@ -5,9 +5,10 @@ var LocalStrategy   = require('passport-local').Strategy;
 
 // load up the user model
 var User = require('../models/user');
+var Input = require('../models/inputs');
 
 // expose this function to our app using module.exports
-module.exports = function(passport, auditLog) {
+module.exports = function(passport) {
 
     // =========================================================================
     // passport session setup ==================================================
@@ -104,24 +105,36 @@ module.exports = function(passport, auditLog) {
             User.findOne({ 'name' :  username }, function(err, user) {
                 // if there are any errors, return the error before anything else
                 if (err) {
-                    auditLog.logEvent(null, JSON.stringify(headersObj), 'local-login', 'passport', null, 'Error. ' + err);
+                    Input.create({ actor: '', date: new Date(), origin: JSON.stringify(headersObj), action: 'local-login', label: 'passport', object: '', description: 'Error. ' + err }, function (err, input) {
+                        if (err) return handleError(err);
+                        // saved!
+                    });
                     return done(err);
                 }
 
                 // if no user is found, return the message
                 if (!user) {
-                    auditLog.logEvent(null, JSON.stringify(headersObj), 'local-login', 'passport', null, 'Error. Usuario inexistente.');
+                    Input.create({ actor: '', date: new Date(), origin: JSON.stringify(headersObj), action: 'local-login', label: 'passport', object: '', description: 'Error. Usuario inexistente.' }, function (err, input) {
+                        if (err) return handleError(err);
+                        // saved!
+                    });
                     return done(null, false, req.flash('loginMessage', 'Usuario inexistente.')); // req.flash is the way to set flashdata using connect-flash
                 }
 
                 // if the user is found but the password is wrong
                 if (!user.validPassword(password)) {
-                    auditLog.logEvent(null, JSON.stringify(headersObj), 'local-login', 'passport', null, 'Error. Contraseña incorrecta.');
+                    Input.create({ actor: '', date: new Date(), origin: JSON.stringify(headersObj), action: 'local-login', label: 'passport', object: '', description: 'Error. Contraseña incorrecta.' }, function (err, input) {
+                        if (err) return handleError(err);
+                        // saved!
+                    });
                     return done(null, false, req.flash('loginMessage', 'Contraseña incorrecta.')); // create the loginMessage and save it to session as flashdata
                 }
 
                 // all is well, return successful user
-                auditLog.logEvent(null, JSON.stringify(headersObj), 'local-login', 'passport', JSON.stringify(user.toObject()), 'Ingreso Correcto.');
+                Input.create({ actor: '', date: new Date(), origin: JSON.stringify(headersObj), action: 'local-login', label: 'passport', object: JSON.stringify(user.toObject()), description: 'Ingreso Correcto.' }, function (err, input) {
+                    if (err) return handleError(err);
+                    // saved!
+                });
                 return done(null, user);
             });
 

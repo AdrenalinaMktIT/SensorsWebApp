@@ -49,6 +49,7 @@ var deviceSchema = mongoose.Schema({
         ref: 'Timezone'
     },
 
+    // viene dado en minutos.
     timeout : Number,
 
     client_id : {
