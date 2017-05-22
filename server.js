@@ -42,7 +42,7 @@ mongoose.Promise = require('bluebird');
 mongoose.connect(uri, options);
 
 mongoose.connection.on('connecting', function() {
-    log(chalk.blue.bgYellow.bold(uri + ' conectando...'));
+    log(chalk.blue.bgYellow.bold(uri + ' conectando... el ' + moment().format("DD-MM-YYYY HH:mm:ss")));
 });
 
 mongoose.connection.on('error', function(error) {
@@ -54,23 +54,23 @@ mongoose.connection.on('timeout', function(error) {
 });
 
 mongoose.connection.on('connected', function() {
-    log(chalk.bgGreen.bold(uri + ' conectado!'));
+    log(chalk.bgGreen.bold(uri + ' conectado! el ' + moment().format("DD-MM-YYYY HH:mm:ss")));
 });
 
 mongoose.connection.once('open', function() {
-    log(chalk.green.bold(uri + ' conexion abierta.'));
+    log(chalk.green.bold(uri + ' conexion abierta el ' + moment().format("DD-MM-YYYY HH:mm:ss")));
 });
 
 mongoose.connection.on('close', function() {
-    log(chalk.blue.bgBlack.bold(uri + ' conexion cerrada.'));
+    log(chalk.blue.bgBlack.bold(uri + ' conexion cerrada. el ' + moment().format("DD-MM-YYYY HH:mm:ss")));
 });
 
 mongoose.connection.on('reconnected', function () {
-    log(chalk.blue.bgBlue.bold(uri + ' reconectado!'));
+    log(chalk.blue.bgBlue.bold(uri + ' reconectado! el ' + moment().format("DD-MM-YYYY HH:mm:ss")));
 });
 
 mongoose.connection.on('disconnected', function() {
-    log(chalk.white.bgRed.bold(uri + ' desconectado!'));
+    log(chalk.white.bgRed.bold(uri + ' desconectado! el ' + moment().format("DD-MM-YYYY HH:mm:ss")));
 });
 
 var app = express();
