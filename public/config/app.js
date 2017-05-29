@@ -1,5 +1,5 @@
 var app = angular.module('sensorsWebApp', [
-    'alertController', 'calculationController', 'deviceController', 'groupController', 'historicalController', 'inputController', 'profileController', 'sensorController', 'statusController', 'userController',
+    'alertController', 'calculationController', 'deviceController', 'groupController', 'historicalController', 'inputController', 'measuresController', 'profileController', 'sensorController', 'statusController', 'userController',
     'appAlertService', 'alertService', 'calculationService', 'carrierService', 'clientService', 'deviceService', 'groupService', 'inputService', 'profileService', 'reportService', 'sensorService', 'typeService', 'timezoneService', 'userService',
     'ui.router', 'ui.bootstrap', 'ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pagination', 'ui.grid.selection', 'ui.grid.exporter', 'highcharts-ng', 'ngMessages', 'ui.select', 'ngAnimate', 'ngSanitize', 'angularSpinner']);
 
@@ -89,7 +89,15 @@ app.config(function($stateProvider, $urlRouterProvider) {
                 roles: ['Admin', 'Monitoreo']
             }
         })
-        // TODO listing
+        .state('measures', {
+            url: '/measures',
+            templateUrl: '../views/partial-measures.html',
+            controller: 'MeasuresCtrl',
+            controllerAs: 'vm',
+            data: {
+                roles: ['Admin', 'Monitoreo']
+            }
+        })
         .state('calculations', {
         url: '/calculations',
         templateUrl: '../views/partial-calculations.html',

@@ -41,6 +41,9 @@
 
     <script src="../libs/angular-ui-grid/ui-grid.min.js"></script>
     <script src="../libs/angular-ui-router/release/angular-ui-router.min.js"></script>
+
+    <script src="../libs/file-saver/FileSaver.js"></script>
+
     <script src="../config/app.js"></script>
 
     <script src="../services/alert.service.js"></script>
@@ -64,6 +67,7 @@
     <script src="../controllers/group.controller.js"></script>
     <script src="../controllers/historical.controller.js"></script>
     <script src="../controllers/input.controller.js"></script>
+    <script src="../controllers/measures.controller.js"></script>
     <script src="../controllers/profile.controller.js"></script>
     <script src="../controllers/sensor.controller.js"></script>
     <script src="../controllers/status.controller.js"></script>
@@ -115,7 +119,7 @@
                         <i class="fa fa-file-o" aria-hidden="true"></i> Reportes <i class="fa fa-caret-down" aria-hidden="true"></i>
                     </a>
                     <ul uib-dropdown-menu>
-                        <!--<li><a ui-sref="listing">Listado</a></li>-->
+                        <li><a ui-sref="measures">Mediciones</a></li>
                         <li><a ui-sref="calculations">Calculos</a></li>
                         <% if (user.user_type === 'Admin') { %>
                         <li role="separator" class="divider"></li>

@@ -1,0 +1,153 @@
+// utils.js
+// ========
+module.exports = {
+
+    createXlsBinary: function(jsonData, callback) {
+
+        let moment = require('moment');
+        let XLSX = require('xlsx');
+        const path = require('path');
+
+        //  (Fecha_Medicion, ID_Sensor,	Nombre_Sensor, Valor, Unidad, Estado)
+
+        var bodyData = [];
+
+        bodyData.push([{text: 'Fecha Medicion', style: 'tableHeader'}, {text: 'ID Sensor', style: 'tableHeader'}, {text: 'Nombre Sensor', style: 'tableHeader'}, {text: 'Valor', style: 'tableHeader'}, {text: 'Unidad', style: 'tableHeader'}, {text: 'Estado', style: 'tableHeader'}]);
+
+        jsonData.forEach(function(sourceRow) {
+            var dataRow = [];
+
+            dataRow.push(moment(sourceRow.timestamp).format('LLL'));
+            dataRow.push(sourceRow.sensor._id);
+            dataRow.push(sourceRow.sensor.name);
+            dataRow.push(sourceRow.data);
+            dataRow.push(sourceRow.sensor.type.units);
+            dataRow.push(sourceRow.sensor.type.units);
+
+
+            bodyData.push(dataRow)
+        });
+
+        const ws_name = "Reporte_Mediciones";
+
+        let ws = XLSX.utils.json_to_sheet(bodyData);
+
+        ws.A1.v = "FechaMedicion";
+        ws.B1.v = "IDSensor";
+        ws.C1.v = "NombreSensor";
+        ws.D1.v = "Valor";
+        ws.E1.v = "Unidad";
+        ws.F1.v = "Estado";
+
+        const wb = { SheetNames: [ws_name], Sheets: {}, Props: {} };
+
+        wb.Sheets[ws_name] = ws;
+
+        /* write file */
+        let wbbuf = XLSX.write(wb, {
+            type: 'base64',
+            bookType: 'xlsx'
+        });
+
+        callback(new Buffer(wbbuf, 'base64'));
+    },
+
+    createPdfBinary: function(jsonData, callback) {
+
+        let moment = require('moment');
+        let pdfMakePrinter = require('pdfmake/src/printer');
+        var fonts = require('pdfmake/build/vfs_fonts');
+        const path = require('path');
+
+        //  (Fecha_Medicion, ID_Sensor,	Nombre_Sensor, Valor, Unidad, Estado)
+
+        var bodyData = [];
+
+        bodyData.push([{text: 'Fecha Medicion', style: 'tableHeader'}, {text: 'ID Sensor', style: 'tableHeader'}, {text: 'Nombre Sensor', style: 'tableHeader'}, {text: 'Valor', style: 'tableHeader'}, {text: 'Unidad', style: 'tableHeader'}, {text: 'Estado', style: 'tableHeader'}]);
+
+        jsonData.forEach(function(sourceRow) {
+            var dataRow = [];
+
+            dataRow.push(moment(sourceRow.timestamp).format('LLL'));
+            dataRow.push(sourceRow.sensor._id);
+            dataRow.push(sourceRow.sensor.name);
+            dataRow.push(sourceRow.data);
+            dataRow.push(sourceRow.sensor.type.units);
+            dataRow.push(sourceRow.sensor.type.units);
+
+
+            bodyData.push(dataRow)
+        });
+
+
+        var fontDescriptors = {
+            Roboto: {
+                normal: path.join(__dirname, '../..', 'assets', '/fonts/Roboto-Regular.ttf'),
+                bold: path.join(__dirname, '../..', 'assets', '/fonts/Roboto-Medium.ttf'),
+                italics: path.join(__dirname, '../..', 'assets', '/fonts/Roboto-Italic.ttf'),
+                bolditalics: path.join(__dirname, '../..', 'assets', '/fonts/Roboto-MediumItalic.ttf')
+            }
+        };
+
+        var pdf = {
+
+            content: [
+                {
+                    image: 'public/assets/img/adrenalina_logo.png',
+                    fit: [100, 100],
+                    pageBreak: 'before'
+                },
+                {
+                    style: 'tableExample',
+                    table: {
+                        headerRows: 1,
+                        body: bodyData
+                    },
+                    layout: 'lightHorizontalLines'
+                }
+            ],
+            styles: {
+                header: {
+                    fontSize: 18,
+                    bold: true,
+                    margin: [0, 0, 0, 10]
+                },
+                subheader: {
+                    fontSize: 16,
+                    bold: true,
+                    margin: [0, 10, 0, 5]
+                },
+                tableExample: {
+                    margin: [0, 5, 0, 15]
+                },
+                tableHeader: {
+                    bold: true,
+                    fontSize: 13,
+                    color: 'black'
+                }
+            },
+            defaultStyle: {
+                // alignment: 'justify'
+            }
+        };
+
+
+
+        var printer = new pdfMakePrinter(fontDescriptors);
+        var doc = printer.createPdfKitDocument(pdf);
+
+        var chunks = [];
+        var result;
+
+        doc.on('data', function (chunk) {
+            chunks.push(chunk);
+        });
+        doc.on('end', function () {
+            result = Buffer.concat(chunks);
+            //callback('data:application/pdf;base64,' + result.toString('base64'));
+            callback(result);
+        });
+        doc.end();
+
+    }
+};

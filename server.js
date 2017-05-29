@@ -31,7 +31,7 @@ var options = {
         reconnectTries: Number.MAX_VALUE,   // Good way to make sure mongoose never stops trying to reconnect
         socketOptions: {
             keepAlive: 1,
-            socketTimeout: 20000 ,
+            socketTimeout: 30000 ,
             connectTimeoutMS: 30000
         }
     }
@@ -236,7 +236,7 @@ function logRequestInDatabase(req, res, next) {
     _.extendOwn(headersObj, {ip: ip, port: port});
 
     Input.create({ actor: req.session.passport.user || '', date: new Date(), origin: JSON.stringify(headersObj), action: method + ' ' + path, label: 'express', object: '', description: '' }, function (err, input) {
-        if (err) return handleError(err);
+        if (err) log(chalk.bgRed.bold(err));
         // saved!
     });
 

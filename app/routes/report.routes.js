@@ -1,15 +1,152 @@
 module.exports = function(app) {
 
-    var Device = new require('./../models/device');
-    var Measure = new require('./../models/measure');
-    var Model  = new require('./../models/model');
-    var Sensor  = new require('./../models/sensor');
+    let utils = require('../config/lib/utils');
+
+    let Device = new require('./../models/device');
+    let Measure = new require('./../models/measure');
+    let Model  = new require('./../models/model');
+    let Sensor  = new require('./../models/sensor');
+
+    function xlsPdfExportQuery(dateFrom, dateTo, sensorIds, isXlsExport, callback) {
+        for (let i = 0; i < sensorIds.length; i++) {
+
+            Measure.aggregate([{
+                $match: {
+                    timestamp: {
+                        $gte: new Date(dateFrom),
+                        $lte: new Date(dateTo)
+                    }
+                }
+            },
+                {
+                    $project: {
+                        _id: 0,
+                        imei: 1,
+                        modelAndVersion: 1,
+                        data: 1,
+                        timestamp: 1
+                    }
+                },
+                {
+                    $sort: {
+                        timestamp: -1
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'devices',
+                        localField: 'imei',
+                        foreignField: '_id',
+                        as: 'device'
+                    }
+                },
+                {
+                    $unwind: "$device"
+                },
+                {
+                    $lookup: {
+                        from: 'models',
+                        localField: 'device.model',
+                        foreignField: '_id',
+                        as: 'model'
+                    }
+                },
+                {
+                    $unwind: "$model"
+                },
+                {
+                    $unwind: {
+                        path: '$model.sensors',
+                        includeArrayIndex: 'sensor_idx'
+                    }
+                },
+                {
+                    $match: {
+                        'model.sensors': sensorIds[i]
+                    }
+                },
+                {
+                    $unwind: {
+                        path: '$data',
+                        includeArrayIndex: 'data_idx'
+                    }
+                },
+                {
+                    $project: {
+                        "data_idx": 1,
+                        "sensor_idx": 1,
+                        "data": 1,
+                        "timestamp": 1,
+                        sensor: "$model.sensors",
+                        cmp_data_and_sensor_idx: {
+                            $cmp: ['$data_idx',
+                                '$sensor_idx']
+                        }
+                    }
+                },
+                {
+                    $match: {
+                        cmp_data_and_sensor_idx: 0
+                    }
+                },
+                {
+                    $project: {
+                        "sensor": 1,
+                        "data": 1,
+                        "timestamp": 1
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'sensors',
+                        localField: 'sensor',
+                        foreignField: '_id',
+                        as: 'sensor'
+                    }
+                },
+                {
+                    $unwind: "$sensor"
+                },
+                {
+                    $lookup: {
+                        from: 'types',
+                        localField: 'sensor.type',
+                        foreignField: '_id',
+                        as: 'sensor.type'
+                    }
+                },
+                {
+                    $unwind: "$sensor.type"
+                }]).then(function(result) {
+
+                if (isXlsExport) {
+
+                    utils.createXlsBinary(result, function(binary) {
+                        callback(binary);
+                    }, function(error) {
+                        console.log('ERROR:' + error);
+                    });
+
+                } else {
+
+                    utils.createPdfBinary(result, function(binary) {
+                        callback(binary);
+                    }, function(error) {
+                        console.log('ERROR:' + error);
+                    });
+
+                }
+            }).catch(function (err) {
+                console.log(err);
+            });
+        }
+    }
 
     // Calcular un nuevo reporte.
     app.post('/api/v1/lastSensorMeasures', function(req, res) {
-        var sensorId = req.body.sensorId;
-        var modelId = null;
-        var imei = null;
+        let sensorId = req.body.sensorId;
+        let modelId = null;
+        let imei = null;
 
         Model.find({
             sensors: sensorId
@@ -65,7 +202,7 @@ module.exports = function(app) {
 
     // Calcular un nuevo reporte.
     app.post('/api/v1/reports', function(req, res) {
-        var sensorIds = req.body.sensors;
+        let sensorIds = req.body.sensors;
         Measure.find({
             timestamp: { '$gte': new Date(req.body.dateFrom), '$lte': new Date(req.body.dateTo) }
         })
@@ -95,8 +232,7 @@ module.exports = function(app) {
     });
 
     app.get('/api/v1/status', function(req, res) {
-        var sensorIds = [], modelId, sensorIdx, imei, sensorAndModels = [];
-        var jsonResponse = '';
+        let imei;
         // busco los ids de todos los sensores y los guardo en un arreglo.
 
         Measure.aggregate([{
@@ -221,6 +357,36 @@ module.exports = function(app) {
             } else {
                 res.json(result);
             }
+        });
+    });
+
+    // Reporte de Lecturas en formato xls (tipo Excel).
+    app.post('/api/v1/xlsMeasureReport', function(req, res) {
+        let dateFrom = req.body.dateFrom;
+        let dateTo = req.body.dateTo;
+        let sensorIds = req.body.sensors;
+        let timeLapseInMinutes = req.body.timeLapseInMinutes;
+
+        xlsPdfExportQuery(dateFrom, dateTo, sensorIds, true, function(binary) {
+            res.contentType('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.send(binary);
+        }, function(error) {
+            res.send('ERROR:' + error);
+        });
+    });
+
+    // Reporte de Lecturas en formato pdf (tipo Acrobat Reader).
+    app.post('/api/v1/pdfMeasureReport', function(req, res) {
+        let dateFrom = req.body.dateFrom;
+        let dateTo = req.body.dateTo;
+        let sensorIds = req.body.sensors;
+        let timeLapseInMinutes = req.body.timeLapseInMinutes;
+
+        xlsPdfExportQuery(dateFrom, dateTo, sensorIds, false, function(binary) {
+            res.contentType('application/pdf');
+            res.send(binary);
+        }, function(error) {
+            res.send('ERROR:' + error);
         });
     });
 };

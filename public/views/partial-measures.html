@@ -1,0 +1,80 @@
+<div class="container">
+
+    <div class="page-header text-center">
+        <h1><span class="fa fa-tachometer"></span> Reporte Lecturas</h1>
+    </div>
+
+    <form name="measuresReportForm" class="form-horizontal">
+        <fieldset ng-disabled="vm.spinnerActive">
+            <legend>Filtrar por:</legend>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Tipo de Sensor</label>
+                    <div class="col-sm-6">
+                        <span us-spinner spinner-key="sensorTypeSpinner"></span>
+                        <ui-select ng-model="vm.type.selected" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
+                            <ui-select-match placeholder="Seleccione o busque un tipo de sensor en la lista...">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices group-by="vm.groupByType" repeat="item in vm.types | filter: $select.search">
+                                <div ng-bind-html="item.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                    <div class="col-sm-3">
+                        <button ng-click="vm.measuresReport(measuresReportForm, 'xls')" type="button" class="btn btn-success"><i class="fa fa-file-excel-o" aria-hidden="true"></i> Excel</button>
+                        <button ng-click="vm.measuresReport(measuresReportForm, 'pdf')" type="button" class="btn btn-danger"><i class="fa fa-file-pdf-o" aria-hidden="true"></i> PDF</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Lapso</label>
+                    <div class="col-sm-6">
+                        <ui-select ng-model="vm.timeLapseSelected.selected" theme="bootstrap">
+                            <ui-select-match placeholder="Seleccione si desea todas las mediciones o x intervalos...">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="item in vm.timeLapseSelections | filter: $select.search">
+                                <div ng-bind-html="item.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                    <div class="col-sm-3">
+                        <input type="number" placeholder="minutos (entre 1 y 1440)" ng-model="vm.timeLapseInMinutes" ng-disabled="vm.timeLapseSelected.selected._id === 'all' || vm.timeLapseSelected.selected == undefined" ng-change="updateMinutes()" class="form-control text-center" min="1" max="1440" tabindex="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="col-sm-3 control-label">Fecha Desde</label>
+                    <p class="input-group">
+                        <input type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" ng-model="dateFrom" is-open="popup1.opened" datepicker-options="dateOptionsFrom" ng-required="true" clear-text="Borrar" close-text="Cerrar" current-text="Hoy"/>
+                        <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="open1()"><i class="glyphicon glyphicon-calendar"></i></button>
+                         </span>
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="col-sm-3 control-label">Fecha Hasta</label>
+                    <p class="input-group">
+                        <input type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" ng-model="dateTo" is-open="popup2.opened" datepicker-options="dateOptionsTo" ng-required="true" clear-text="Borrar" close-text="Cerrar" current-text="Hoy"/>
+                        <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="open2()"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                    </p>
+                </div>
+            </div>
+            <span us-spinner="{lines: 13, radius:42, scale: 1, width:14, length: 28, color: '#000'}" spinner-key="measuresReportSpinner"></span>
+            <uib-accordion>
+                <div uib-accordion-group class="panel-default" ng-repeat="group in groups">
+                    <uib-accordion-heading>
+                        <div ng-bind-html="group.title" compile-template></div>
+                    </uib-accordion-heading>
+                    <div ng-bind-html="group.content" compile-template></div>
+                </div>
+            </uib-accordion>
+        </fieldset>
+    </form>
+
+</div>
