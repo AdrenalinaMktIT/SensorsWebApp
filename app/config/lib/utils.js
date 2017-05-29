@@ -90,13 +90,20 @@ module.exports = {
         };
 
         var pdf = {
-
+            header: {
+                margin: 10,
+                columns: [
+                    {
+                        image: 'public/assets/img/adrenalina_logo.png',
+                        width: 40
+                    },
+                    {
+                        margin: [10, 0, 0, 0],
+                        text: 'Reporte de Mediciones'
+                    }
+                ]
+            },
             content: [
-                {
-                    image: 'public/assets/img/adrenalina_logo.png',
-                    fit: [100, 100],
-                    pageBreak: 'before'
-                },
                 {
                     style: 'tableExample',
                     table: {
