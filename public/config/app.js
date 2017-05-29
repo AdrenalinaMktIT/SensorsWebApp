@@ -18,13 +18,6 @@ app.config(function($stateProvider, $urlRouterProvider) {
             data: {
                 roles: ['Admin']
             }
-            /*resolve: {
-                security: ['$q', function($q){
-                    if(true){
-                        return $q.reject("Not Authorized");
-                    }
-                }]
-            }*/
         })
         .state('sensors', {
             url: '/sensors',
@@ -123,13 +116,13 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
 app.controller('MainCtrl', function($scope, $transitions, $state) {
 
-    $scope.init = function(stringifiedArray) {
-        $scope.userType = stringifiedArray;
+    $scope.init = function(user) {
+        $scope.user = JSON.parse(user);
     };
 
     $transitions.onStart({}, function($transition) {
-        var requiredRoles = $transition.$to().data.roles;
-        var userRole = $scope.userType;
+        let requiredRoles = $transition.$to().data.roles;
+        let userRole = $scope.user.user_type;
         if (!_.contains(requiredRoles, userRole)) {
             return $state.target("status");
         }

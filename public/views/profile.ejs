@@ -137,9 +137,9 @@
                 <a href="/logout" type="button" class="btn btn-default navbar-btn"><i class="fa fa-sign-out" aria-hidden="true"></i> Salir</a>
                 <p class="navbar-text"><i class="fa fa-user-circle" aria-hidden="true"></i> <%= user.name %></p>
                 <% if (user.user_type === 'Admin') { %>
-                <span class="navbar-text" ng-init="init('<%= user.user_type %>')">Usuario Administrador</span>
+                <span class="navbar-text" ng-init="init('<%= JSON.stringify(user) %>')">Usuario Administrador</span>
                 <% } else { %>
-                <span class="navbar-text" ng-init="init('<%= user.user_type %>')">Usuario Monitoreo</span>
+                <span class="navbar-text" ng-init="init('<%= JSON.stringify(user) %>')">Usuario Monitoreo</span>
                 <% } %>
             </ul>
 

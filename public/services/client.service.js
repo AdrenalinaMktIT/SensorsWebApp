@@ -6,6 +6,9 @@ angular.module('clientService', []).factory('Clients', function ($http) {
             getAll: function () {
                 return $http.get('/api/v1/clients');
             },
+            getAssociatedCalculations: function (id) {
+                return $http.get('/api/v1/clients/getAssociatedCalculations/' + id);
+            },
             create: function (clientData) {
                 return $http.post('/api/v1/clients', clientData);
             },

@@ -22,6 +22,10 @@ var clientSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
+    associated_calculations: [{
+        type: String,
+        ref: 'Calculation'
+    }],
     active: {
         type: Boolean,
         default: true

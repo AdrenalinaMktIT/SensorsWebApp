@@ -91,7 +91,7 @@ module.exports = function(app) {
                 if (!client) {
                     res.status(404).json({
                         message: 'No encontrado!. Cliente inexistente.',
-                        user: null
+                        client: null
                     });
                 } else {
                     res.status(200).json({
@@ -104,6 +104,30 @@ module.exports = function(app) {
                 res.status(500).json({
                     message: 'Error interno de servidor. Por favor, intente nuevamente.',
                     client: null
+                });
+            });
+    });
+
+    // Obtener los calculos diponibles asociados a un cliente.
+    app.get('/api/v1/clients/getAssociatedCalculations/:client_id', function(req, res) {
+        Client.findById(req.params.client_id).populate('associated_calculations')
+            .then(function (client) {
+                if (!client) {
+                    res.status(404).json({
+                        message: 'No encontrado!. Calculos del cliente inexistentes.',
+                        calculations: null
+                    });
+                } else {
+                    res.status(200).json({
+                        message: 'OK!. Calculos del cliente obtenidos correctamente.',
+                        calculations: client.associated_calculations
+                    });
+                }
+            })
+            .catch(function () {
+                res.status(500).json({
+                    message: 'Error interno de servidor. Por favor, intente nuevamente.',
+                    calculations: null
                 });
             });
     });

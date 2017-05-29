@@ -1,10 +1,10 @@
 angular.module('calculationController', [])
-    .controller('CalculationCtrl', function ($scope, $sce, $uibModal, Calculations, Sensors, AppAlert, usSpinnerService){
+    .controller('CalculationCtrl', function ($scope, $sce, $uibModal, Clients, Calculations, Sensors, AppAlert, usSpinnerService){
         var vm = this;
 
         vm.checkModel = {};
 
-        Calculations.getAll()
+        Clients.getAssociatedCalculations($scope.$parent.user.client_id)
             .then(function successCallback(response) {
                 vm.calculations = [];
                 for (var i = 0; i < response.data.calculations.length; i++) {
