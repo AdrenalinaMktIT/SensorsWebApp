@@ -75,9 +75,9 @@ angular.module('measuresController', [])
                                 usSpinnerService.stop('measuresReportSpinner');
                                 vm.spinnerActive = false;
                                 let blob = new Blob([response.data], { type: "application/vnd.ms-excel" });
-                                let objectUrl = URL.createObjectURL(blob);
-                                window.open(objectUrl);
-                                //saveAs(new Blob([response.data],{type:"application/vnd.ms-excel"}), "test.xlsx")
+                                /*let objectUrl = URL.createObjectURL(blob);
+                                window.open(objectUrl);*/
+                                saveAs(blob, 'Reporte_Mediciones_' + moment().format("YYYY-MM-DD_HH-mm-ss") + '.xlsx')
 
 
                             }, function errorCallback(response) {
@@ -91,8 +91,9 @@ angular.module('measuresController', [])
                                 usSpinnerService.stop('measuresReportSpinner');
                                 vm.spinnerActive = false;
                                 let blob = new Blob([response.data], { type:'application/pdf'});
-                                let objectUrl = URL.createObjectURL(blob);
-                                window.open(objectUrl);
+                                /*let objectUrl = URL.createObjectURL(blob);
+                                window.open(objectUrl);*/
+                                saveAs(blob, 'Reporte_Mediciones_' + moment().format("YYYY-MM-DD_HH-mm-ss") + '.pdf')
                             }, function errorCallback(response) {
                                 usSpinnerService.stop('measuresReportSpinner');
                                 vm.spinnerActive = false;

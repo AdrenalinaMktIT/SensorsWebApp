@@ -32,9 +32,9 @@ module.exports = {
 
         let ws = XLSX.utils.json_to_sheet(bodyData);
 
-        ws.A1.v = "FechaMedicion";
-        ws.B1.v = "IDSensor";
-        ws.C1.v = "NombreSensor";
+        ws.A1.v = "Fecha Medicion";
+        ws.B1.v = "ID Sensor";
+        ws.C1.v = "Nombre Sensor";
         ws.D1.v = "Valor";
         ws.E1.v = "Unidad";
         ws.F1.v = "Estado";
