@@ -134,7 +134,7 @@ module.exports = {
                 }
             },
             defaultStyle: {
-                // alignment: 'justify'
+                alignment: 'justify'
             }
         };
 
@@ -149,11 +149,12 @@ module.exports = {
         doc.on('data', function (chunk) {
             chunks.push(chunk);
         });
+
         doc.on('end', function () {
             result = Buffer.concat(chunks);
-            //callback('data:application/pdf;base64,' + result.toString('base64'));
             callback(result);
         });
+
         doc.end();
 
     }

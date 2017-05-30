@@ -7,8 +7,15 @@ module.exports = function(app) {
     let Model  = new require('./../models/model');
     let Sensor  = new require('./../models/sensor');
 
+    let async = new require('async');
+
     function xlsPdfExportQuery(dateFrom, dateTo, sensorIds, isXlsExport, callback) {
-        for (let i = 0; i < sensorIds.length; i++) {
+
+        let results = [];
+
+        // assuming openFiles is an array of file names
+        async.eachSeries(sensorIds, function(sensorId, callback) {
+
 
             Measure.aggregate([{
                 $match: {
@@ -62,7 +69,8 @@ module.exports = function(app) {
                 },
                 {
                     $match: {
-                        'model.sensors': sensorIds[i]
+                        //'model.sensors': sensorIds[i]
+                        'model.sensors': sensorId
                     }
                 },
                 {
@@ -119,9 +127,24 @@ module.exports = function(app) {
                     $unwind: "$sensor.type"
                 }]).then(function(result) {
 
+                results = results.concat(result);
+                callback();
+
+            }).catch(function (err) {
+                console.log(err);
+                callback(err);
+            });
+
+        }, function(err) {
+            // if any of the file processing produced an error, err would equal that error
+            if( err ) {
+                // One of the iterations produced an error.
+                // All processing will now stop.
+                console.log('A file failed to process');
+            } else {
                 if (isXlsExport) {
 
-                    utils.createXlsBinary(result, function(binary) {
+                    utils.createXlsBinary(results, function(binary) {
                         callback(binary);
                     }, function(error) {
                         console.log('ERROR:' + error);
@@ -129,17 +152,15 @@ module.exports = function(app) {
 
                 } else {
 
-                    utils.createPdfBinary(result, function(binary) {
+                    utils.createPdfBinary(results, function(binary) {
                         callback(binary);
                     }, function(error) {
                         console.log('ERROR:' + error);
                     });
 
                 }
-            }).catch(function (err) {
-                console.log(err);
-            });
-        }
+            }
+        });
     }
 
     // Calcular un nuevo reporte.

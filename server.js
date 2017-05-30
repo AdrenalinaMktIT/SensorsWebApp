@@ -31,8 +31,8 @@ var options = {
         reconnectTries: Number.MAX_VALUE,   // Good way to make sure mongoose never stops trying to reconnect
         socketOptions: {
             keepAlive: 1,
-            socketTimeout: 30000 ,
-            connectTimeoutMS: 30000
+            socketTimeout: 300000 ,
+            connectTimeoutMS: 300000
         }
     }
 };
