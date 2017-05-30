@@ -1,6 +1,6 @@
 var app = angular.module('sensorsWebApp', [
-    'alertController', 'calculationController', 'deviceController', 'groupController', 'historicalController', 'inputController', 'measuresController', 'profileController', 'sensorController', 'statusController', 'userController',
-    'appAlertService', 'alertService', 'calculationService', 'carrierService', 'clientService', 'deviceService', 'groupService', 'inputService', 'profileService', 'reportService', 'sensorService', 'typeService', 'timezoneService', 'userService',
+    'alertController', 'calculationController', 'clientController', 'deviceController', 'groupController', 'historicalController', 'inputController', 'measuresController', 'modelController', 'profileController', 'sensorController', 'statusController', 'userController',
+    'appAlertService', 'alertService', 'calculationService', 'carrierService', 'clientService', 'deviceService', 'groupService', 'inputService', 'modelService', 'profileService', 'reportService', 'sensorService', 'typeService', 'timezoneService', 'userService',
     'ui.router', 'ui.bootstrap', 'ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pagination', 'ui.grid.selection', 'ui.grid.exporter', 'highcharts-ng', 'ngMessages', 'ui.select', 'ngAnimate', 'ngSanitize', 'angularSpinner']);
 
 app.config(function($stateProvider, $urlRouterProvider) {
@@ -23,6 +23,24 @@ app.config(function($stateProvider, $urlRouterProvider) {
             url: '/sensors',
             templateUrl: '../views/partial-sensors.html',
             controller: 'SensorCtrl',
+            controllerAs: 'vm',
+            data: {
+                roles: ['Admin']
+            }
+        })
+        .state('models', {
+            url: '/models',
+            templateUrl: '../views/partial-models.html',
+            controller: 'ModelCtrl',
+            controllerAs: 'vm',
+            data: {
+                roles: ['Admin']
+            }
+        })
+        .state('clients', {
+            url: '/clients',
+            templateUrl: '../views/partial-clients.html',
+            controller: 'ClientCtrl',
             controllerAs: 'vm',
             data: {
                 roles: ['Admin']

@@ -1,0 +1,62 @@
+<div class="container">
+
+    <div class="page-header text-center">
+        <h1><span class="fa fa-registered"></span> Modelos de Equipos</h1>
+    </div>
+
+    <div class="well text-center">
+        <p>Esta pagina permite <span class="text-success">agregar</span>, <span class="text-warning">editar</span> y <span class="text-danger">eliminar</span> modelos de equipos.</p>
+    </div>
+
+    <div ui-i18n="{{vm.lang}}">
+        <button id="addBtn" ng-click="vm.openModal(null, 'add')" type="button" class="btn btn-primary"><i class="fa fa-plus" aria-hidden="true"></i> Agregar Modelo</button>
+        <br>
+        <br>
+        <div id="grid1" ui-grid="vm.gridOptions" ui-grid-resize-columns ui-grid-selection ui-grid-exporter class="grid"></div>
+    </div>
+
+    <div class="modal-demo">
+        <script type="text/ng-template" id="myModalContent.html">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="vm.cancel()"><i class="fa fa-window-close" aria-hidden="true"></i></button>
+                <h3 class="modal-title" id="modal-title">{{vm.modalName}}</h3>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <form class="form-horizontal" name="UpdateEmployeeForm" >
+                    <fieldset ng-disabled="vm.isDisabled">
+                        <input class="form-control" readonly="readonly" name="alertId" ng-model="vm.alert.alertId" type="hidden" placeholder="ID de Grupo" required />
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="control-label">Nombre</label>
+                                <input class="form-control" name="name" ng-model="vm.alert.name" type="text" placeholder="Nombre" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="control-label">Sensor</label>
+                                <select class="form-control" name="sensor" ng-model="vm.alert.sensor" ng-options="sensor as sensor.name for sensor in vm.sensors track by sensor._id" required ></select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="control-label">Perfil</label>
+                                <select class="form-control" name="profile" ng-model="vm.alert.profile" ng-options="profile as profile.name for profile in vm.profiles track by profile._id" required ></select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="control-label">Menor que</label>
+                                <input class="form-control" less_than="less_than" ng-model="vm.alert.less_than" type="text" placeholder="menor que" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="control-label">Mayor que</label>
+                                <input class="form-control" greater_than="greater_than" ng-model="vm.alert.greater_than" type="text" placeholder="mayor que" required />
+                            </div>
+                        </div>
+                    </fieldset>                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="button" ng-show="vm.isAdd" ng-click="vm.add()">Guardar</button>
+                <button class="btn btn-primary" type="button" ng-show="vm.isView" ng-click="vm.back()">Volver</button>
+                <button class="btn btn-primary" type="button" ng-show="vm.isUpdate" ng-click="vm.update()">Actualizar</button>
+                <button class="btn btn-primary" type="button" ng-show="vm.isDelete" ng-click="vm.delete()">Eliminar</button>
+                <button class="btn btn-warning" type="button" ng-hide="vm.isView" ng-click="vm.cancel()">Cancelar</button>
+            </div>
+        </script>
+    </div>
+
+</div>

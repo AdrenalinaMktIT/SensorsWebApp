@@ -54,6 +54,7 @@
     <script src="../services/device.service.js"></script>
     <script src="../services/group.service.js"></script>
     <script src="../services/input.service.js"></script>
+    <script src="../services/model.service.js"></script>
     <script src="../services/profile.service.js"></script>
     <script src="../services/report.service.js"></script>
     <script src="../services/sensor.service.js"></script>
@@ -63,11 +64,13 @@
 
     <script src="../controllers/alert.controller.js"></script>
     <script src="../controllers/calculation.controller.js"></script>
+    <script src="../controllers/client.controller.js"></script>
     <script src="../controllers/device.controller.js"></script>
     <script src="../controllers/group.controller.js"></script>
     <script src="../controllers/historical.controller.js"></script>
     <script src="../controllers/input.controller.js"></script>
     <script src="../controllers/measures.controller.js"></script>
+    <script src="../controllers/model.controller.js"></script>
     <script src="../controllers/profile.controller.js"></script>
     <script src="../controllers/sensor.controller.js"></script>
     <script src="../controllers/status.controller.js"></script>
@@ -79,7 +82,7 @@
     <div class="container-fluid">
         <div class="navbar-header">
             <a class="navbar-brand" href="#">
-                <img alt="Brand" height="20" width="20" src="../assets/img/adrenalina_logo.png">
+                <img alt="Brand" height="25" width="40" src="../assets/img/adrenalina_logo.png">
             </a>
         </div>
 
@@ -92,12 +95,21 @@
                         <i class="fa fa-cog" aria-hidden="true"></i> Admin <i class="fa fa-caret-down" aria-hidden="true"></i>
                     </a>
                     <ul uib-dropdown-menu>
-                        <li><a ui-sref="groups" ui-sref-active="active-dropdown-menu">Grupos</a></li>
-                        <li><a ui-sref="sensors" ui-sref-active="active-dropdown-menu">Sensores</a></li>
-                        <li role="separator" class="divider"></li>
                         <li><a ui-sref="alerts" ui-sref-active="active-dropdown-menu">Avisos</a></li>
-                        <li><a ui-sref="devices" ui-sref-active="active-dropdown-menu">Equipos</a></li>
+
                         <li role="separator" class="divider"></li>
+
+                        <li><a ui-sref="clients">Clientes</a></li>
+
+                        <li role="separator" class="divider"></li>
+
+                        <li><a ui-sref="devices" ui-sref-active="active-dropdown-menu">Equipos</a></li>
+                        <li><a ui-sref="models">Modelos</a></li>
+                        <li><a ui-sref="sensors" ui-sref-active="active-dropdown-menu">Sensores</a></li>
+
+                        <li role="separator" class="divider"></li>
+
+                        <li><a ui-sref="groups" ui-sref-active="active-dropdown-menu">Grupos</a></li>
                         <li><a ui-sref="users" ui-sref-active="active-dropdown-menu">Usuarios</a></li>
                         <li><a ui-sref="profiles" ui-sref-active="active-dropdown-menu">Perfiles</a></li>
                     </ul>
