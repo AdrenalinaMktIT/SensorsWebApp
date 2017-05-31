@@ -71,6 +71,17 @@ app.config(function($stateProvider, $urlRouterProvider) {
             controllerAs: 'vm',
             data: {
                 roles: ['Admin']
+            },
+            resolve: {
+                allClients: function (Clients) {
+                    return Clients.getAll();
+                },
+                allTimezones: function (Timezones) {
+                    return Timezones.getAll();
+                },
+                allUsers: function (Users) {
+                    return Users.getAll();
+                }
             }
         })
         .state('profiles', {

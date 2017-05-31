@@ -1,9 +1,9 @@
 angular.module('userController', [])
 
 // inject the User service factory into our controller
-    .controller('UserCtrl', function ($http, $uibModal, $log, Clients, Timezones, Users, AppAlert) {
+    .controller('UserCtrl', function ($uibModal, $log, Users, AppAlert, uiGridConstants, allClients, allTimezones, allUsers) {
 
-        var vm = this;
+        let vm = this;
 
         vm.formData = {};
 
@@ -18,10 +18,10 @@ angular.module('userController', [])
             /*enableRowHeaderSelection: true,*/
             showGridFooter: true,
             columnDefs: [
-                { field: 'name', displayName: 'NOMBRE', enableHiding: false },
-                { field: 'description', displayName: 'DESCRIPCION', enableHiding: false },
-                { field: 'user_type', displayName: 'TIPO DE USUARIO', enableHiding: false },
-                { field: 'crud', displayName: 'VER / EDITAR / BORRAR', enableHiding: false, enableSorting: false,
+                { field: 'name', cellClass:'text-center', sort: { direction: uiGridConstants.ASC, priority: 0 }, displayName: 'NOMBRE', width: '25%', enableHiding: false },
+                { field: 'description', cellClass:'text-center', displayName: 'DESCRIPCION', width: '25%', enableHiding: false },
+                { field: 'user_type', cellClass:'text-center', displayName: 'TIPO DE USUARIO', width: '25%', enableHiding: false },
+                { field: 'crud', cellClass:'text-center', displayName: 'VER / EDITAR / BORRAR', width: '20%', enableHiding: false, enableSorting: false,
                     cellTemplate:
                     '<button id="readBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'read\')" type="button" class="btn btn-xs btn-info"><i class="fa fa-eye" aria-hidden="true"></i> Ver</button> ' +
                     '<button id="updateBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'update\')" type="button" class="btn btn-xs btn-success"><i class="fa fa-pencil" aria-hidden="true"></i> Editar</button> ' +
@@ -33,12 +33,19 @@ angular.module('userController', [])
             }
         };
 
-        // GET =====================================================================
-        // when landing on the page, get all users and show them
-        // use the service to get all the users
-        loadUsers();
-        loadClients();
-        loadTimezones();
+        // You can be sure that allClients, allTimezones, allUsers are ready to use!
+        vm.clients = allClients.data.clients;
+        vm.timezones = allTimezones.data.timezones;
+        vm.gridOptions.data = vm.users = allUsers.data.users;
+
+        vm.clientsWithAllOption = [];
+
+        vm.clientsWithAllOption = allClients.data.clients;
+
+        vm.clientsWithAllOption.unshift({
+            _id: -99,
+            name: 'Todos'
+        });
 
         function loadUsers() {
             Users.getAll()
@@ -50,39 +57,13 @@ angular.module('userController', [])
                 });
         }
 
-        function loadClients() {
-            Clients.getAll()
-                .then(function successCallback(response) {
-                    //vm.clients = response.data.clients;
-                    vm.clients = [];
-                    vm.clients.push({
-                        _id: -99,
-                        name: 'Todos'
-                    });
-                    for (var i = 0; i < response.data.clients.length; i++) {
-                        vm.clients.push(response.data.clients[i]);
-                    }
-                }, function errorCallback(response) {
-                    console.log('Error: ' + response);
-                });
-        }
-
-        function loadTimezones() {
-            Timezones.getAll()
-                .then(function successCallback(response) {
-                    vm.timezones = response.data.timezones;
-                }, function errorCallback(response) {
-                    console.log('Error: ' + response);
-                });
-        }
-
         vm.openModal = function (id, mode) {
 
             var vm = this;
 
             vm.mode = mode;
 
-            if (mode != 'add') {
+            if (mode !== 'add') {
 
                 Users.get(id)
                     .then(function successCallback(response) {

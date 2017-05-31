@@ -15,7 +15,7 @@
         <div class="col-sm-6">
             <ui-select ng-model="vm.selectedClient" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
                 <ui-select-match placeholder="Seleccione o busque un cliente en la lista...">{{$select.selected.name}}</ui-select-match>
-                <ui-select-choices repeat="item in vm.clients | filter: $select.search">
+                <ui-select-choices repeat="item in vm.clientsWithAllOption | filter: $select.search">
                     <div ng-bind-html="item.name | highlight: $select.search"></div>
                 </ui-select-choices>
             </ui-select>
@@ -41,21 +41,21 @@
                     <fieldset ng-disabled="vm.isDisabled">
                     <input class="form-control" readonly="readonly" name="userId" ng-model="vm.user.userId" type="hidden" placeholder="ID de Usuario" />
                     <div class="row">
-                        <div class="col-md-6" ng-class="{ 'has-error': userForm.name.$touched || userForm.name.$invalid }">
+                        <div class="col-md-6" ng-class="{ 'has-error': userForm.name.$touched && userForm.name.$invalid }">
                             <label>Nombre</label>
                             <input class="form-control" name="name" ng-model="vm.user.name" type="text" placeholder="Nombre" ng-minlength="4" ng-maxlength="12" required autofocus/>
 
-                            <div class="help-block" ng-messages="userForm.name.$error" ng-show="userForm.name.$touched || userForm.name.$invalid">
+                            <div class="help-block" ng-messages="userForm.name.$error" ng-show="userForm.name.$touched && userForm.name.$invalid">
                                 <p ng-message="minlength">El nombre de usuario debe poseer al menos 4 caracteres.</p>
                                 <p ng-message="maxlength">El nombre de usuario debe poseer como maximo 12 caracteres.</p>
                                 <p ng-message="required">El nombre de usuario es requerido.</p>
                             </div>
                         </div>
-                        <div class="col-md-6" ng-class="{ 'has-error': userForm.password.$touched || userForm.password.$invalid }">
+                        <div class="col-md-6" ng-class="{ 'has-error': userForm.password.$touched && userForm.password.$invalid }">
                             <label>Contraseña</label>
                             <input class="form-control" name="password" ng-model="vm.user.password" type="password" placeholder="Contraseña" required />
 
-                            <div class="help-block" ng-messages="userForm.password.$error" ng-show="userForm.password.$touched || userForm.password.$invalid">
+                            <div class="help-block" ng-messages="userForm.password.$error" ng-show="userForm.password.$touched && userForm.password.$invalid">
                                 <p ng-message="required">La contrase&nacute;a es requerida.</p>
                             </div>
                         </div>
@@ -65,39 +65,52 @@
                             <label>Descripcion</label>
                             <input class="form-control" name="description" ng-model="vm.user.description" type="text" placeholder="Descripcion"/>
                         </div>
-                        <div class="col-md-6" ng-class="{ 'has-error': userForm.client.$touched || userForm.client.$invalid }">
+                        <div class="col-md-6" ng-class="{ 'has-error': userForm.client.$touched && userForm.client.$invalid }">
                             <label>Pertenece a Cliente</label>
-                            <select class="form-control" name="client" ng-model="vm.user.client" ng-options="client as client.name for client in vm.clients track by client._id" required ></select>
+                            <!--<select class="form-control" name="client" ng-model="vm.user.client" ng-options="client as client.name for client in vm.clients track by client._id" required ></select>-->
+                            <ui-select ng-model="vm.user.client" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
+                                <ui-select-match placeholder="Seleccione o busque un cliente en la lista...">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item in vm.clients | filter: $select.search">
+                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                                <ui-select-no-choice>Debe indicar un cliente</ui-select-no-choice>
+                            </ui-select>
 
-                            <div class="help-block" ng-messages="userForm.client.$error" ng-show="userForm.client.$touched || userForm.client.$invalid">
+                            <div class="help-block" ng-messages="userForm.client.$error" ng-show="userForm.client.$touched && userForm.client.$invalid">
                                 <p ng-message="required">El cliente es requerido.</p>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6" ng-class="{ 'has-error': userForm.type.$touched || userForm.type.$invalid }">
+                        <div class="col-md-6" ng-class="{ 'has-error': userForm.type.$touched && userForm.type.$invalid }">
                             <label>Nivel de Acceso</label>
                             <select class="form-control" name="type" ng-model="vm.user.type" ng-options="type for type in vm.types" required ></select>
 
-                            <div class="help-block" ng-messages="userForm.type.$error" ng-show="userForm.type.$touched || userForm.type.$invalid">
+                            <div class="help-block" ng-messages="userForm.type.$error" ng-show="userForm.type.$touched && userForm.type.$invalid">
                                 <p ng-message="required">El tipo de usuario es requerido.</p>
                             </div>
                         </div>
-                        <div class="col-md-6" ng-class="{ 'has-error': userForm.timezone.$touched || userForm.timezone.$invalid }">
-                            <label> Zona Horaria</label>
-                            <select class="form-control" name="timezone" ng-model="vm.user.timezone" ng-options="timezone as timezone.name for timezone in vm.timezones track by timezone._id" required ></select>
+                        <div class="col-md-6" ng-class="{ 'has-error': userForm.timezone.$touched && userForm.timezone.$invalid }">
+                            <label>Zona Horaria</label>
+                            <!--<select class="form-control" name="timezone" ng-model="vm.user.timezone" ng-options="timezone as timezone.name for timezone in vm.timezones track by timezone._id" required ></select>-->
+                            <ui-select ng-model="vm.user.timezone" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
+                                <ui-select-match placeholder="Seleccione o busque una zona horaria en la lista...">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="item in vm.timezones | filter: $select.search">
+                                    <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
 
-                            <div class="help-block" ng-messages="userForm.timezone.$error" ng-show="userForm.timezone.$touched || userForm.timezone.$invalid">
+                            <div class="help-block" ng-messages="userForm.timezone.$error" ng-show="userForm.timezone.$touched && userForm.timezone.$invalid">
                                 <p ng-message="required">Debe indicar una zona horaria.</p>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6" ng-class="{ 'has-error': userForm.active.$touched || userForm.active.$invalid }">
+                        <div class="col-md-6" ng-class="{ 'has-error': userForm.active.$touched && userForm.active.$invalid }">
                             <label>Activo</label>
                             <select class="form-control" name="active" ng-model="vm.user.active" ng-options="active for active in vm.actives" required ></select>
 
-                            <div class="help-block" ng-messages="userForm.active.$error" ng-show="userForm.active.$touched || userForm.active.$invalid">
+                            <div class="help-block" ng-messages="userForm.active.$error" ng-show="userForm.active.$touched && userForm.active.$invalid">
                                 <p ng-message="required">Debe indicar si el usuario se encuentra activo o no.</p>
                             </div>
                         </div>
