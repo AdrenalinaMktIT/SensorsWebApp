@@ -8,7 +8,7 @@
 
     <link rel="stylesheet" href="../libs/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="../libs/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../libs/bootstrap/dist/css/bootstrap-theme.min.css">
+    <!--<link rel="stylesheet" href="../libs/bootstrap/dist/css/bootstrap-theme.min.css">-->
     <link rel="styleSheet" href="../libs/angular-ui-grid/ui-grid.min.css"/>
     <link rel="styleSheet" href="../libs/angular-ui-select/dist/select.css"/>
     <!-- Optional theme -->
@@ -78,7 +78,7 @@
 </head>
 
 <body ng-controller="MainCtrl">
-<nav class="navbar navbar-inverse">
+<nav class="navbar navbar-default" role="navigation">
     <div class="container-fluid">
         <div class="navbar-header">
             <a class="navbar-brand" href="#">
@@ -99,12 +99,12 @@
 
                         <li role="separator" class="divider"></li>
 
-                        <li><a ui-sref="clients">Clientes</a></li>
+                        <li><a ui-sref="clients" ui-sref-active="active-dropdown-menu">Clientes</a></li>
 
                         <li role="separator" class="divider"></li>
 
                         <li><a ui-sref="devices" ui-sref-active="active-dropdown-menu">Equipos</a></li>
-                        <li><a ui-sref="models">Modelos</a></li>
+                        <li><a ui-sref="models" ui-sref-active="active-dropdown-menu">Modelos</a></li>
                         <li><a ui-sref="sensors" ui-sref-active="active-dropdown-menu">Sensores</a></li>
 
                         <li role="separator" class="divider"></li>
@@ -121,8 +121,8 @@
                         <i class="fa fa-line-chart" aria-hidden="true"></i> Monitoreo <i class="fa fa-caret-down" aria-hidden="true"></i>
                     </a>
                     <ul uib-dropdown-menu>
-                        <li><a ui-sref="status">Status</a></li>
-                        <li><a ui-sref="historical">Historico</a></li>
+                        <li><a ui-sref="status" ui-sref-active="active-dropdown-menu">Status</a></li>
+                        <li><a ui-sref="historical" ui-sref-active="active-dropdown-menu">Historico</a></li>
                     </ul>
                 </li>
 
@@ -131,11 +131,11 @@
                         <i class="fa fa-file-o" aria-hidden="true"></i> Reportes <i class="fa fa-caret-down" aria-hidden="true"></i>
                     </a>
                     <ul uib-dropdown-menu>
-                        <li><a ui-sref="measures">Mediciones</a></li>
-                        <li><a ui-sref="calculations">Calculos</a></li>
+                        <li><a ui-sref="measures" ui-sref-active="active-dropdown-menu">Mediciones</a></li>
+                        <li><a ui-sref="calculations" ui-sref-active="active-dropdown-menu">Calculos</a></li>
                         <% if (user.user_type === 'Admin') { %>
                         <li role="separator" class="divider"></li>
-                        <li><a ui-sref="inputs">Ingresos</a></li>
+                        <li><a ui-sref="inputs" ui-sref-active="active-dropdown-menu">Ingresos</a></li>
                         <% } %>
                         <!--<li><a ui-sref="messages">Mensajes</a></li>
                         <li role="separator" class="divider"></li>

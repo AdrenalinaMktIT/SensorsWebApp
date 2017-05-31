@@ -1,6 +1,6 @@
-var mongoose = require('mongoose');
+let mongoose = require('mongoose');
 
-var measureSchema = mongoose.Schema({
+let measureSchema = mongoose.Schema({
 
     imei: {
         type: String,

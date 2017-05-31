@@ -1,21 +1,22 @@
-var mongoose = require('mongoose');
+let mongoose = require('mongoose');
 
-var calculationSchema = mongoose.Schema({
+let calculationSchema = mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            required: true
+        },
 
-    _id: {
-        type: String,
-        required: true
-    },
+        name: {
+            type: String,
+            required: true
+        },
 
-    name: {
-        type: String,
-        required: true
-    },
-
-    required_sensors: [{
-        type: String,
-        ref: 'Type'
-    }]
-});
+        required_sensors: [{
+            type: String,
+            ref: 'Type'
+        }]
+    }
+);
 
 module.exports = mongoose.model('Calculation', calculationSchema);

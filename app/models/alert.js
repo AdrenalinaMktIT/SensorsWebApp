@@ -1,31 +1,38 @@
-var mongoose = require('mongoose');
+let mongoose = require('mongoose');
 
-var alertSchema = mongoose.Schema({
+let alertSchema = mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: true
+        },
 
-    name: {
-        type: String,
-        required: true
+        sensor: {
+            type: Number,
+            ref: 'Sensor'
+        },
+
+        less_than: {
+            type: Number,
+            required: true
+        },
+
+        greater_than: {
+            type: Number,
+            required: true
+        },
+
+        profile: {
+            type: Number,
+            ref: 'Profile'
+        }
     },
-
-    sensor: {
-        type: Number,
-        ref: 'Sensor'
-    },
-
-    less_than: {
-        type: Number,
-        required: true
-    },
-
-    greater_than: {
-        type: Number,
-        required: true
-    },
-
-    profile: {
-        type: Number,
-        ref: 'Profile'
+    {
+        timestamps: {
+            createdAt: 'created_at',
+            updatedAt: 'updated_at'
+        }
     }
-});
+);
 
 module.exports = mongoose.model('Alert', alertSchema);

@@ -110,7 +110,7 @@ module.exports = function(app) {
 
     // Obtener los calculos diponibles asociados a un cliente.
     app.get('/api/v1/clients/getAssociatedCalculations/:client_id', function(req, res) {
-        Client.findById(req.params.client_id).populate('associated_calculations')
+        Client.findById(req.params.client_id).populate('available_calculations')
             .then(function (client) {
                 if (!client) {
                     res.status(404).json({
@@ -120,7 +120,7 @@ module.exports = function(app) {
                 } else {
                     res.status(200).json({
                         message: 'OK!. Calculos del cliente obtenidos correctamente.',
-                        calculations: client.associated_calculations
+                        calculations: client.available_calculations
                     });
                 }
             })

@@ -1,7 +1,7 @@
 angular.module('modelController', [])
 
 // inject the Alert service factory into our controller
-    .controller('ModelCtrl', function ($http, $uibModal, $log, Alerts, Profiles, Sensors) {
+    .controller('ModelCtrl', function ($http, $uibModal, $log, Models, Alerts, Profiles, Sensors) {
 
         var vm = this;
 
@@ -18,35 +18,32 @@ angular.module('modelController', [])
             /*enableRowHeaderSelection: true,*/
             showGridFooter: true,
             columnDefs: [
-                { field: 'name', displayName: 'NOMBRE', enableHiding: false, width: '15%' },
-                { field: 'profile.name', displayName: 'PERFIL', enableHiding: false, width: '20%' },
-                { field: 'sensor.name', displayName: 'SENSOR', enableHiding: false, width: '25%' },
-                { field: 'less_than', displayName: 'MENOR QUE', enableHiding: false, width: '10%' },
-                { field: 'greater_than', displayName: 'MAYOR QUE', enableHiding: false, width: '10%' },
-                { field: 'crud', displayName: 'VER / EDITAR / BORRAR', enableHiding: false, enableSorting: false, exporterSuppressExport: true,
+                { field: 'name', displayName: 'NOMBRE', enableHiding: false, width: '30%' },
+                { field: 'sensors', displayName: 'SENSORES', enableHiding: false, width: '40%' },
+                { field: 'crud', displayName: 'VER / EDITAR / BORRAR', enableHiding: false, width: '30%', enableSorting: false, exporterSuppressExport: true,
                     cellTemplate:
                     '<button id="readBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'read\')" type="button" class="btn btn-xs btn-info"><i class="fa fa-eye" aria-hidden="true"></i> Ver</button> ' +
                     '<button id="updateBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'update\')" type="button" class="btn btn-xs btn-success"><i class="fa fa-pencil" aria-hidden="true"></i> Editar</button> ' +
                     '<button id="deleteBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'delete\')" type="button" class="btn btn-xs btn-danger"><i class="fa fa-trash" aria-hidden="true"></i> Borrar</button>',
-                    width: '20%'}
+                }
             ],
             enableGridMenu: true
         };
 
         // GET =====================================================================
-        // when landing on the page, get all alerts and show them
-        // use the service to get all the alerts
-        loadAlerts();
+        // when landing on the page, get all models and show them
+        // use the service to get all the models
+        loadModels();
         loadProfiles();
         loadSensors();
 
-        function loadAlerts() {
-            Alerts.getAll()
+        function loadModels() {
+            Models.getAll()
                 .then(function successCallback(response) {
                     // this callback will be called asynchronously
                     // when the response is available
-                    vm.alerts = response.data.alerts;
-                    vm.gridOptions.data = response.data.alerts;
+                    vm.models = response.data.models;
+                    vm.gridOptions.data = response.data.models;
                 }, function errorCallback(response) {
                     // called asynchronously if an error occurs
                     // or server returns response with an error status.
@@ -78,7 +75,7 @@ angular.module('modelController', [])
 
             vm.mode = mode;
 
-            if (mode != 'add') {
+            if (mode !== 'add') {
 
                 Alerts.get(id)
                     .then(function successCallback(response) {

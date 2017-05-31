@@ -118,9 +118,7 @@ app.use(favicon(__dirname + '/public/assets/img/favicon.ico'));
 // Funcion Middleware que es llamada para cada request.
 // En este caso siempre hago un check para ver si la base de datos esta conectada.
 app.use(function (req, res, next) {
-    log(chalk.white.bgBlue.bold('Request Time: ', moment().format("DD-MM-YYYY HH:mm:ss")));
     logRequestInDatabase(req, res, next);
-    //next();
 });
 
 // APP routes ======================================================================
@@ -190,7 +188,8 @@ function developmentFormatLine(tokens, req, res) {
         + ' ' + chalk[statusColor](status)
         + ' ' + chalk.reset(padLeft(tokens['response-time'](req, res) + ' ms', 8))
         + ' ' + chalk.reset('-')
-        + ' ' + chalk.reset(tokens.res(req, res, 'content-length') || '-');
+        + ' ' + chalk.reset(tokens.res(req, res, 'content-length') || '-')
+        + ' ' + chalk.reset(padRight('el ' + moment().format("DD-MM-YYYY HH:mm:ss"), 30));
 }
 
 function padLeft(str, len) {

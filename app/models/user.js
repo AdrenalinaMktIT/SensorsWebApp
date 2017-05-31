@@ -1,45 +1,51 @@
-var mongoose = require('mongoose');
-var bcrypt   = require('bcrypt-nodejs');
+let mongoose = require('mongoose');
+let bcrypt   = require('bcrypt-nodejs');
 
 // define the schema for our user model
-var userSchema = mongoose.Schema({
+let userSchema = mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: true
+        },
 
-    name: {
-        type: String,
-        required: true
+        password: {
+            type: String,
+            required: true
+        },
+
+        description: {
+            type: String,
+            default: 'Default User Description'
+        },
+
+        client_id: {
+            type: Number,
+            ref: 'Client'
+        },
+
+        user_type: {
+            type: String,
+            default: 'Monitoreo',
+            enum: ['Admin', 'Monitoreo']
+        },
+
+        timezone_id: {
+            type: Number,
+            ref: 'Timezone'
+        },
+
+        active: {
+            type: Boolean,
+            default: true
+        }
     },
-
-    password: {
-        type: String,
-        required: true
-    },
-
-    description: {
-        type: String,
-        default: 'Default User Description'
-    },
-
-    client_id: {
-        type: Number,
-        ref: 'Client'
-    },
-
-    user_type: {
-        type: String,
-        default: 'Monitoreo',
-        enum: ['Admin', 'Monitoreo']
-    },
-
-    timezone_id: {
-        type: Number,
-        ref: 'Timezone'
-    },
-
-    active: {
-        type: Boolean,
-        default: true
-    }
-});
+    {
+        timestamps: {
+            createdAt: 'created_at',
+            updatedAt: 'updated_at'
+        }
+    });
 
 // generating a hash
 userSchema.methods.generateHash = function(password) {
@@ -51,10 +57,9 @@ userSchema.methods.validPassword = function(password) {
     return bcrypt.compareSync(password, this.password);
 };
 
-
 // this method hashes the password and sets the users password
 userSchema.methods.hashPassword = function(password) {
-    var user = this;
+    let user = this;
 
     // hash the password
     bcrypt.hash(password, null, null, function(err, hash) {

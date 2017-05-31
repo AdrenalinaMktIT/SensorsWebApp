@@ -1,20 +1,27 @@
-var mongoose = require('mongoose');
+let mongoose = require('mongoose');
 
-var groupSchema = mongoose.Schema({
+let groupSchema = mongoose.Schema(
+    {
+        _id: {
+            type: Number,
+            required: true
+        },
 
-    _id: {
-        type: Number,
-        required: true
+        name: {
+            type: String,
+            required: true
+        },
+
+        description: String,
+
+        image: String
     },
-
-    name: {
-        type: String,
-        required: true
-    },
-
-    description: String,
-
-    image: String
-});
+    {
+        timestamps: {
+            createdAt: 'created_at',
+            updatedAt: 'updated_at'
+        }
+    }
+);
 
 module.exports = mongoose.model('Group', groupSchema);

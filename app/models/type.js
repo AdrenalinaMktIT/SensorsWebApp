@@ -1,16 +1,17 @@
-var mongoose = require('mongoose');
+let mongoose = require('mongoose');
 
-var typeSchema = mongoose.Schema({
+let typeSchema = mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            required: true
+        },
 
-    _id: {
-        type: String,
-        required: true
-    },
-
-    name: {
-        type: String,
-        required: true
+        name: {
+            type: String,
+            required: true
+        }
     }
-});
+);
 
 module.exports = mongoose.model('Type', typeSchema);
