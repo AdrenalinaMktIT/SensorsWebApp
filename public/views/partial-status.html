@@ -124,7 +124,7 @@
 
         <div class="row">
             <div class="col-md-6">
-                <label class="col-sm-3 control-label">Grupo</label>
+                <label class="control-label">Grupo</label>
                 <ui-select ng-model="vm.group.selected" theme="bootstrap" uis-open-close="vm.onOpenCloseSelectGroup(isOpen)">
                     <ui-select-match placeholder="Seleccione o busque un grupo en la lista...">{{$select.selected.name}}</ui-select-match>
                     <ui-select-choices repeat="group in vm.groups | filter: $select.search">
@@ -132,9 +132,8 @@
                     </ui-select-choices>
                 </ui-select>
             </div>
-
             <div class="col-md-6">
-                <label class="col-sm-3 control-label">Estado</label>
+                <label class="control-label">Estado</label>
                 <ui-select ng-model="vm.status.selected" theme="bootstrap" uis-open-close="vm.onOpenCloseSelectStatus(isOpen)">
                     <ui-select-match placeholder="Seleccione o busque un estado en la lista...">{{$select.selected.name}}</ui-select-match>
                     <ui-select-choices repeat="status in vm.statuses | filter: $select.search">

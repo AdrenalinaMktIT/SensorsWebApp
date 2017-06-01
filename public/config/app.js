@@ -109,6 +109,36 @@ app.config(function($stateProvider, $urlRouterProvider) {
             controllerAs: 'vm',
             data: {
                 roles: ['Admin', 'Monitoreo']
+            },
+            resolve: {
+                allGroups: function (Groups) {
+                    return Groups.getAll();
+                },
+                allStatuses: function () {
+                    let statuses  = [];
+                    statuses.push(
+                        {
+                            _id: 'all',
+                            name: 'Todos'
+                        },
+                        {
+                            _id: 'critical',
+                            name: 'Critico'
+                        },
+                        {
+                            _id: 'warning',
+                            name: 'Advertencia'
+                        },
+                        {
+                            _id: 'ok',
+                            name: 'Normal'
+                        },
+                        {
+                            _id: 'unknown',
+                            name: 'Desconocido'
+                        });
+                    return statuses;
+                }
             }
         })
         .state('measures', {

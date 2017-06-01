@@ -1,76 +1,48 @@
 angular.module('statusController', [])
-    .controller('StatusCtrl', function ($uibModal, $log, Groups, Reports) {
-        var vm = this, imei, model, sensor, data, timestamp, status;
+    .controller('StatusCtrl', function ($scope, $interval, $uibModal, allStatuses, allGroups, Reports) {
+        var vm = this, imei, model, sensor, data, timestamp, status, checkingStatus;
 
         vm.sensorList = [];
         vm.sensorListCopy = [];
+        vm.filteredByGroupSensorList = [];
+        vm.filteredByStatusSensorList = [];
 
         vm.animationsEnabled = true;
 
-        // use the service to get all the groups and statuses.
-        loadGroups();
-        loadStatuses();
+        checkingStatus = $interval(function() {
+            checkStatus()
+        }, 10000);
 
-        function loadGroups() {
-            Groups.getAll()
-                .then(function successCallback(response) {
-                    vm.groups = [];
-                    vm.groups.push({
-                        _id: 'all',
-                        name: 'Todos'
-                    });
-                    for (var i = 0; i < response.data.groups.length; i++) {
-                        vm.groups.push(response.data.groups[i]);
-                    }
-                }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                    console.log('Error: ' + response);
-                });
-        }
+        vm.groups = allGroups.data.groups;
+        vm.groups.unshift({
+            _id: 'all',
+            name: 'Todos'
+        });
 
-        function loadStatuses() {
-            vm.statuses  = [];
-            vm.statuses .push(
-                {
-                    _id: 'all',
-                    name: 'Todos'
-                },
-                {
-                    _id: 'critical',
-                    name: 'Critico'
-                },
-                {
-                    _id: 'warning',
-                    name: 'Advertencia'
-                },
-                {
-                    _id: 'ok',
-                    name: 'Normal'
-                },
-                {
-                    _id: 'unknown',
-                    name: 'Desconocido'
-                });
-        }
+        vm.statuses = allStatuses;
+
+        vm.group = { selected: vm.groups[0] };
+        vm.status = { selected: vm.statuses[0] };
 
         vm.onOpenCloseSelectGroup = function (isOpen){
             if (!isOpen) {
                 if (vm.group.selected._id === 'all') {
-                    vm.sensorList = vm.sensorListCopy;
+                    vm.filteredByGroupSensorList = vm.sensorListCopy;
                 } else {
-                    vm.sensorList = _.filter(vm.sensorListCopy, function(item){ return item.sensor.group === vm.group.selected._id; });
+                    vm.filteredByGroupSensorList = _.filter(vm.sensorListCopy, function(item){ return item.sensor.group === vm.group.selected._id; });
                 }
+                vm.sensorList = _.intersection(vm.filteredByGroupSensorList, vm.filteredByStatusSensorList);
             }
         };
 
         vm.onOpenCloseSelectStatus = function (isOpen){
             if (!isOpen) {
                 if (vm.status.selected._id === 'all') {
-                    vm.sensorList = vm.sensorListCopy;
+                    vm.filteredByStatusSensorList = vm.sensorListCopy;
                 } else {
-                    vm.sensorList = _.filter(vm.sensorListCopy, function(item){ return item.status === vm.status.selected._id; });
+                    vm.filteredByStatusSensorList = _.filter(vm.sensorListCopy, function(item){ return item.status === vm.status.selected._id; });
                 }
+                vm.sensorList = _.intersection(vm.filteredByGroupSensorList, vm.filteredByStatusSensorList);
             }
         };
 
@@ -134,37 +106,48 @@ angular.module('statusController', [])
             return isOk;
         };
 
-        Reports.status()
-            .then(function successCallback(response) {
-                _.each(response.data, function(value) {
-                    imei = value._id;
-                    model = value.model.name;
-                    sensor = value.sensor;
-                    data = value.data;
-                    timestamp = moment(value.timestamp).format("DD/MM/YYYY HH:mm:ss");
-                    if (checkCritical(data, value.sensor.params.critical)) {
-                        status = "critical";
-                    } else if (checkWarning(data, value.sensor.params.warning)) {
-                        status = "warning";
-                    } else if (checkOk(data, value.sensor.params.ok)) {
-                        status = "ok";
-                    } else {
-                        status = "unknown";
-                    }
-                    vm.sensorList.push({
-                        imei: imei,
-                        model: model,
-                        sensor: sensor,
-                        data: data,
-                        timestamp: timestamp,
-                        status: status
+        function checkStatus() {
+            Reports.status()
+                .then(function successCallback(response) {
+                    vm.sensorList = [];
+                    _.each(response.data, function (value) {
+                        imei = value._id;
+                        model = value.model.name;
+                        sensor = value.sensor;
+                        data = value.data;
+                        timestamp = moment(value.timestamp).format("DD/MM/YYYY HH:mm:ss");
+                        if (checkCritical(data, value.sensor.params.critical)) {
+                            status = "critical";
+                        } else if (checkWarning(data, value.sensor.params.warning)) {
+                            status = "warning";
+                        } else if (checkOk(data, value.sensor.params.ok)) {
+                            status = "ok";
+                        } else {
+                            status = "unknown";
+                        }
+                        vm.sensorList.push({
+                            imei: imei,
+                            model: model,
+                            sensor: sensor,
+                            data: data,
+                            timestamp: timestamp,
+                            status: status
+                        });
                     });
+                    vm.sensorListCopy = vm.sensorList;
+                    vm.onOpenCloseSelectGroup(false);
+                    vm.onOpenCloseSelectStatus(false);
+                }, function errorCallback(response) {
+                    console.log('Error: ' + response);
                 });
-                vm.sensorListCopy = vm.sensorList;
+        }
 
-            }, function errorCallback(response) {
-                console.log('Error: ' + response);
-            });
+        checkStatus();
+
+        $scope.$on('$destroy', function() {
+            // Make sure that the interval is destroyed too
+            $interval.cancel(checkingStatus);
+        });
     })
     .controller('StatusModalInstanceCtrl', function ($uibModalInstance, Reports, sensorDetails, usSpinnerService) {
         var vm = this;
