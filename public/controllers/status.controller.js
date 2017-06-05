@@ -36,6 +36,7 @@ angular.module('statusController', [])
                     vm.filteredByGroupSensorList = _.filter(vm.sensorListCopy, function(item){ return item.sensor.group === vm.group.selected._id; });
                 }
                 vm.sensorList = _.intersection(vm.filteredByGroupSensorList, vm.filteredByStatusSensorList);
+                drawSensors();
             }
         };
 
@@ -47,6 +48,7 @@ angular.module('statusController', [])
                     vm.filteredByStatusSensorList = _.filter(vm.sensorListCopy, function(item){ return item.status === vm.status.selected._id; });
                 }
                 vm.sensorList = _.intersection(vm.filteredByGroupSensorList, vm.filteredByStatusSensorList);
+                drawSensors();
             }
         };
 
