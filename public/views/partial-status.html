@@ -156,20 +156,7 @@
                      x.status == 'ok' && {'border-color': '#dff0d8'} ||
                      x.status == 'unknown' && {'border-color': '#337ab7'}">
 
-                <div class="caption">
-                    <h4 class="text-center"
-                        ng-class="{ 'bg-danger'   : x.status == 'critical',
-                          'bg-warning' : x.status == 'warning',
-                          'bg-success'    : x.status == 'ok',
-                          'bg-primary'   : x.status == 'unknown' }">{{x.sensor.name}}</h4>
-                    <dl>
-                        <dt>Ult. Valor Leido</dt>
-                        <dd>{{x.data}} {{x.sensor.type.units}}</dd>
-
-                        <dt>Fecha</dt>
-                        <dd>{{x.timestamp}}</dd>
-                    </dl>
-                </div>
+                <highchart id="{{$index}}" style="background-color: #c8c8c8; min-height: 250px; max-width: 400px; height: 300px; margin: 0 auto" config="vm.sensorChartConfig[$index]" class="span10"></highchart>
             </div>
         </div>
     </div>
