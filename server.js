@@ -17,7 +17,7 @@ var favicon = require('serve-favicon');
 var configDB = require('./app/config/database.js');
 var moment = require('moment');
 var _ = require('underscore');
-const chalk = require('chalk');
+var chalk = require('chalk');
 const log = console.log;
 
 // configuration ===============================================================

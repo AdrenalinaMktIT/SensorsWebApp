@@ -73,7 +73,9 @@
                                 <ui-select-choices repeat="item in vm.clients | filter: $select.search">
                                     <div ng-bind-html="item.name | highlight: $select.search"></div>
                                 </ui-select-choices>
-                                <ui-select-no-choice>Debe indicar un cliente</ui-select-no-choice>
+                                <ui-select-no-choice>
+                                    <div style="text-align: center;">Debe indicar un cliente</div>
+                                </ui-select-no-choice>
                             </ui-select>
 
                             <div class="help-block" ng-messages="userForm.client.$error" ng-show="userForm.client.$touched && userForm.client.$invalid">

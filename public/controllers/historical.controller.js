@@ -57,6 +57,8 @@ angular.module('historicalController', [])
                         .then(function successCallback(response) {
                             usSpinnerService.stop('historicalGraphSpinner');
 
+                            let measures = response.data;
+
                             var seriesData = [];
                             var labels = [], series = [], chartData = [];
 
@@ -66,19 +68,23 @@ angular.module('historicalController', [])
 
                                 seriesData = [];
 
-                                response.data.forEach(function(measure, idx, arr) {
+                                measures.forEach(function(measure, idx, arr) {
 
-                                    // busco el indice en el cual se encuentra el sensor en el modelo configurado para este imei.
-                                    var listOfSensorNames = _.pluck(measure.imei.model.sensors, '_id');
-                                    var sensorIdx = _.indexOf(listOfSensorNames, sensorKeys[i]);
-                                    sensorName = measure.imei.model.sensors[sensorIdx].name + ' (' + measure.imei.model.sensors[sensorIdx].type + ')';
-                                    labels.push(moment(measure.timestamp).format('DD-MM-YYYY HH:mm:ss'));
-                                    labels = _.uniq(labels);
-                                    seriesData.push(measure.data[sensorIdx]);
+                                    if (measure.sensorId === sensorKeys[i]) {
+                                        sensorName = measure.sensorName;
+                                        sensorType = measure.sensorType;
+                                        labels.push(moment(measure.timestamp).format('DD-MM-YYYY HH:mm:ss'));
+                                        seriesData.push(measure.data !== -99 ? measure.data : null);
+                                    }
 
                                 });
-                                series.push(sensorName);
-                                chartData.push(seriesData);
+                                //labels = _.uniq(labels);
+
+                                chartData.push({
+                                    type: 'area',
+                                    name: sensorName + ' (' + sensorType.units + ')',
+                                    data: seriesData
+                                });
                             }
 
                             vm.chartConfig = {
@@ -86,7 +92,7 @@ angular.module('historicalController', [])
                                     zoomType: ' x'
                                 },
                                 title: {
-                                    text: 'Sensores Selec.'
+                                    text: 'Rango de fechas entre ' + moment($scope.dateFrom).format('DD-MM-YYYY') + ' hasta ' + moment($scope.dateTo).format('DD-MM-YYYY')
                                 },
                                 subtitle: {
                                     text: 'Hacer clic y arrastrar en el area para hacer zoom.'
@@ -96,7 +102,9 @@ angular.module('historicalController', [])
                                     categories: labels
                                 },
                                 legend: {
-                                    enabled: false
+                                    layout: 'vertical',
+                                    borderWidth: 1,
+                                    backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
                                 },
                                 plotOptions: {
                                     area: {
@@ -129,11 +137,7 @@ angular.module('historicalController', [])
                                         text: 'Lecturas'
                                     }
                                 },
-                                series: [{
-                                    type: 'area',
-                                    name: 'Medidas',
-                                    data: chartData[0]
-                                }]
+                                series: chartData
                             };
 
                             if (response.data.length > 0) {

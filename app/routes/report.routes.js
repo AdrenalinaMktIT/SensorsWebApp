@@ -8,6 +8,7 @@ module.exports = function(app) {
     let Sensor  = new require('./../models/sensor');
 
     let async = new require('async');
+    let _ = require('underscore');
 
     function xlsPdfExportQuery(dateFrom, dateTo, sensorIds, isXlsExport, callback) {
 
@@ -224,32 +225,86 @@ module.exports = function(app) {
     // Calcular un nuevo reporte.
     app.post('/api/v1/reports', function(req, res) {
         let sensorIds = req.body.sensors;
-        Measure.find({
-            timestamp: { '$gte': new Date(req.body.dateFrom), '$lte': new Date(req.body.dateTo) }
-        })
-            .sort({'timestamp': -1})
-            .limit(20)
-            .populate({
-                path: 'imei',
-                model: 'Device',
-                populate: {
-                    path: 'model',
-                    model: 'Model',
-                    populate: {
-                        path: 'sensors',
-                        model: 'Sensor',
-                        match: {
-                            _id: { $in: sensorIds }
-                        }
+
+        let results = [];
+        async.eachSeries(sensorIds, function(sensorId, callback) {
+
+            let modelId = null;
+            let imei = null;
+
+            Model.find({
+                sensors: sensorId
+            }).lean().exec()
+                .then(function (model) {
+                    modelId = model[0]._id;
+
+                    if (modelId) {
+                        Device.find({
+                            model: modelId
+                        }).lean().exec()
+                            .then(function (device) {
+                                imei = device[0]._id;
+
+                                if (imei) {
+
+                                    Measure.find({
+                                        timestamp: { '$gte': new Date(req.body.dateFrom), '$lte': new Date(req.body.dateTo) },
+                                        imei: imei
+                                    })
+                                        .sort({'timestamp': -1})
+                                        //.limit(20)
+                                        .populate({
+                                            path: 'imei',
+                                            model: 'Device',
+                                            populate: {
+                                                path: 'model',
+                                                model: 'Model',
+                                                populate: {
+                                                    path: 'sensors',
+                                                    model: 'Sensor',
+                                                    populate: {
+                                                        path: 'type',
+                                                        model: 'Type'
+                                                    }
+                                                }
+                                            }
+                                        })
+                                        .lean().exec(function (err, measures) {
+                                            measures = _.filter(measures, function(measure){
+                                                let indexOfSensor = _.indexOf(_.pluck(measure.imei.model.sensors, '_id'), sensorId);
+                                                measure.data = measure.data[indexOfSensor];
+                                                measure.sensorId = sensorId;
+                                                measure.sensorName = measure.imei.model.sensors[indexOfSensor].name;
+                                                measure.sensorType = measure.imei.model.sensors[indexOfSensor].type;
+                                                return true;
+                                            });
+                                        results = results.concat(measures.reverse());
+                                        callback();
+                                        });
+
+                                }
+
+                            }).catch(function (err) {
+                            console.log(err);
+                            callback(err);
+                        });
                     }
-                }
-            })
-            .exec(function (err, measures) {
-                measures.reverse();
-                res.json(measures.filter(function(doc){
-                    return doc.imei.model.sensors.length;
-                }));
+
+                }).catch(function (err) {
+                console.log(err);
+                callback(err);
             });
+
+        }, function(err) {
+            // if any of the file processing produced an error, err would equal that error
+            if( err ) {
+                // One of the iterations produced an error.
+                // All processing will now stop.
+                console.log('A file failed to process');
+            } else {
+                res.json(results);
+            }
+        });
     });
 
     app.get('/api/v1/status', function(req, res) {
@@ -374,7 +429,7 @@ module.exports = function(app) {
                 $unwind: "$sensor.type"
             }], function (err, result) {
             if (err) {
-                next(err);
+                console.log(err);
             } else {
                 res.json(result);
             }
