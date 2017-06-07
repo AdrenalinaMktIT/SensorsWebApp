@@ -1,6 +1,8 @@
 let mongoose = require('mongoose');
 let bcrypt   = require('bcrypt-nodejs');
 
+let Input = require('../models/inputs');
+
 // define the schema for our user model
 let userSchema = mongoose.Schema(
     {
@@ -71,5 +73,18 @@ userSchema.methods.hashPassword = function(password) {
 
 };
 
-// create the model for users and expose it to our app
+userSchema.methods.lastSession = function (name, cb) {
+    Input.find({ $and: [{description: 'Ingreso Correcto.'}, { $text: { $search: name } }]}, { _id: 0, date: 1 }).sort({date: -1}).limit(2).lean().exec()
+        .then(function (result) {
+            if (result.length >= 2) {
+                cb(result[1].date);
+            } else {
+                cb('N/A');
+            }
+        })
+        .catch(function (err) {
+            cb(err);
+        })
+};
+
 module.exports = mongoose.model('User', userSchema);

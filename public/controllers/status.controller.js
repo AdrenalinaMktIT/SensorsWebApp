@@ -344,6 +344,9 @@ angular.module('statusController', [])
                     vm.sensorDetails.timestamp = _.last(labels);
 
                     vm.chartConfig = {
+                        credits: {
+                            enabled: false
+                        },
                         chart: {
                             zoomType: ' x'
                         },

@@ -1,6 +1,6 @@
 module.exports = function(app) {
 
-    var Input = require('./../models/inputs');
+    let Input = require('./../models/inputs');
 
     // Obtener todos los ingresos.
     app.get('/api/v1/inputs', function(req, res) {

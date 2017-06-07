@@ -24,7 +24,7 @@ let inputSchema = mongoose.Schema(
          *   "description":"Default User Description"}"
          */
 
-        object: String,
+        object: { type: String, text: true },
 
         /* 
          *   "{"host":"c86246ad.ngrok.io",

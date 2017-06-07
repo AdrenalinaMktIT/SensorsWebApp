@@ -154,6 +154,7 @@
                 <% } else { %>
                 <span class="navbar-text" ng-init="init('<%= JSON.stringify(user) %>')">Usuario Monitoreo</span>
                 <% } %>
+                <span class="navbar-text" style="font-weight: bold;font-family: monospace;"><i class="fa fa-clock-o" aria-hidden="true"></i> Ult. Inicio Sesion: <%= lastSession %></span>
             </ul>
 
         </div><!-- /.navbar-collapse -->
