@@ -36,6 +36,7 @@ angular.module('statusController', [])
                     vm.filteredByGroupSensorList = _.filter(vm.sensorListCopy, function(item){ return item.sensor.group === vm.group.selected._id; });
                 }
                 vm.sensorList = _.intersection(vm.filteredByGroupSensorList, vm.filteredByStatusSensorList);
+                vm.sensorList = _.groupBy(vm.sensorList, 'imei');
                 drawSensors();
             }
         };
@@ -48,11 +49,12 @@ angular.module('statusController', [])
                     vm.filteredByStatusSensorList = _.filter(vm.sensorListCopy, function(item){ return item.status === vm.status.selected._id; });
                 }
                 vm.sensorList = _.intersection(vm.filteredByGroupSensorList, vm.filteredByStatusSensorList);
+                vm.sensorList = _.groupBy(vm.sensorList, 'imei');
                 drawSensors();
             }
         };
 
-        vm.open = function (idx) {
+        vm.open = function (imei, idx) {
             var modalInstance = $uibModal.open({
                 ariaLabelledBy: 'modal-title',
                 ariaDescribedBy: 'modal-body',
@@ -62,7 +64,7 @@ angular.module('statusController', [])
                 size: 'lg',
                 resolve: {
                     sensorDetails: function () {
-                        return vm.sensorList[idx];
+                        return vm.sensorList[imei][idx];
                     }
                 }
             });
@@ -113,136 +115,140 @@ angular.module('statusController', [])
         };
 
         let drawSensors = function () {
-            _.each(vm.sensorList, function (value, key, list) {
+            _.each(vm.sensorList, function (sensors, imei, list) {
 
-                let sensorNameClass;
+                _.each(sensors, function (value, key, list) {
 
-                switch (value.status) {
-                    case 'critical':
-                        sensorNameClass = 'bg-danger';
-                        break;
-                    case 'warning':
-                        sensorNameClass = 'bg-warning';
-                        break;
-                    case 'ok':
-                        sensorNameClass = 'bg-success';
-                        break;
-                    default:
-                        sensorNameClass = 'bg-primary';
-                }
 
-                vm.sensorChartConfig[key] = {
+                    let sensorNameClass;
 
-                    credits: {
-                        enabled: false
-                    },
+                    switch (value.status) {
+                        case 'critical':
+                            sensorNameClass = 'bg-danger';
+                            break;
+                        case 'warning':
+                            sensorNameClass = 'bg-warning';
+                            break;
+                        case 'ok':
+                            sensorNameClass = 'bg-success';
+                            break;
+                        default:
+                            sensorNameClass = 'bg-primary';
+                    }
 
-                    chart: {
-                        backgroundColor: '#c8c8c8',
-                        type: 'gauge',
-                        plotBackgroundColor: null,
-                        plotBackgroundImage: null,
-                        plotBorderWidth: 0,
-                        plotShadow: false
-                    },
+                    vm.sensorChartConfig[value.imei + '_' + value.sensor._id] = {
 
-                    exporting: {
-                        enabled: false
-                    },
-
-                    title: {
-                        text: "<h4 class='text-center " + sensorNameClass + "'>" + value.sensor.name + "</h4>",
-                        margin: 0,
-                        widthAdjust: 0,
-                        useHTML: true
-                    },
-
-                    subtitle: {
-                        text: "<div class='caption'>" + value.timestamp + "</div>",
-                        useHTML: true
-                    },
-
-                    pane: {
-                        startAngle: -150,
-                        endAngle: 150,
-                        background: [{
-                            backgroundColor: {
-                                linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
-                                stops: [
-                                    [0, '#FFF'],
-                                    [1, '#333']
-                                ]
-                            },
-                            borderWidth: 0,
-                            outerRadius: '109%'
-                        }, {
-                            backgroundColor: {
-                                linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
-                                stops: [
-                                    [0, '#333'],
-                                    [1, '#FFF']
-                                ]
-                            },
-                            borderWidth: 1,
-                            outerRadius: '107%'
-                        }, {
-                            // default background
-                        }, {
-                            backgroundColor: '#DDD',
-                            borderWidth: 0,
-                            outerRadius: '105%',
-                            innerRadius: '103%'
-                        }]
-                    },
-
-                    // the value axis
-                    yAxis: {
-                        min: 0,
-                        max: 200,
-
-                        minorTickInterval: 'auto',
-                        minorTickWidth: 1,
-                        minorTickLength: 10,
-                        minorTickPosition: 'inside',
-                        minorTickColor: '#666',
-
-                        tickPixelInterval: 30,
-                        tickWidth: 2,
-                        tickPosition: 'inside',
-                        tickLength: 10,
-                        tickColor: '#666',
-                        labels: {
-                            step: 2,
-                            rotation: 'auto'
+                        credits: {
+                            enabled: false
                         },
+
+                        chart: {
+                            backgroundColor: '#c8c8c8',
+                            type: 'gauge',
+                            plotBackgroundColor: null,
+                            plotBackgroundImage: null,
+                            plotBorderWidth: 0,
+                            plotShadow: false
+                        },
+
+                        exporting: {
+                            enabled: false
+                        },
+
                         title: {
-                            text: value.sensor.type.units,
-                            verticalAlign: 'bottom',
+                            text: "<h4 class='text-center " + sensorNameClass + "'>" + value.sensor.name + "</h4>",
+                            margin: 0,
+                            widthAdjust: 0,
+                            useHTML: true
                         },
-                        plotBands: [{
-                            from: 0,
-                            to: 120,
-                            color: '#55BF3B' // green
-                        }, {
-                            from: 120,
-                            to: 160,
-                            color: '#DDDF0D' // yellow
-                        }, {
-                            from: 160,
-                            to: 200,
-                            color: '#DF5353' // red
+
+                        subtitle: {
+                            text: "<div class='caption'>" + value.timestamp + "</div>",
+                            useHTML: true
+                        },
+
+                        pane: {
+                            startAngle: -150,
+                            endAngle: 150,
+                            background: [{
+                                backgroundColor: {
+                                    linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
+                                    stops: [
+                                        [0, '#FFF'],
+                                        [1, '#333']
+                                    ]
+                                },
+                                borderWidth: 0,
+                                outerRadius: '109%'
+                            }, {
+                                backgroundColor: {
+                                    linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
+                                    stops: [
+                                        [0, '#333'],
+                                        [1, '#FFF']
+                                    ]
+                                },
+                                borderWidth: 1,
+                                outerRadius: '107%'
+                            }, {
+                                // default background
+                            }, {
+                                backgroundColor: '#DDD',
+                                borderWidth: 0,
+                                outerRadius: '105%',
+                                innerRadius: '103%'
+                            }]
+                        },
+
+                        // the value axis
+                        yAxis: {
+                            min: 0,
+                            max: 200,
+
+                            minorTickInterval: 'auto',
+                            minorTickWidth: 1,
+                            minorTickLength: 10,
+                            minorTickPosition: 'inside',
+                            minorTickColor: '#666',
+
+                            tickPixelInterval: 30,
+                            tickWidth: 2,
+                            tickPosition: 'inside',
+                            tickLength: 10,
+                            tickColor: '#666',
+                            labels: {
+                                step: 2,
+                                rotation: 'auto'
+                            },
+                            title: {
+                                text: value.sensor.type.units,
+                                verticalAlign: 'bottom',
+                            },
+                            plotBands: [{
+                                from: 0,
+                                to: 120,
+                                color: '#55BF3B' // green
+                            }, {
+                                from: 120,
+                                to: 160,
+                                color: '#DDDF0D' // yellow
+                            }, {
+                                from: 160,
+                                to: 200,
+                                color: '#DF5353' // red
+                            }]
+                        },
+
+                        series: [{
+                            name: value.sensor.type.name,
+                            data: [value.data],
+                            tooltip: {
+                                valueSuffix: ' ' + value.sensor.type.units
+                            }
                         }]
-                    },
 
-                    series: [{
-                        name: value.sensor.type.name,
-                        data: [value.data],
-                        tooltip: {
-                            valueSuffix: ' ' + value.sensor.type.units
-                        }
-                    }]
-
-                };
+                    };
+                });
             });
         };
 
@@ -275,6 +281,7 @@ angular.module('statusController', [])
                         });
                     });
                     vm.sensorListCopy = vm.sensorList;
+                    vm.sensorList = _.groupBy(vm.sensorList, 'imei');
                     vm.onOpenCloseSelectGroup(false);
                     vm.onOpenCloseSelectStatus(false);
 
