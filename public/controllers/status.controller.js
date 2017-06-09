@@ -339,8 +339,8 @@ angular.module('statusController', [])
 
                     response.data.forEach(function(measure, idx, arr) {
 
-                        // busco el indice en el cual se encuentra el sensor en el modelo configurado para este imei.
-                        var listOfSensorNames = _.pluck(measure.imei.model.sensors, '_id');
+                        // busco el indice en el cual se encuentra el sensor en este imei.
+                        var listOfSensorNames = _.pluck(measure.imei.sensors, '_id');
                         var sensorIdx = _.indexOf(listOfSensorNames, sensorDetails.sensor._id);
                         labels.push(moment(measure.timestamp).format('DD-MM-YYYY HH:mm:ss'));
                         labels = _.uniq(labels);

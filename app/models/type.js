@@ -10,7 +10,12 @@ let typeSchema = mongoose.Schema(
         name: {
             type: String,
             required: true
-        }
+        },
+
+        units: {
+            type: String,
+            required: true
+        },
     }
 );
 

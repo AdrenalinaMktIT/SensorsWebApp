@@ -62,9 +62,10 @@ angular.module('historicalController', [])
                             var seriesData = [];
                             var labels = [], series = [], chartData = [];
 
-                            for (var i =0; i < sensorKeys.length; i++) {
+                            for (let i =0; i < sensorKeys.length; i++) {
 
-                                var sensorName = '';
+                                let sensorName = '';
+                                let sensorType = {};
 
                                 seriesData = [];
 
@@ -78,7 +79,8 @@ angular.module('historicalController', [])
                                     }
 
                                 });
-                                //labels = _.uniq(labels);
+
+
 
                                 chartData.push({
                                     type: 'area',

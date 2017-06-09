@@ -64,14 +64,14 @@ module.exports = function(app) {
                 },
                 {
                     $unwind: {
-                        path: '$model.sensors',
+                        path: '$device.sensors',
                         includeArrayIndex: 'sensor_idx'
                     }
                 },
                 {
                     $match: {
                         //'model.sensors': sensorIds[i]
-                        'model.sensors': sensorId
+                        'device.sensors': sensorId
                     }
                 },
                 {
@@ -86,7 +86,7 @@ module.exports = function(app) {
                         "sensor_idx": 1,
                         "data": 1,
                         "timestamp": 1,
-                        sensor: "$model.sensors",
+                        sensor: "$device.sensors",
                         cmp_data_and_sensor_idx: {
                             $cmp: ['$data_idx',
                                 '$sensor_idx']
@@ -170,51 +170,30 @@ module.exports = function(app) {
         let modelId = null;
         let imei = null;
 
-        Model.find({
+        Device.find({
             sensors: sensorId
         }).lean().exec()
-            .then(function (model) {
-                modelId = model[0]._id;
+            .then(function (device) {
+                imei = device[0]._id;
 
-                if (modelId) {
-                    Device.find({
-                        model: modelId
-                    }).lean().exec()
-                        .then(function (device) {
-                            imei = device[0]._id;
+                if (imei) {
 
-                            if (imei) {
-
-                                Measure.find({
-                                    /*timestamp: { '$gte': new Date(req.body.dateFrom), '$lte': new Date(req.body.dateTo) },*/
-                                    imei: imei
-                                })
-                                    .sort({'timestamp': -1})
-                                    .limit(20)
-                                    .populate({
-                                        path: 'imei',
-                                        model: 'Device',
-                                        populate: {
-                                            path: 'model',
-                                            model: 'Model',
-                                            populate: {
-                                                path: 'sensors',
-                                                model: 'Sensor'
-                                            }
-                                        }
-                                    })
-                                    .exec(function (err, measures) {
-                                        measures.reverse();
-                                        res.json(measures.filter(function(doc){
-                                            return doc.imei.model._id === modelId;
-                                        }));
-                                    });
-
+                    Measure.find({
+                        imei: imei
+                    })
+                        .sort({'timestamp': -1})
+                        .limit(20)
+                        .populate({
+                            path: 'imei',
+                            model: 'Device',
+                            populate: {
+                                path: 'sensors',
+                                model: 'Sensor'
                             }
-
-                        }).catch(function (err) {
-                        console.log(err);
-                    });
+                        })
+                        .exec(function (err, measures) {
+                            res.json(measures.reverse());
+                        });
                 }
 
             }).catch(function (err) {
@@ -229,64 +208,45 @@ module.exports = function(app) {
         let results = [];
         async.eachSeries(sensorIds, function(sensorId, callback) {
 
-            let modelId = null;
             let imei = null;
 
-            Model.find({
+            Device.find({
                 sensors: sensorId
             }).lean().exec()
-                .then(function (model) {
-                    modelId = model[0]._id;
+                .then(function (device) {
+                    imei = device[0]._id;
 
-                    if (modelId) {
-                        Device.find({
-                            model: modelId
-                        }).lean().exec()
-                            .then(function (device) {
-                                imei = device[0]._id;
+                    if (imei) {
 
-                                if (imei) {
-
-                                    Measure.find({
-                                        timestamp: { '$gte': new Date(req.body.dateFrom), '$lte': new Date(req.body.dateTo) },
-                                        imei: imei
-                                    })
-                                        .sort({'timestamp': -1})
-                                        //.limit(20)
-                                        .populate({
-                                            path: 'imei',
-                                            model: 'Device',
-                                            populate: {
-                                                path: 'model',
-                                                model: 'Model',
-                                                populate: {
-                                                    path: 'sensors',
-                                                    model: 'Sensor',
-                                                    populate: {
-                                                        path: 'type',
-                                                        model: 'Type'
-                                                    }
-                                                }
-                                            }
-                                        })
-                                        .lean().exec(function (err, measures) {
-                                            measures = _.filter(measures, function(measure){
-                                                let indexOfSensor = _.indexOf(_.pluck(measure.imei.model.sensors, '_id'), sensorId);
-                                                measure.data = measure.data[indexOfSensor];
-                                                measure.sensorId = sensorId;
-                                                measure.sensorName = measure.imei.model.sensors[indexOfSensor].name;
-                                                measure.sensorType = measure.imei.model.sensors[indexOfSensor].type;
-                                                return true;
-                                            });
-                                        results = results.concat(measures.reverse());
-                                        callback();
-                                        });
-
+                        Measure.find({
+                            timestamp: { '$gte': new Date(req.body.dateFrom), '$lte': new Date(req.body.dateTo) },
+                            imei: imei
+                        })
+                            .sort({'timestamp': -1})
+                            //.limit(20)
+                            .populate({
+                                path: 'imei',
+                                model: 'Device',
+                                populate: {
+                                    path: 'sensors',
+                                    model: 'Sensor',
+                                    populate: {
+                                        path: 'type',
+                                        model: 'Type'
+                                    }
                                 }
-
-                            }).catch(function (err) {
-                            console.log(err);
-                            callback(err);
+                            })
+                            .lean().exec(function (err, measures) {
+                            measures = _.filter(measures, function(measure){
+                                let indexOfSensor = _.indexOf(_.pluck(measure.imei.sensors, '_id'), sensorId);
+                                measure.data = measure.data[indexOfSensor];
+                                measure.sensorId = sensorId;
+                                measure.sensorName = measure.imei.sensors[indexOfSensor].name;
+                                measure.sensorType = measure.imei.sensors[indexOfSensor].type;
+                                return true;
+                            });
+                            results = results.concat(measures.reverse());
+                            callback();
                         });
                     }
 
@@ -369,10 +329,10 @@ module.exports = function(app) {
                     includeArrayIndex: 'data_idx'
                 }
             },
-            // unwind del campo de tipo array 'model.sensors' y ademas agrego el campo 'sensor_idx' con el indice de el arreglo.
+            // unwind del campo de tipo array 'device.sensors' y ademas agrego el campo 'sensor_idx' con el indice de el arreglo.
             {
                 $unwind: {
-                    path: '$model.sensors',
+                    path: '$device.sensors',
                     includeArrayIndex: 'sensor_idx'
                 }
             },
@@ -382,7 +342,7 @@ module.exports = function(app) {
                     "model.name": 1,
                     "data_idx": 1,
                     "sensor_idx": 1,
-                    sensor: "$model.sensors",
+                    sensor: "$device.sensors",
                     data: "$last_measure_by_device.data",
                     timestamp: "$last_measure_by_device.timestamp",
                     cmp_data_and_sensor_idx: {

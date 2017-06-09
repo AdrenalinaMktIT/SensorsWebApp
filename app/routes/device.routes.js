@@ -1,10 +1,10 @@
 module.exports = function(app) {
 
-    var Device = require('./../models/device');
+    let Device = require('./../models/device');
 
     // Obtener todos los equipos.
     app.get('/api/v1/devices', function(req, res) {
-        Device.find().populate('model client_id').exec()
+        Device.find().populate('model sensors client_id').exec()
             .then(function (devices) {
                 res.status(200).json({
                     message: 'OK!. Alertas obtenidas correctamente.',

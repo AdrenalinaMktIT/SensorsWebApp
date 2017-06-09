@@ -12,6 +12,11 @@ let deviceSchema = mongoose.Schema(
             ref: 'Model'
         },
 
+        sensors: [{
+            type: Number,
+            ref: 'Sensor'
+        }],
+
         keys : {
             master : Number,
             user : Number
