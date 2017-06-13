@@ -128,7 +128,7 @@ angular.module('userController', [])
                                     };
                                     Users.update(data.user.userId, userData)
                                         .then(function(response) {
-                                            if (response.status == 200) {
+                                            if (response.status === 200) {
                                                 loadUsers();
                                                 AppAlert.add('success', response.data.message);
                                             } else {
@@ -142,7 +142,7 @@ angular.module('userController', [])
                                 case 'delete':
                                     Users.delete(data.user.userId)
                                         .then(function(response) {
-                                            if (response.status == 200) {
+                                            if (response.status === 200) {
                                                 loadUsers();
                                                 AppAlert.add('success', response.data.message);
                                             } else {
@@ -199,7 +199,7 @@ angular.module('userController', [])
 
                     Users.create(userData)
                         .then(function(response) {
-                            if (response.status == 201) {
+                            if (response.status === 201) {
                                 loadUsers();
                                 AppAlert.add('success', response.data.message);
                             } else {
@@ -255,7 +255,7 @@ angular.module('userController').controller('UserModalInstanceCtrl', function ($
 
     vm.isDisabled = true;
 
-    if (mode != 'add') {
+    if (mode !== 'add') {
         vm.user.client = clients[user.client];
         vm.user.timezone = _.find(timezones, function(val){ return val._id == user.timezone; });
         vm.user.active = user.active ? 'Si' : 'No';

@@ -4,7 +4,6 @@ module.exports = function(app) {
 
     let Device = new require('./../models/device');
     let Measure = new require('./../models/measure');
-    let Model  = new require('./../models/model');
     let Sensor  = new require('./../models/sensor');
 
     let async = new require('async');

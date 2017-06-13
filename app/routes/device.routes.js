@@ -11,10 +11,10 @@ module.exports = function(app) {
                     devices: devices
                 });
             })
-            .catch(function () {
+            .catch(function (err) {
                 res.status(500).json({
                     message: 'Error interno de servidor. Por favor, intente nuevamente.',
-                    devices: null
+                    cause: err
                 });
             });
     });

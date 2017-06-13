@@ -1,4 +1,5 @@
-let mongoose = require('mongoose');
+let mongoose = require('mongoose')
+    , Schema = mongoose.Schema;
 
 let deviceSchema = mongoose.Schema(
     {
@@ -8,7 +9,7 @@ let deviceSchema = mongoose.Schema(
         },
 
         model : {
-            type: Number,
+            type: Schema.Types.ObjectId,
             ref: 'Model'
         },
 

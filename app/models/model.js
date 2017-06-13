@@ -2,17 +2,17 @@ let mongoose = require('mongoose');
 
 let modelSchema = mongoose.Schema(
     {
-        _id: {
-            type: Number,
-            required: true
-        },
         name: {
             type: String,
             required: true
         },
-        sensors: [{
-            type: String,
-            ref: 'Type'
+
+        sensors_config: [{
+            position : { type: Number, min: 1, max: 10 },
+            type: {
+                type: String,
+                ref: 'Type'
+            }
         }]
     },
     {

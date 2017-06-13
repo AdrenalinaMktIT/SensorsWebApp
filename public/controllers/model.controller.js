@@ -1,9 +1,9 @@
 angular.module('modelController', [])
 
 // inject the Alert service factory into our controller
-    .controller('ModelCtrl', function ($http, $uibModal, $log, Models, Alerts, Profiles, Sensors) {
+    .controller('ModelCtrl', function ($http, $uibModal, $log, Models, AppAlert, uiGridConstants, allModels, allTypes) {
 
-        var vm = this;
+        let vm = this;
 
         vm.formData = {};
 
@@ -11,16 +11,22 @@ angular.module('modelController', [])
 
         vm.gridOptions = {
             enableSorting: true,
-            /*paginationPageSizes: [25, 50, 75],
-             paginationPageSize: 25,*/
             gridMenuShowHideColumns: false,
             enableFiltering: true,
-            /*enableRowHeaderSelection: true,*/
             showGridFooter: true,
             columnDefs: [
-                { field: 'name', displayName: 'NOMBRE', enableHiding: false, width: '30%' },
-                { field: 'sensors', displayName: 'SENSORES', enableHiding: false, width: '40%' },
-                { field: 'crud', displayName: 'VER / EDITAR / BORRAR', enableHiding: false, width: '30%', enableSorting: false, exporterSuppressExport: true,
+                { field: 'name', cellClass:'text-center', sort: { direction: uiGridConstants.ASC, priority: 0 }, displayName: 'NOMBRE', enableHiding: false, width: '20%' },
+                { field: 'sensors_config[0]', cellTemplate:'<p class="bg-info">{{COL_FIELD}}</p>', cellClass:'text-center', displayName: 'SENSOR_1', enableHiding: false, width: '10%' },
+                { field: 'sensors_config[1]', cellTemplate:'<p class="bg-info">{{COL_FIELD}}</p>', cellClass:'text-center', displayName: 'SENSOR_2', enableHiding: false, width: '10%' },
+                { field: 'sensors_config[2]', cellTemplate:'<p class="bg-info">{{COL_FIELD}}</p>', cellClass:'text-center', displayName: 'SENSOR_3', enableHiding: false, width: '10%' },
+                { field: 'sensors_config[3]', cellTemplate:'<p class="bg-info">{{COL_FIELD}}</p>', cellClass:'text-center', displayName: 'SENSOR_4', enableHiding: false, width: '10%' },
+                { field: 'sensors_config[4]', cellTemplate:'<p class="bg-info">{{COL_FIELD}}</p>', cellClass:'text-center', displayName: 'SENSOR_5', enableHiding: false, width: '10%' },
+                { field: 'sensors_config[5]', cellTemplate:'<p class="bg-info">{{COL_FIELD}}</p>', cellClass:'text-center', displayName: 'SENSOR_6', enableHiding: false, width: '10%' },
+                { field: 'sensors_config[6]', cellTemplate:'<p class="bg-info">{{COL_FIELD}}</p>', cellClass:'text-center', displayName: 'SENSOR_7', enableHiding: false, width: '10%' },
+                { field: 'sensors_config[7]', cellTemplate:'<p class="bg-info">{{COL_FIELD}}</p>', cellClass:'text-center', displayName: 'SENSOR_8', enableHiding: false, width: '10%' },
+                { field: 'sensors_config[8]', cellTemplate:'<p class="bg-info">{{COL_FIELD}}</p>', cellClass:'text-center', displayName: 'SENSOR_9', enableHiding: false, width: '10%' },
+                { field: 'sensors_config[9]', cellTemplate:'<p class="bg-info">{{COL_FIELD}}</p>', cellClass:'text-center', displayName: 'SENSOR_10', enableHiding: false, width: '10%' },
+                { field: 'crud', cellClass:'text-center', displayName: 'VER / EDITAR / BORRAR', enableHiding: false, width: '20%', enableSorting: false, exporterSuppressExport: true,
                     cellTemplate:
                     '<button id="readBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'read\')" type="button" class="btn btn-xs btn-info"><i class="fa fa-eye" aria-hidden="true"></i> Ver</button> ' +
                     '<button id="updateBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'update\')" type="button" class="btn btn-xs btn-success"><i class="fa fa-pencil" aria-hidden="true"></i> Editar</button> ' +
@@ -30,83 +36,64 @@ angular.module('modelController', [])
             enableGridMenu: true
         };
 
-        // GET =====================================================================
-        // when landing on the page, get all models and show them
-        // use the service to get all the models
-        loadModels();
-        loadProfiles();
-        loadSensors();
+        vm.types = allTypes.data.types;
+        vm.models = allModels.data.models;
+        loadSensorsModel();
 
         function loadModels() {
             Models.getAll()
                 .then(function successCallback(response) {
-                    // this callback will be called asynchronously
-                    // when the response is available
                     vm.models = response.data.models;
-                    vm.gridOptions.data = response.data.models;
-                }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                    console.log('Error: ' + response);
-                });
-        }
-
-        function loadProfiles() {
-            Profiles.getAll()
-                .then(function successCallback(response) {
-                    vm.profiles = response.data.profiles;
+                    loadSensorsModel();
                 }, function errorCallback(response) {
                     console.log('Error: ' + response);
                 });
         }
 
-        function loadSensors() {
-            Sensors.getAll()
-                .then(function successCallback(response) {
-                    vm.sensors = response.data.sensors;
-                }, function errorCallback(response) {
-                    console.log('Error: ' + response);
+        function loadSensorsModel() {
+            sensors_config = _.map(vm.models, function(item) {
+                let sensors_config = new Array(10).fill('');
+                let positions = _.pluck(item.sensors_config, 'position');
+                let types = _.pluck(item.sensors_config, 'type');
+                _.each(positions, function (pos, idx, list) {
+                    sensors_config[pos-1] = types[idx].name;
                 });
+
+                return item.sensors_config = sensors_config;
+            });
+            vm.gridOptions.data = vm.models;
         }
 
         vm.openModal = function (id, mode) {
 
-            var vm = this;
+            let vm = this;
 
             vm.mode = mode;
 
             if (mode !== 'add') {
 
-                Alerts.get(id)
+                Models.get(id)
                     .then(function successCallback(response) {
 
-                        vm.id = response.data.alert._id;
-                        vm.name = response.data.alert.name;
-                        vm.profile = response.data.profile;
-                        vm.sensor = response.data.sensor;
-                        vm.greater_than = response.data.greater_than;
-                        vm.less_than = response.data.less_than;
-
-                        var alert = {
-                            alertId: vm.id,
-                            name: vm.name,
-                            profile: vm.profile,
-                            sensor: vm.sensor,
-                            greater_than: vm.greater_than,
-                            less_than: vm.less_than
+                        let model = {
+                            modelId: response.data.model._id,
+                            name: response.data.model.name,
+                            selectedSensors: response.data.model.sensors_config
                         };
 
-                        var modalInstance = $uibModal.open({
+                        let modalInstance = $uibModal.open({
                             ariaLabelledBy: 'modal-title',
                             ariaDescribedBy: 'modal-body',
-                            templateUrl: 'myModalContent.html',
-                            controller: 'AlertModalInstanceCtrl',
+                            templateUrl: 'modelModalContent.html',
+                            controller: 'ModelModalInstanceCtrl',
                             controllerAs: 'vm',
                             size: 'lg',
-                            //appendTo: parentElem,
                             resolve: {
-                                alert: function () {
-                                    return alert;
+                                model: function () {
+                                    return model;
+                                },
+                                types: function () {
+                                    return vm.types;
                                 },
                                 mode: function () {
                                     return mode;
@@ -119,29 +106,42 @@ angular.module('modelController', [])
                                 case 'read':
                                     break;
                                 case 'update':
-                                    var alertData = {
-                                        alertId: data.alert.Id,
-                                        name: data.alert.name,
-                                        sensor: data.alert.sensor,
-                                        profile: data.alert.profile,
-                                        greater_than: data.alert.greater_than,
-                                        less_than: data.alert.less_than
+                                    let sensors_config = _.map(data.model.sensors_config, function(item) {
+                                        item.type = item.type.id;
+                                        return item;
+                                    });
+
+                                    let modelData = {
+                                        name: data.model.name,
+                                        sensors_config: sensors_config
+
                                     };
-                                    Alerts.update(data.alert.alertId, alertData);
+                                    Models.update(data.model.modelId, modelData)
+                                        .then(function(response) {
+                                            if (response.status === 200) {
+                                                loadModels();
+                                                AppAlert.add('success', response.data.message);
+                                            } else {
+                                                AppAlert.add('danger', response.data.message);
+                                            }
+                                        })
+                                        .catch(function(error) {
+                                            AppAlert.add('danger', error.message);
+                                        });
                                     break;
                                 case 'delete':
-                                    Alerts.delete(data.alert.alertId);
-                                    break;
-                                case 'add':
-                                    var alertData = {
-                                        //alertId: data.alert.alertId,
-                                        name: data.alert.name,
-                                        sensor: data.alert.sensor,
-                                        profile: data.alert.profile,
-                                        greater_than: data.alert.greater_than,
-                                        less_than: data.alert.less_than
-                                    };
-                                    Alerts.add(alertData);
+                                    Models.delete(data.model.modelId)
+                                        .then(function(response) {
+                                            if (response.status === 200) {
+                                                loadModels();
+                                                AppAlert.add('success', response.data.message);
+                                            } else {
+                                                AppAlert.add('danger', response.data.message);
+                                            }
+                                        })
+                                        .catch(function(error) {
+                                            AppAlert.add('danger', error.message);
+                                        });
                                     break;
                             }
                         }, function () {
@@ -152,23 +152,19 @@ angular.module('modelController', [])
 
             } else {
 
-                var modalInstance = $uibModal.open({
+                let modalInstance = $uibModal.open({
                     ariaLabelledBy: 'modal-title',
                     ariaDescribedBy: 'modal-body',
-                    templateUrl: 'myModalContent.html',
-                    controller: 'AlertModalInstanceCtrl',
+                    templateUrl: 'modelModalContent.html',
+                    controller: 'ModelModalInstanceCtrl',
                     controllerAs: 'vm',
                     size: 'lg',
-                    //appendTo: parentElem,
                     resolve: {
-                        alert: function () {
+                        model: function () {
                             return null;
                         },
-                        sensors: function(){
-                            return vm.sensors;
-                        },
-                        profiles: function() {
-                            return vm.profiles;
+                        types: function () {
+                            return vm.types;
                         },
                         mode: function () {
                             return mode;
@@ -176,17 +172,30 @@ angular.module('modelController', [])
                     }
                 });
 
-                modalInstance.result.then(function (data) {
+                modalInstance.result.then(function(data) {
 
-                    var alertData = {
-                        //alertId: data.alert.alertId,
-                        name: data.alert.name,
-                        sensor: data.alert.sensor,
-                        profile: data.alert.profile,
-                        greater_than: data.alert.greater_than,
-                        less_than: data.alert.less_than
+                    let sensors_config = _.map(data.model.sensors_config, function(item) {
+                        item.type = item.type.id;
+                        return item;
+                    });
+
+                    let modelData = {
+                        name: data.model.name,
+                        sensors_config: sensors_config
+
                     };
-                    Alerts.create(alertData);
+                    Models.create(modelData)
+                        .then(function(response) {
+                            if (response.status === 201) {
+                                loadModels();
+                                AppAlert.add('success', response.data.message);
+                            } else {
+                                AppAlert.add('danger', response.data.message);
+                            }
+                        })
+                        .catch(function(error) {
+                            AppAlert.add('danger', error.status + ' - ' + error.statusText);
+                        });
                 }, function () {
                     $log.info('modal-component dismissed at: ' + new Date());
                 });
@@ -194,54 +203,88 @@ angular.module('modelController', [])
         };
     });
 
-angular.module('alertController').controller('AlertModalInstanceCtrl', function ($uibModalInstance, alert, mode, sensors, profiles) {
-    var vm = this;
+angular.module('modelController').controller('ModelModalInstanceCtrl', function ($uibModalInstance, model, types, mode) {
+    let vm = this;
 
     vm.isView = vm.isUpdate = vm.isDelete = vm.isAdd = false;
 
-    vm.alert = alert;
+    vm.model = model;
 
-    vm.sensors = sensors;
+    vm.types = types;
 
-    vm.profiles = profiles;
+    vm.selectedSensors = [];
+
+    vm.isDisabled = true;
+
+    if (mode !== 'add') {
+        vm.selectedSensors = vm.model.selectedSensors;
+    }
 
     switch (mode) {
         case 'read':
-            vm.modalName = "Detalle Alerta";
+            vm.modalName = "Detalle Modelo";
             vm.isView = true;
             break;
         case 'update':
-            vm.modalName = "Actualizar Alerta";
+            vm.modalName = "Actualizar Modelo";
             vm.isDisabled = false;
             vm.isUpdate = true;
             break;
         case 'delete':
-            vm.modalName = "Eliminar Alerta";
+            vm.modalName = "Eliminar Modelo";
             vm.isDelete = true;
             break;
         case 'add':
-            vm.modalName = "Nueva Alerta";
+            vm.modalName = "Nuevo Modelo";
             vm.isDisabled = false;
             vm.isAdd = true;
             break;
     }
 
-    console.log(mode);
-
-    vm.ok = function () {
-        $uibModalInstance.dismiss('ok');
+    vm.remove = function (position) {
+        vm.selectedSensors = _.reject(vm.selectedSensors, function(item){ return item.position == position; });
     };
 
-    vm.add = function () {
-        $uibModalInstance.close({mode: 'add', alert: vm.alert});
+    vm.addSensor = function () {
+        if (vm.selectedSensors.length < 10) {
+
+            vm.selectedSensors = _.reject(vm.selectedSensors, function(item){ return item.position == vm.inlineRadioOption; });
+
+            vm.selectedSensors.push({
+                position: vm.inlineRadioOption,
+                type: {
+                    name: vm.type.selected.name,
+                    units: vm.type.selected.units,
+                    id: vm.type.selected._id
+                }
+            })
+        }
     };
 
-    vm.update = function () {
-        $uibModalInstance.close({mode: 'update', alert: vm.alert});
+    vm.add = function (modelForm) {
+        if (modelForm.$valid) {
+            if (vm.selectedSensors.length >= 1) {
+                vm.model.sensors_config = vm.selectedSensors;
+                $uibModalInstance.close({mode: 'add', model: vm.model});
+            } else {
+                // TODO mostrar alerta de 1 sensor minimo requerido.
+            }
+        }
+    };
+
+    vm.update = function (modelForm) {
+        if (modelForm.$valid) {
+            if (vm.selectedSensors.length >= 1) {
+                vm.model.sensors_config = vm.selectedSensors;
+                $uibModalInstance.close({mode: 'update', model: vm.model});
+            } else {
+                // TODO mostrar alerta de 1 sensor minimo requerido.
+            }
+        }
     };
 
     vm.delete = function () {
-        $uibModalInstance.close({mode: 'delete', alert: vm.alert});
+        $uibModalInstance.close({mode: 'delete', model: vm.model});
     };
 
     vm.cancel = function () {

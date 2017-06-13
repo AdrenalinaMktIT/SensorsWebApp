@@ -16,43 +16,107 @@
     </div>
 
     <div class="modal-demo">
-        <script type="text/ng-template" id="myModalContent.html">
+        <script type="text/ng-template" id="modelModalContent.html">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="vm.cancel()"><i class="fa fa-window-close" aria-hidden="true"></i></button>
                 <h3 class="modal-title" id="modal-title">{{vm.modalName}}</h3>
             </div>
             <div class="modal-body" id="modal-body">
-                <form class="form-horizontal" name="UpdateEmployeeForm" >
+                <form class="form-horizontal" name="modelForm" autocomplete="off" novalidate>
                     <fieldset ng-disabled="vm.isDisabled">
-                        <input class="form-control" readonly="readonly" name="alertId" ng-model="vm.alert.alertId" type="hidden" placeholder="ID de Grupo" required />
-                        <div class="row">
-                            <div class="col-md-4">
+                        <input class="form-control" readonly="readonly" name="modelId" ng-model="vm.model.modelId" type="hidden" placeholder="ID de Modelo"/>
+
+                        <div class="panel panel-primary">
+                            <div class="panel-body">
+
+                            <div class="col-md-6 col-md-offset-3" ng-class="{ 'has-error': modelForm.name.$touched && modelForm.name.$invalid }">
                                 <label class="control-label">Nombre</label>
-                                <input class="form-control" name="name" ng-model="vm.alert.name" type="text" placeholder="Nombre" required />
+                                <input class="form-control" name="name" ng-model="vm.model.name" type="text" placeholder="Nombre" required autofocus/>
+
+                                <div class="help-block" ng-messages="modelForm.name.$error" ng-show="modelForm.name.$touched && modelForm.name.$invalid">
+                                <p ng-message="required">El nombre de modelo de equipo es requerido.</p>
                             </div>
-                            <div class="col-md-4">
-                                <label class="control-label">Sensor</label>
-                                <select class="form-control" name="sensor" ng-model="vm.alert.sensor" ng-options="sensor as sensor.name for sensor in vm.sensors track by sensor._id" required ></select>
                             </div>
-                            <div class="col-md-4">
-                                <label class="control-label">Perfil</label>
-                                <select class="form-control" name="profile" ng-model="vm.alert.profile" ng-options="profile as profile.name for profile in vm.profiles track by profile._id" required ></select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="control-label">Menor que</label>
-                                <input class="form-control" less_than="less_than" ng-model="vm.alert.less_than" type="text" placeholder="menor que" required />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="control-label">Mayor que</label>
-                                <input class="form-control" greater_than="greater_than" ng-model="vm.alert.greater_than" type="text" placeholder="mayor que" required />
                             </div>
                         </div>
-                    </fieldset>                </form>
+
+                        <div class="panel panel-primary">
+                            <div class="panel-body">
+
+                            <div class="col-md-6">
+                                <form class="form-inline">
+                                    <div class="form-group">
+                                        <label for="exampleInputName2">Tipo de Sensor</label>
+                                        <span us-spinner spinner-key="sensorTypeSpinner"></span>
+                                        <ui-select id="exampleInputName2" ng-model="vm.type.selected" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
+                                            <ui-select-match placeholder="Seleccione o busque un tipo de sensor en la lista...">{{$select.selected.name}}</ui-select-match>
+                                            <ui-select-choices group-by="vm.groupByType" repeat="item in vm.types | filter: $select.search">
+                                                <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="radio-inline">
+                                            <input type="radio" ng-model="vm.inlineRadioOption" id="inlineRadio1" value="1" ng-disabled="checked"> 1
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" ng-model="vm.inlineRadioOption" id="inlineRadio2" value="2" ng-disabled="checked"> 2
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" ng-model="vm.inlineRadioOption" id="inlineRadio3" value="3" ng-disabled="checked"> 3
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" ng-model="vm.inlineRadioOption" id="inlineRadio4" value="4" ng-disabled="checked"> 4
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" ng-model="vm.inlineRadioOption" id="inlineRadio5" value="5" ng-disabled="checked"> 5
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" ng-model="vm.inlineRadioOption" id="inlineRadio6" value="6" ng-disabled="checked"> 6
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" ng-model="vm.inlineRadioOption" id="inlineRadio7" value="7" ng-disabled="checked"> 7
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" ng-model="vm.inlineRadioOption" id="inlineRadio8" value="8" ng-disabled="checked"> 8
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" ng-model="vm.inlineRadioOption" id="inlineRadio9" value="9" ng-disabled="checked"> 9
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input type="radio" ng-model="vm.inlineRadioOption" id="inlineRadio10" value="10" ng-disabled="checked"> 10
+                                        </label>
+                                    </div>
+
+                                    <button type="button" class="btn btn-default" ng-click="vm.addSensor()"><i class="fa fa-plus-circle fa-lg"></i> Agregar</button>
+                                </form>
+                            </div>
+                                <div class="col-md-6">
+                                    <div class="panel panel-default">
+                                        <div class="list-group">
+                                            <div class="list-group-item" ng-repeat="sensor in vm.selectedSensors | orderBy:'1*position'">
+                                                <h4 class="list-group-item-heading list-group-item-info">Posicion: {{sensor.position}}</h4>
+                                                <div class="row">
+                                                    <div class="col-md-10">
+                                                        <span class="list-group-item-text">Tipo: {{sensor.type.name}} [{{sensor.type.units}}]</span>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <button ng-click="vm.remove(sensor.position)"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" type="button" ng-show="vm.isAdd" ng-click="vm.add()">Guardar</button>
+                <button class="btn btn-primary" type="button" ng-show="vm.isAdd" ng-click="vm.add(modelForm)">Guardar</button>
                 <button class="btn btn-primary" type="button" ng-show="vm.isView" ng-click="vm.back()">Volver</button>
-                <button class="btn btn-primary" type="button" ng-show="vm.isUpdate" ng-click="vm.update()">Actualizar</button>
+                <button class="btn btn-primary" type="button" ng-show="vm.isUpdate" ng-click="vm.update(modelForm)">Actualizar</button>
                 <button class="btn btn-primary" type="button" ng-show="vm.isDelete" ng-click="vm.delete()">Eliminar</button>
                 <button class="btn btn-warning" type="button" ng-hide="vm.isView" ng-click="vm.cancel()">Cancelar</button>
             </div>

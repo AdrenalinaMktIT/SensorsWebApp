@@ -35,6 +35,14 @@ app.config(function($stateProvider, $urlRouterProvider) {
             controllerAs: 'vm',
             data: {
                 roles: ['Admin']
+            },
+            resolve: {
+                allModels: function (Models) {
+                    return Models.getAll();
+                },
+                allTypes: function (Types) {
+                    return Types.getAll();
+                }
             }
         })
         .state('clients', {
