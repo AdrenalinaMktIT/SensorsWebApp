@@ -144,9 +144,31 @@
         </div>
     </fieldset>
 
+    <span us-spinner="{lines: 13, radius:42, scale: 1, width:14, length: 28, color: '#000'}" spinner-key="statusSpinner" spinner-start-active="true"></span>
+
     <br>
 
-    <div class="panel panel-default" ng-repeat-start="(imei, sensors) in vm.sensorList">
+    <uib-accordion class="myClass" close-others="false">
+        <div uib-accordion-group ng-class="{'panel-danger': vm.isOpen(imei), 'panel-default': !vm.isOpen(imei)}" ng-init="isOpen = vm.isOpen(imei)" is-open="isOpen" ng-repeat="(imei, sensors) in vm.sensorList">
+            <uib-accordion-heading>
+                <strong>IMEI {{imei}} [Equipo: {{sensors[0].deviceName}}]</strong> <span class="badge">{{sensors.length}}</span>
+                <i class="pull-right fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
+            </uib-accordion-heading>
+            <div class="col-sm-6 col-md-3" ng-repeat="sensor in sensors track by sensor.sensor._id">
+                <div class="thumbnail" style="background-color: #c8c8c8; min-height: 250px" ng-click="vm.open(imei, $index)">
+                    <img style="border: 5px solid; height: 25%; width: 25%; display: block;" src="../assets/img/node.png" class="img-responsive img-circle"
+                         ng-style="
+                        sensor.status == 'critical' && {'border-color': '#f2dede'} ||
+                        sensor.status == 'warning' && {'border-color': '#fcf8e3'} ||
+                        sensor.status == 'ok' && {'border-color': '#dff0d8'} ||
+                        sensor.status == 'unknown' && {'border-color': '#337ab7'}">
+                    <highchart id="{{ imei + '_' + sensor.sensor._id }}" style="background-color: #c8c8c8; min-height: 250px; max-width: 400px; height: 300px; margin: 0 auto" config="vm.sensorChartConfig[imei + '_' + sensor.sensor._id]" class="span10"></highchart>
+                </div>
+            </div>
+        </div>
+    </uib-accordion>
+
+    <!--<div class="panel panel-default" ng-repeat-start="(imei, sensors) in vm.sensorList">
         <div class="panel-heading">
             <h3 class="panel-title">IMEI {{imei}} <span class="badge">{{sensors.length}}</span></h3>
         </div>
@@ -164,6 +186,6 @@
             </div>
         </div>
     </div>
-    <div ng-repeat-end></div>
+    <div ng-repeat-end></div>-->
 
 </div>

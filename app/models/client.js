@@ -2,11 +2,6 @@ let mongoose = require('mongoose');
 
 let clientSchema = mongoose.Schema(
     {
-        _id: {
-            type: Number,
-            required: true
-        },
-
         name: {
             type: String,
             required: true
@@ -20,7 +15,7 @@ let clientSchema = mongoose.Schema(
             type: String
         },
 
-        css: {
+        css_name: {
             type: String
         },
 

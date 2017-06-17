@@ -1,4 +1,5 @@
-let mongoose = require('mongoose');
+let mongoose = require('mongoose'),
+    Schema = mongoose.Schema;
 let bcrypt   = require('bcrypt-nodejs');
 
 let Input = require('../models/inputs');
@@ -22,7 +23,7 @@ let userSchema = mongoose.Schema(
         },
 
         client_id: {
-            type: Number,
+            type: Schema.Types.ObjectId,
             ref: 'Client'
         },
 

@@ -74,7 +74,7 @@ module.exports = function(app) {
 
     // Obtener todos los posibles calculos.
     app.get('/api/v1/calculations', function(req, res) {
-        Calculation.find({})
+        Calculation.find({}).populate('required_sensors')
             .then(function (calculations) {
                 res.status(200).json({
                     message: 'OK!. Calculos disponibles obtenidos correctamente.',

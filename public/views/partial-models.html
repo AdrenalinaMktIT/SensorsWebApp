@@ -29,14 +29,14 @@
                         <div class="panel panel-primary">
                             <div class="panel-body">
 
-                            <div class="col-md-6 col-md-offset-3" ng-class="{ 'has-error': modelForm.name.$touched && modelForm.name.$invalid }">
-                                <label class="control-label">Nombre</label>
-                                <input class="form-control" name="name" ng-model="vm.model.name" type="text" placeholder="Nombre" required autofocus/>
+                                <div class="col-md-6 col-md-offset-3" ng-class="{ 'has-error': modelForm.name.$touched && modelForm.name.$invalid }">
+                                    <label class="control-label">Nombre</label>
+                                    <input class="form-control" name="name" ng-model="vm.model.name" type="text" placeholder="Nombre" required autofocus/>
 
-                                <div class="help-block" ng-messages="modelForm.name.$error" ng-show="modelForm.name.$touched && modelForm.name.$invalid">
-                                <p ng-message="required">El nombre de modelo de equipo es requerido.</p>
-                            </div>
-                            </div>
+                                    <div class="help-block" ng-messages="modelForm.name.$error" ng-show="modelForm.name.$touched && modelForm.name.$invalid">
+                                        <p ng-message="required">El nombre de modelo de equipo es requerido.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

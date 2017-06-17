@@ -1,5 +1,5 @@
-let mongoose = require('mongoose')
-    , Schema = mongoose.Schema;
+let mongoose = require('mongoose'),
+    Schema = mongoose.Schema;
 
 let deviceSchema = mongoose.Schema(
     {
@@ -59,7 +59,7 @@ let deviceSchema = mongoose.Schema(
         timeout : Number,
 
         client_id : {
-            type: Number,
+            type: Schema.Types.ObjectId,
             ref: 'Client'
         },
 

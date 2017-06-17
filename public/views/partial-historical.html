@@ -63,12 +63,12 @@
         </fieldset>
 
         <uib-accordion>
-        <div uib-accordion-group class="panel-default" ng-repeat="group in groups">
-            <uib-accordion-heading>
-                <div ng-bind-html="group.title" compile-template></div>
-            </uib-accordion-heading>
-            <div ng-bind-html="group.content" compile-template></div>
-        </div>
+            <div uib-accordion-group class="panel-default" ng-repeat="group in groups">
+                <uib-accordion-heading>
+                    <div ng-bind-html="group.title" compile-template></div>
+                </uib-accordion-heading>
+                <div ng-bind-html="group.content" compile-template></div>
+            </div>
         </uib-accordion>
 
     </form>

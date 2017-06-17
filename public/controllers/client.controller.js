@@ -1,7 +1,7 @@
 angular.module('clientController', [])
-    .controller('ClientCtrl', function ($uibModal, $log, Clients, Alerts, Profiles, Sensors) {
+    .controller('ClientCtrl', function ($uibModal, $log, Clients, AppAlert, uiGridConstants, allCalculations, allClients) {
 
-        var vm = this;
+        let vm = this;
 
         vm.formData = {};
 
@@ -16,10 +16,10 @@ angular.module('clientController', [])
             /*enableRowHeaderSelection: true,*/
             showGridFooter: true,
             columnDefs: [
-                { field: 'name', displayName: 'NOMBRE', enableHiding: false, width: '30%' },
-                { field: 'app_id', displayName: 'ID DE APLICACION', enableHiding: false, width: '20%' },
-                { field: 'available_calculations', displayName: 'CALCULOS DISPONIBLES', enableHiding: false, width: '30%' },
-                { field: 'crud', displayName: 'VER / EDITAR / BORRAR', enableHiding: false, width: '20%', enableSorting: false, exporterSuppressExport: true,
+                { field: 'name', cellClass:'text-center', sort: { direction: uiGridConstants.ASC, priority: 0 }, displayName: 'NOMBRE', enableHiding: false, width: '30%' },
+                { field: 'app_id', cellClass:'text-center', displayName: 'ID DE APLICACION', enableHiding: false, width: '15%' },
+                { field: 'available_calculations', cellClass:'text-center', displayName: 'CALCULOS DISPONIBLES', enableHiding: false, width: '30%' },
+                { field: 'crud', cellClass:'text-center', displayName: 'VER / EDITAR / BORRAR', enableHiding: false, width: '20%', enableSorting: false, exporterSuppressExport: true,
                     cellTemplate:
                     '<button id="readBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'read\')" type="button" class="btn btn-xs btn-info"><i class="fa fa-eye" aria-hidden="true"></i> Ver</button> ' +
                     '<button id="updateBtn" ng-click="grid.appScope.vm.openModal(row.entity._id, \'update\')" type="button" class="btn btn-xs btn-success"><i class="fa fa-pencil" aria-hidden="true"></i> Editar</button> ' +
@@ -29,12 +29,10 @@ angular.module('clientController', [])
             enableGridMenu: true
         };
 
-        // GET =====================================================================
-        // when landing on the page, get all clients and show them
-        // use the service to get all the clients
-        loadClients();
-        loadProfiles();
-        loadSensors();
+
+        // You can be sure that allClients are ready to use!
+        vm.calculations = allCalculations.data.calculations;
+        vm.gridOptions.data = vm.clients = allClients.data.clients;
 
         function loadClients() {
             Clients.getAll()
@@ -50,62 +48,42 @@ angular.module('clientController', [])
                 });
         }
 
-        function loadProfiles() {
-            Profiles.getAll()
-                .then(function successCallback(response) {
-                    vm.profiles = response.data.profiles;
-                }, function errorCallback(response) {
-                    console.log('Error: ' + response);
-                });
-        }
-
-        function loadSensors() {
-            Sensors.getAll()
-                .then(function successCallback(response) {
-                    vm.sensors = response.data.sensors;
-                }, function errorCallback(response) {
-                    console.log('Error: ' + response);
-                });
-        }
-
         vm.openModal = function (id, mode) {
 
-            var vm = this;
+            let vm = this;
 
             vm.mode = mode;
 
-            if (mode != 'add') {
+            if (mode !== 'add') {
 
-                Alerts.get(id)
+                Clients.get(id)
                     .then(function successCallback(response) {
+                        vm.client = {};
+                        vm.client.clientId = response.data.client._id;
+                        vm.client.name = response.data.client.name;
+                        vm.client.appId = response.data.client.app_id;
+                        vm.client.logo = response.data.client.logo;
+                        vm.client.cssName = response.data.client.css_name;
+                        vm.client.pdfCertified = response.data.client.pdf_certified ? "1" : "0";
+                        vm.selectedCalculations = response.data.client.available_calculations;
+                        vm.client.active = response.data.client.active ? "1" : "0";
 
-                        vm.id = response.data.alert._id;
-                        vm.name = response.data.alert.name;
-                        vm.profile = response.data.profile;
-                        vm.sensor = response.data.sensor;
-                        vm.greater_than = response.data.greater_than;
-                        vm.less_than = response.data.less_than;
-
-                        var alert = {
-                            alertId: vm.id,
-                            name: vm.name,
-                            profile: vm.profile,
-                            sensor: vm.sensor,
-                            greater_than: vm.greater_than,
-                            less_than: vm.less_than
-                        };
-
-                        var modalInstance = $uibModal.open({
+                        let modalInstance = $uibModal.open({
                             ariaLabelledBy: 'modal-title',
                             ariaDescribedBy: 'modal-body',
-                            templateUrl: 'myModalContent.html',
-                            controller: 'AlertModalInstanceCtrl',
+                            templateUrl: 'ClientModalContent.html',
+                            controller: 'ClientModalInstanceCtrl',
                             controllerAs: 'vm',
                             size: 'lg',
-                            //appendTo: parentElem,
                             resolve: {
-                                alert: function () {
-                                    return alert;
+                                calculations: function () {
+                                    return vm.calculations;
+                                },
+                                selectedCalculations: function () {
+                                    return vm.selectedCalculations;
+                                },
+                                client: function () {
+                                    return vm.client;
                                 },
                                 mode: function () {
                                     return mode;
@@ -118,29 +96,42 @@ angular.module('clientController', [])
                                 case 'read':
                                     break;
                                 case 'update':
-                                    var alertData = {
-                                        alertId: data.alert.Id,
-                                        name: data.alert.name,
-                                        sensor: data.alert.sensor,
-                                        profile: data.alert.profile,
-                                        greater_than: data.alert.greater_than,
-                                        less_than: data.alert.less_than
+                                    let clientData = {
+                                        clientId: data.user.clientId,
+                                        name: data.client.name,
+                                        appId: data.client.appId,
+                                        logo: data.client.logo,
+                                        cssName: data.client.cssName,
+                                        pdfCertified: data.client.pdfCertified,
+                                        availableCalculations: _.pluck(data.client.available_calculations, '_id'),
+                                        active: data.client.active
                                     };
-                                    Alerts.update(data.alert.alertId, alertData);
+                                    Clients.update(data.client.clientId, clientData)
+                                        .then(function(response) {
+                                            if (response.status === 200) {
+                                                loadClients();
+                                                AppAlert.add('success', response.data.message);
+                                            } else {
+                                                AppAlert.add('danger', response.data.message);
+                                            }
+                                        })
+                                        .catch(function(error) {
+                                            AppAlert.add('danger', error.message);
+                                        });
                                     break;
                                 case 'delete':
-                                    Alerts.delete(data.alert.alertId);
-                                    break;
-                                case 'add':
-                                    var alertData = {
-                                        //alertId: data.alert.alertId,
-                                        name: data.alert.name,
-                                        sensor: data.alert.sensor,
-                                        profile: data.alert.profile,
-                                        greater_than: data.alert.greater_than,
-                                        less_than: data.alert.less_than
-                                    };
-                                    Alerts.add(alertData);
+                                    Clients.delete(data.client.clientId)
+                                        .then(function(response) {
+                                            if (response.status === 200) {
+                                                loadClients();
+                                                AppAlert.add('success', response.data.message);
+                                            } else {
+                                                AppAlert.add('danger', response.data.message);
+                                            }
+                                        })
+                                        .catch(function(error) {
+                                            AppAlert.add('danger', error.message);
+                                        });
                                     break;
                             }
                         }, function () {
@@ -151,23 +142,22 @@ angular.module('clientController', [])
 
             } else {
 
-                var modalInstance = $uibModal.open({
+                let modalInstance = $uibModal.open({
                     ariaLabelledBy: 'modal-title',
                     ariaDescribedBy: 'modal-body',
-                    templateUrl: 'myModalContent.html',
-                    controller: 'AlertModalInstanceCtrl',
+                    templateUrl: 'ClientModalContent.html',
+                    controller: 'ClientModalInstanceCtrl',
                     controllerAs: 'vm',
                     size: 'lg',
-                    //appendTo: parentElem,
                     resolve: {
-                        alert: function () {
+                        calculations: function () {
+                            return vm.calculations;
+                        },
+                        selectedCalculations: function () {
                             return null;
                         },
-                        sensors: function(){
-                            return vm.sensors;
-                        },
-                        profiles: function() {
-                            return vm.profiles;
+                        client: function () {
+                            return null;
                         },
                         mode: function () {
                             return mode;
@@ -177,15 +167,27 @@ angular.module('clientController', [])
 
                 modalInstance.result.then(function (data) {
 
-                    var alertData = {
-                        //alertId: data.alert.alertId,
-                        name: data.alert.name,
-                        sensor: data.alert.sensor,
-                        profile: data.alert.profile,
-                        greater_than: data.alert.greater_than,
-                        less_than: data.alert.less_than
+                    let clientData = {
+                        name: data.client.name,
+                        appId: data.client.appId,
+                        logo: data.client.logo,
+                        cssName: data.client.cssName,
+                        pdfCertified: data.client.pdfCertified,
+                        availableCalculations: _.pluck(data.client.available_calculations, '_id'),
+                        active: data.client.active
                     };
-                    Alerts.create(alertData);
+                    Clients.create(clientData)
+                        .then(function(response) {
+                            if (response.status === 201) {
+                                loadClients();
+                                AppAlert.add('success', response.data.message);
+                            } else {
+                                AppAlert.add('danger', response.data.message);
+                            }
+                        })
+                        .catch(function(error) {
+                            AppAlert.add('danger', error.status + ' - ' + error.statusText);
+                        });
                 }, function () {
                     $log.info('modal-component dismissed at: ' + new Date());
                 });
@@ -193,54 +195,74 @@ angular.module('clientController', [])
         };
     });
 
-angular.module('alertController').controller('AlertModalInstanceCtrl', function ($uibModalInstance, alert, mode, sensors, profiles) {
-    var vm = this;
+angular.module('clientController').controller('ClientModalInstanceCtrl', function ($uibModalInstance, calculations, selectedCalculations, client, mode) {
+    let vm = this;
 
     vm.isView = vm.isUpdate = vm.isDelete = vm.isAdd = false;
 
-    vm.alert = alert;
+    _.filter(calculations, function(item){
+        return _.each(selectedCalculations, function(item2){
+            item._id == item2;
+        })
+    });
 
-    vm.sensors = sensors;
+    vm.calculations = _.reject(calculations, function(item){ return item._id == selectedCalculations; });
 
-    vm.profiles = profiles;
+    vm.selectedCalculations = _.filter(calculations, function(item){ return item._id == selectedCalculations; });
+
+    vm.client = client;
+
+    vm.isDisabled = true;
 
     switch (mode) {
         case 'read':
-            vm.modalName = "Detalle Alerta";
+            vm.modalName = "Detalle Cliente";
             vm.isView = true;
             break;
         case 'update':
-            vm.modalName = "Actualizar Alerta";
+            vm.modalName = "Actualizar Cliente";
             vm.isDisabled = false;
             vm.isUpdate = true;
             break;
         case 'delete':
-            vm.modalName = "Eliminar Alerta";
+            vm.modalName = "Eliminar Cliente";
             vm.isDelete = true;
             break;
         case 'add':
-            vm.modalName = "Nueva Alerta";
+            vm.modalName = "Nuevo Cliente";
             vm.isDisabled = false;
             vm.isAdd = true;
             break;
     }
 
-    console.log(mode);
-
     vm.ok = function () {
         $uibModalInstance.dismiss('ok');
     };
 
-    vm.add = function () {
-        $uibModalInstance.close({mode: 'add', alert: vm.alert});
+    vm.add = function (clientForm) {
+        if (clientForm.$valid) {
+            if (vm.selectedCalculations.length >= 1) {
+                vm.client.available_calculations = vm.selectedCalculations;
+                $uibModalInstance.close({mode: 'add', client: vm.client});
+            } else {
+                // TODO mostrar alerta de 1 calculo minimo requerido.
+            }
+        }
     };
 
-    vm.update = function () {
-        $uibModalInstance.close({mode: 'update', alert: vm.alert});
+    vm.update = function (clientForm) {
+        if (clientForm.$valid) {
+            if (vm.selectedCalculations.length >= 1) {
+                vm.client.available_calculations = vm.selectedCalculations;
+                $uibModalInstance.close({mode: 'update', client: vm.client});
+            } else {
+                // TODO mostrar alerta de 1 calculo minimo requerido.
+            }
+        }
     };
 
     vm.delete = function () {
-        $uibModalInstance.close({mode: 'delete', alert: vm.alert});
+        $uibModalInstance.close({mode: 'delete', client: vm.client});
     };
 
     vm.cancel = function () {

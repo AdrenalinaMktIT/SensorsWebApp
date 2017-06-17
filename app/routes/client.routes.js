@@ -29,12 +29,13 @@ module.exports = function(app) {
                         client: null
                     });
                 } else {
-                    var newClient = new Client();
+                    let newClient = new Client();
                     newClient.name = req.body.name;
-                    newClient.app_id = req.body.app_id;
+                    newClient.app_id = req.body.appId;
                     newClient.logo = req.body.logo;
-                    newClient.css = req.body.css;
-                    newClient.pdf_certified = req.body.pdf_certified.type;
+                    newClient.css_name = req.body.cssName;
+                    newClient.pdf_certified = req.body.pdfCertified;
+                    newClient.available_calculations = req.body.availableCalculations;
                     newClient.active = req.body.active;
 
                     newClient.save()
@@ -44,18 +45,18 @@ module.exports = function(app) {
                                 client: client
                             });
                         })
-                        .catch(function () {
+                        .catch(function (err) {
                             res.status(500).json({
                                 message: 'Error interno de servidor. Por favor, intente nuevamente.',
-                                client: null
+                                cause: err
                             });
                         });
                 }
             })
-            .catch(function () {
+            .catch(function (err) {
                 res.status(500).json({
                     message: 'Error interno de servidor. Por favor, intente nuevamente.',
-                    client: null
+                    cause: err
                 });
             });
     });

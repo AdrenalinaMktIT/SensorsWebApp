@@ -1,5 +1,5 @@
 angular.module('statusController', [])
-    .controller('StatusCtrl', function ($scope, $interval, $uibModal, allStatuses, allGroups, Reports) {
+    .controller('StatusCtrl', function ($scope, $interval, $uibModal, allStatuses, allGroups, Reports, usSpinnerService) {
         var vm = this, imei, model, sensor, data, timestamp, status, checkingStatus;
 
         const intervalDelay = 30000;
@@ -27,6 +27,12 @@ angular.module('statusController', [])
 
         vm.group = { selected: vm.groups[0] };
         vm.status = { selected: vm.statuses[0] };
+
+        vm.isOpen =  function (imei) {
+            return _.some(vm.sensorList[imei], function (item) {
+                return item.status === 'critical';
+            });
+        };
 
         vm.onOpenCloseSelectGroup = function (isOpen){
             if (!isOpen) {
@@ -136,128 +142,229 @@ angular.module('statusController', [])
                             sensorNameClass = 'bg-primary';
                     }
 
-                    vm.sensorChartConfig[value.imei + '_' + value.sensor._id] = {
+                    if (value.sensor.type._id === 'temp') {
 
-                        credits: {
-                            enabled: false
-                        },
+                        vm.sensorChartConfig[value.imei + '_' + value.sensor._id] = {
 
-                        chart: {
-                            backgroundColor: '#c8c8c8',
-                            type: 'gauge',
-                            plotBackgroundColor: null,
-                            plotBackgroundImage: null,
-                            plotBorderWidth: 0,
-                            plotShadow: false
-                        },
-
-                        exporting: {
-                            enabled: false
-                        },
-
-                        title: {
-                            text: "<h4 class='text-center " + sensorNameClass + "'>" + value.sensor.name + "</h4>",
-                            margin: 0,
-                            widthAdjust: 0,
-                            useHTML: true
-                        },
-
-                        subtitle: {
-                            text: "<div class='caption'>" + value.timestamp + "</div>",
-                            useHTML: true
-                        },
-
-                        pane: {
-                            startAngle: -150,
-                            endAngle: 150,
-                            background: [{
-                                backgroundColor: {
-                                    linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
-                                    stops: [
-                                        [0, '#FFF'],
-                                        [1, '#333']
-                                    ]
-                                },
-                                borderWidth: 0,
-                                outerRadius: '109%'
-                            }, {
-                                backgroundColor: {
-                                    linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
-                                    stops: [
-                                        [0, '#333'],
-                                        [1, '#FFF']
-                                    ]
-                                },
-                                borderWidth: 1,
-                                outerRadius: '107%'
-                            }, {
-                                // default background
-                            }, {
-                                backgroundColor: '#DDD',
-                                borderWidth: 0,
-                                outerRadius: '105%',
-                                innerRadius: '103%'
-                            }]
-                        },
-
-                        // the value axis
-                        yAxis: {
-                            min: 0,
-                            max: 200,
-
-                            minorTickInterval: 'auto',
-                            minorTickWidth: 1,
-                            minorTickLength: 10,
-                            minorTickPosition: 'inside',
-                            minorTickColor: '#666',
-
-                            tickPixelInterval: 30,
-                            tickWidth: 2,
-                            tickPosition: 'inside',
-                            tickLength: 10,
-                            tickColor: '#666',
-                            labels: {
-                                step: 2,
-                                rotation: 'auto'
+                            chart: {
+                                backgroundColor: '#c8c8c8',
+                                type: 'solidgauge',
+                                plotBackgroundColor: null,
+                                plotBackgroundImage: null,
+                                plotBorderWidth: 0,
+                                plotShadow: false
                             },
+
                             title: {
-                                text: value.sensor.type.units,
-                                verticalAlign: 'bottom',
+                                text: "<h4 class='text-center " + sensorNameClass + "'>" + value.sensor.name + "</h4>",
+                                margin: 0,
+                                widthAdjust: 0,
+                                useHTML: true
                             },
-                            plotBands: [{
-                                from: 0,
-                                to: 120,
-                                color: '#55BF3B' // green
-                            }, {
-                                from: 120,
-                                to: 160,
-                                color: '#DDDF0D' // yellow
-                            }, {
-                                from: 160,
-                                to: 200,
-                                color: '#DF5353' // red
-                            }]
-                        },
 
-                        series: [{
-                            name: value.sensor.type.name,
-                            data: [value.data],
+                            subtitle: {
+                                text: "<div class='caption'>" + value.timestamp + "</div>",
+                                useHTML: true
+                            },
+
+                            pane: {
+                                center: ['50%', '85%'],
+                                size: '100%',
+                                startAngle: -90,
+                                endAngle: 90,
+                                background: {
+                                    backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || '#EEE',
+                                    innerRadius: '60%',
+                                    outerRadius: '100%',
+                                    shape: 'arc'
+                                }
+                            },
+
                             tooltip: {
-                                valueSuffix: ' ' + value.sensor.type.units
-                            }
-                        }]
+                                enabled: false
+                            },
 
-                    };
+                            // the value axis
+                            yAxis: {
+                                min: 0,
+                                max: 200,
+                                title: {
+                                    text: value.sensor.type.name,
+                                    y: -70
+                                },
+                                stops: [
+                                    [0.1, '#55BF3B'], // green
+                                    [0.5, '#DDDF0D'], // yellow
+                                    [0.9, '#DF5353'] // red
+                                ],
+                                lineWidth: 0,
+                                minorTickInterval: null,
+                                tickAmount: 2,
+                                labels: {
+                                    y: 16
+                                }
+                            },
+
+                            exporting: {
+                                enabled: false
+                            },
+
+                            plotOptions: {
+                                solidgauge: {
+                                    dataLabels: {
+                                        y: 5,
+                                        borderWidth: 0,
+                                        useHTML: true
+                                    }
+                                }
+                            },
+
+                            credits: {
+                                enabled: false
+                            },
+
+                            series: [{
+                                name: value.sensor.type.name,
+                                data: [value.data],
+                                dataLabels: {
+                                    format: '<div style="text-align:center"><span style="font-size:20px;color:' +
+                                    ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
+                                    '<span style="font-size:12px;">'+value.sensor.type.units+'</span></div>'
+                                },
+                                tooltip: {
+                                    valueSuffix: ' ' + value.sensor.type.units
+                                }
+                            }]
+
+                        };
+
+                    } else {
+
+                        vm.sensorChartConfig[value.imei + '_' + value.sensor._id] = {
+
+                            credits: {
+                                enabled: false
+                            },
+
+                            chart: {
+                                backgroundColor: '#c8c8c8',
+                                type: 'gauge',
+                                plotBackgroundColor: null,
+                                plotBackgroundImage: null,
+                                plotBorderWidth: 0,
+                                plotShadow: false
+                            },
+
+                            exporting: {
+                                enabled: false
+                            },
+
+                            title: {
+                                text: "<h4 class='text-center " + sensorNameClass + "'>" + value.sensor.name + "</h4>",
+                                margin: 0,
+                                widthAdjust: 0,
+                                useHTML: true
+                            },
+
+                            subtitle: {
+                                text: "<div class='caption'>" + value.timestamp + "</div>",
+                                useHTML: true
+                            },
+
+                            pane: {
+                                startAngle: -150,
+                                endAngle: 150,
+                                background: [{
+                                    backgroundColor: {
+                                        linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
+                                        stops: [
+                                            [0, '#FFF'],
+                                            [1, '#333']
+                                        ]
+                                    },
+                                    borderWidth: 0,
+                                    outerRadius: '109%'
+                                }, {
+                                    backgroundColor: {
+                                        linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
+                                        stops: [
+                                            [0, '#333'],
+                                            [1, '#FFF']
+                                        ]
+                                    },
+                                    borderWidth: 1,
+                                    outerRadius: '107%'
+                                }, {
+                                    // default background
+                                }, {
+                                    backgroundColor: '#DDD',
+                                    borderWidth: 0,
+                                    outerRadius: '105%',
+                                    innerRadius: '103%'
+                                }]
+                            },
+
+                            // the value axis
+                            yAxis: {
+                                min: 0,
+                                max: 200,
+
+                                minorTickInterval: 'auto',
+                                minorTickWidth: 1,
+                                minorTickLength: 10,
+                                minorTickPosition: 'inside',
+                                minorTickColor: '#666',
+
+                                tickPixelInterval: 30,
+                                tickWidth: 2,
+                                tickPosition: 'inside',
+                                tickLength: 10,
+                                tickColor: '#666',
+                                labels: {
+                                    step: 2,
+                                    rotation: 'auto'
+                                },
+                                title: {
+                                    text: value.sensor.type.units,
+                                    verticalAlign: 'bottom',
+                                },
+                                plotBands: [{
+                                    from: 0,
+                                    to: 120,
+                                    color: '#55BF3B' // green
+                                }, {
+                                    from: 120,
+                                    to: 160,
+                                    color: '#DDDF0D' // yellow
+                                }, {
+                                    from: 160,
+                                    to: 200,
+                                    color: '#DF5353' // red
+                                }]
+                            },
+
+                            series: [{
+                                name: value.sensor.type.name,
+                                data: [value.data],
+                                tooltip: {
+                                    valueSuffix: ' ' + value.sensor.type.units
+                                }
+                            }]
+
+                        };
+                    }
                 });
             });
         };
 
         function checkStatus() {
+            usSpinnerService.spin('statusSpinner');
             Reports.status()
                 .then(function successCallback(response) {
                     vm.sensorList = [];
-                    _.each(response.data, function (value, key, list) {
+                    _.each(response.data, (value, key, list) =>{
                         imei = value._id;
+                        deviceName = value.device.name;
                         model = value.model.name;
                         sensor = value.sensor;
                         data = value.data;
@@ -273,6 +380,7 @@ angular.module('statusController', [])
                         }
                         vm.sensorList.push({
                             imei: imei,
+                            deviceName: deviceName,
                             model: model,
                             sensor: sensor,
                             data: data,
@@ -286,8 +394,10 @@ angular.module('statusController', [])
                     vm.onOpenCloseSelectStatus(false);
 
                     drawSensors();
+                    usSpinnerService.stop('statusSpinner');
                 }, function errorCallback(response) {
                     console.log('Error: ' + response);
+                    usSpinnerService.stop('statusSpinner');
                 });
         }
 

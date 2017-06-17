@@ -16,43 +16,82 @@
     </div>
 
     <div class="modal-demo">
-        <script type="text/ng-template" id="myModalContent.html">
+        <script type="text/ng-template" id="ClientModalContent.html">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="vm.cancel()"><i class="fa fa-window-close" aria-hidden="true"></i></button>
                 <h3 class="modal-title" id="modal-title">{{vm.modalName}}</h3>
             </div>
             <div class="modal-body" id="modal-body">
-                <form class="form-horizontal" name="UpdateEmployeeForm" >
+                <form class="form-horizontal" name="clientForm" autocomplete="off" novalidate>
                     <fieldset ng-disabled="vm.isDisabled">
-                        <input class="form-control" readonly="readonly" name="alertId" ng-model="vm.alert.alertId" type="hidden" placeholder="ID de Grupo" required />
+                        <input class="form-control" readonly="readonly" name="clientId" ng-model="vm.client.clientId" type="hidden" placeholder="ID de Grupo"/>
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-4 col-md-offset-4" ng-class="{ 'has-error': clientForm.name.$touched && clientForm.name.$invalid }">
                                 <label class="control-label">Nombre</label>
-                                <input class="form-control" name="name" ng-model="vm.alert.name" type="text" placeholder="Nombre" required />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="control-label">Sensor</label>
-                                <select class="form-control" name="sensor" ng-model="vm.alert.sensor" ng-options="sensor as sensor.name for sensor in vm.sensors track by sensor._id" required ></select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="control-label">Perfil</label>
-                                <select class="form-control" name="profile" ng-model="vm.alert.profile" ng-options="profile as profile.name for profile in vm.profiles track by profile._id" required ></select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="control-label">Menor que</label>
-                                <input class="form-control" less_than="less_than" ng-model="vm.alert.less_than" type="text" placeholder="menor que" required />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="control-label">Mayor que</label>
-                                <input class="form-control" greater_than="greater_than" ng-model="vm.alert.greater_than" type="text" placeholder="mayor que" required />
+                                <input class="form-control" name="name" ng-model="vm.client.name" type="text" placeholder="Nombre" required autofocus/>
+
+                                <div class="help-block" ng-messages="clientForm.name.$error" ng-show="clientForm.name.$touched && clientForm.name.$invalid">
+                                    <p ng-message="required">El nombre de cliente es requerido.</p>
+                                </div>
                             </div>
                         </div>
-                    </fieldset>                </form>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="control-label">ID de Aplicacion (AppId)</label>
+                                <input class="form-control" name="appId" ng-model="vm.client.appId" type="text" placeholder="AppId"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="control-label">Logo</label>
+                                <input class="form-control" name="logo" ng-model="vm.client.logo" type="text" placeholder="Logo"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="control-label">Nombre Hoja de Estilos</label>
+                                <input class="form-control" name="cssName" ng-model="vm.client.cssName" type="text" placeholder="Nombre CSS"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="control-label">Certifica PDF?</label>
+                                <div class="form-control">
+                                    <label class="radio-inline">
+                                        <input type="radio" ng-model="vm.client.pdfCertified" value="1"> S&iacute;
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" ng-model="vm.client.pdfCertified" value="0"> No
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <label>Calculos Disponibles</label>
+                                <ui-select multiple ng-model="vm.selectedCalculations" theme="bootstrap" ng-disabled="vm.disabled" sortable="true">
+                                    <ui-select-match placeholder="Seleccionar calculos de la lista...">{{$item.name}}</ui-select-match>
+                                    <ui-select-choices repeat="item in vm.calculations | orderBy:'_id' | filter: $select.search">
+                                        <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                        <small>
+                                            Sensores Requeridos: <ins><span ng-bind-html="''+_.pluck(item.required_sensors, 'name') | highlight: $select.search"></span></ins>
+                                        </small>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="control-label">Activo?</label>
+                                <div class="form-control">
+                                    <label class="radio-inline">
+                                        <input type="radio" ng-model="vm.client.active" value="1"> S&iacute;
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" ng-model="vm.client.active" value="0"> No
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" type="button" ng-show="vm.isAdd" ng-click="vm.add()">Guardar</button>
+                <button class="btn btn-primary" type="button" ng-show="vm.isAdd" ng-click="vm.add(clientForm)">Guardar</button>
                 <button class="btn btn-primary" type="button" ng-show="vm.isView" ng-click="vm.back()">Volver</button>
-                <button class="btn btn-primary" type="button" ng-show="vm.isUpdate" ng-click="vm.update()">Actualizar</button>
+                <button class="btn btn-primary" type="button" ng-show="vm.isUpdate" ng-click="vm.update(clientForm)">Actualizar</button>
                 <button class="btn btn-primary" type="button" ng-show="vm.isDelete" ng-click="vm.delete()">Eliminar</button>
                 <button class="btn btn-warning" type="button" ng-hide="vm.isView" ng-click="vm.cancel()">Cancelar</button>
             </div>

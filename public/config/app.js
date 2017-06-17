@@ -52,6 +52,14 @@ app.config(function($stateProvider, $urlRouterProvider) {
             controllerAs: 'vm',
             data: {
                 roles: ['Admin']
+            },
+            resolve: {
+                allCalculations: function (Calculations) {
+                    return Calculations.getAll();
+                },
+                allClients: function (Clients) {
+                    return Clients.getAll();
+                }
             }
         })
         .state('alerts', {
@@ -179,6 +187,10 @@ app.config(function($stateProvider, $urlRouterProvider) {
     // TODO messages
     // TODO statuses
     // TODO settings
+});
+
+app.run(function ($rootScope) {
+    $rootScope._ = window._;
 });
 
 app.controller('MainCtrl', function($scope, $transitions, $state) {
