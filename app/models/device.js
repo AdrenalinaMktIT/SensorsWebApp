@@ -14,32 +14,9 @@ let deviceSchema = mongoose.Schema(
         },
 
         sensors: [{
-            type: Number,
+            type: Schema.Types.ObjectId,
             ref: 'Sensor'
         }],
-
-        keys : {
-            master : Number,
-            user : Number
-        },
-
-        report1 : {
-            ip : String,
-            port : Number,
-            refresh : Number
-        },
-
-        report2 : {
-            ip : String,
-            port : Number,
-            refresh : Number
-        },
-
-        apn : {
-            name : String,
-            user : String,
-            pass : String
-        },
 
         name : String,
 
@@ -63,25 +40,13 @@ let deviceSchema = mongoose.Schema(
             ref: 'Client'
         },
 
-        sms_config : {
-            type: Boolean,
-            default: false
-        },
-
-        calibrated : {
-            type: Boolean,
-            default: false
-        },
-
-        buzzer : {
-            type: Boolean,
-            default: false
-        },
-
         active : {
             type: Boolean,
             default: true
-        }
+        },
+
+        //llenar este campo en la vista
+        frecuency : Number
 
     },
     {
@@ -93,3 +58,103 @@ let deviceSchema = mongoose.Schema(
 );
 
 module.exports = mongoose.model('Device', deviceSchema);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,7 +1,7 @@
 angular.module('deviceController', [])
 
 // inject the Device service factory into our controller
-    .controller('DeviceCtrl', function ($http, $uibModal, $log, Devices) {
+    .controller('DeviceCtrl', function ($http, $uibModal, $log, Devices, allModels, allClients, allTimezones, allCarriers) {
 
         var vm = this;
 
@@ -49,6 +49,11 @@ angular.module('deviceController', [])
                     console.log('Error: ' + response);
                 });
         }
+
+        vm.models = allModels.data.models;
+        vm.clients = allClients.data.clients;
+        vm.timezones = allTimezones.data.timezones;
+        vm.carriers = allCarriers.data.carriers;
 
         vm.openModal = function (id, mode) {
 
@@ -120,14 +125,15 @@ angular.module('deviceController', [])
                                     break;
                                 case 'add':
                                     var deviceData = {
-                                        //deviceId: data.device.deviceId,
+                                        id: data.device._id,
                                         name: data.device.name,
-                                        password: data.device.password,
-                                        description: data.device.description,
                                         client: data.device.client._id,
-                                        type: data.device.type,
                                         timezone: data.device.timezone._id,
-                                        active: data.device.active !== 'No'
+                                        active: data.device.active !== 'No',
+                                        model: data.device.model,
+                                        cell_number: data.device.cell_number,
+                                        carrier: data.device.carrier._id,
+                                        timeout: data.device.timeout
                                     };
                                     Devices.add(deviceData);
                                     break;
@@ -151,6 +157,18 @@ angular.module('deviceController', [])
                         device: function () {
                             return null;
                         },
+                        clients: function () {
+                            return vm.clients;
+                        },
+                        timezones: function () {
+                            return vm.timezones;
+                        },
+                        models: function () {
+                            return vm.models;
+                        },
+                        carriers: function () {
+                            return vm.carriers;
+                        },
                         mode: function () {
                             return mode;
                         }
@@ -160,13 +178,15 @@ angular.module('deviceController', [])
                 modalInstance.result.then(function (data) {
 
                     var deviceData = {
+                        id: data.device._id,
                         name: data.device.name,
-                        password: data.device.password,
-                        description: data.device.description,
                         client: data.device.client._id,
-                        type: data.device.type,
                         timezone: data.device.timezone._id,
-                        active: data.device.active !== 'No'
+                        active: data.device.active !== 'No',
+                        model: data.device.model,
+                        cell_number: data.device.cell_number,
+                        carrier: data.device.carrier._id,
+                        timeout: data.device.timeout
                     };
                     Devices.create(deviceData);
                 }, function () {
@@ -177,23 +197,28 @@ angular.module('deviceController', [])
 
     });
 
-angular.module('deviceController').controller('DeviceModalInstanceCtrl', function ($uibModalInstance, device, mode) {
+angular.module('deviceController').controller('DeviceModalInstanceCtrl', function ($uibModalInstance, device, clients, timezones, models, carriers, mode) {
     var vm = this;
 
     vm.isView = vm.isUpdate = vm.isDelete = vm.isAdd = false;
 
     vm.device = device;
 
+    vm.clients = clients;
+
+    vm.timezones = timezones;
+
+    vm.models = models;
+
+    vm.carriers = carriers;
+
+    vm.timeouts = [1,2,3,4,5,6,7,8,9,10,15,20,25,30];
+
+    vm.timeouts.selected = vm.timeouts[9];
+
     vm.actives = ['Si', 'No'];
 
-    vm.types = ['Admin', 'Monitoreo'];
-
-    vm.isDisabled = true;
-
-    if (mode != 'add') {
-        vm.device.active = device.active ? 'Si' : 'No';
-        vm.device.type = device.type;
-    }
+    vm.actives.selected = 'Si';
 
     switch (mode) {
         case 'read':

@@ -22,23 +22,107 @@
                 <h3 class="modal-title" id="modal-title">{{vm.modalName}}</h3>
             </div>
             <div class="modal-body" id="modal-body">
-                <form class="form-horizontal" name="UpdateEmployeeForm" >
+                <form class="form-horizontal" name="deviceForm" >
                     <fieldset ng-disabled="vm.isDisabled">
-                        <input class="form-control" readonly="readonly" name="deviceId" ng-model="vm.device.deviceId" type="hidden" placeholder="ID de Grupo" required />
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="control-label"> IMEI</label>
+                                <input class="form-control" name="imei" ng-model="vm.device._id" type="text" placeholder="IMEI" required />
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-md-4">
                                 <label class="control-label"> Nombre</label>
                                 <input class="form-control" name="name" ng-model="vm.device.name" type="text" placeholder="Nombre" required />
                             </div>
-                            <div class="col-md-4">
-                                <label class="control-label"> Descripcion</label>
-                                <input class="form-control" name="description" ng-model="vm.device.description" type="text" placeholder="Descripcion" required />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="control-label"> Imagen</label>
-                                <input class="form-control" name="image" ng-model="vm.device.image" type="text" placeholder="URL Imagen" />
+                            <div class="col-md-4" ng-class="{ 'has-error': deviceForm.client.$touched && deviceForm.client.$invalid }">
+                                <label>Pertenece a Cliente</label>
+                                <!--<select class="form-control" name="client" ng-model="vm.user.client" ng-options="client as client.name for client in vm.clients track by client._id" required ></select>-->
+                                <ui-select ng-model="vm.device.client" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
+                                    <ui-select-match placeholder="Seleccione un cliente">{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="item in vm.clients | filter: $select.search">
+                                        <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                    <ui-select-no-choice>
+                                        <div style="text-align: center;">Debe indicar un cliente</div>
+                                    </ui-select-no-choice>
+                                </ui-select>
+                                <div class="help-block" ng-messages="deviceForm.client.$error" ng-show="deviceForm.client.$touched && deviceForm.client.$invalid">
+                                    <p ng-message="required">El cliente es requerido.</p>
+                                </div>
                             </div>
                         </div>
+
+                        <div class="row">
+                            <div class="col-md-4" ng-class="{ 'has-error': deviceForm.model.$touched && deviceForm.model.$invalid }">
+                                <label>Modelo</label>
+                                <ui-select ng-model="vm.device.model" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
+                                    <ui-select-match placeholder="Seleccione un modelo">{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="item in vm.models | filter: $select.search">
+                                        <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                    <ui-select-no-choice>
+                                        <div style="text-align: center;">Debe indicar un modelo</div>
+                                    </ui-select-no-choice>
+                                </ui-select>
+                                <div class="help-block" ng-messages="userForm.client.$error" ng-show="deviceForm.model.$touched && deviceForm.model.$invalid">
+                                    <p ng-message="required">El modelo es requerido.</p>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4" ng-class="{ 'has-error': deviceForm.timezone.$touched && deviceForm.timezone.$invalid }">
+                                <label>Zona horaria</label>
+                                <ui-select ng-model="vm.device.timezone" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
+                                    <ui-select-match placeholder="Seleccione una zona horaria">{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat="item in vm.timezones | filter: $select.search">
+                                        <div ng-bind-html="item.name | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                    <ui-select-no-choice>
+                                        <div style="text-align: center;">Debe indicar una zona horaria</div>
+                                    </ui-select-no-choice>
+                                </ui-select>
+                                <div class="help-block" ng-messages="deviceForm.client.$error" ng-show="deviceForm.model.$touched && deviceForm.model.$invalid">
+                                    <p ng-message="required">La zona horaria es requerida.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="control-label">Celular</label>
+                                <input class="form-control" name="cell_number" ng-model="vm.device.cell_number" type="text" placeholder="Ingrese nro. celular" />
+                            </div>
+                            <div class="col-md-4" ng-class="{ 'has-error': deviceForm.client.$touched && deviceForm.client.$invalid }">
+                                <label>Companía</label>
+                                <ui-select ng-model="vm.device.carrier" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
+                                    <ui-select-match placeholder="Seleccione una companía celular">{{$select.selected.carrier}}</ui-select-match>
+                                    <ui-select-choices repeat="item in vm.carriers | filter: $select.search">
+                                        <div ng-bind-html="item.carrier | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                         </div>
+
+                        <div class="row">
+                             <div class="col-md-4" ng-class="{ 'has-error': deviceForm.client.$touched && deviceForm.client.$invalid }">
+                                  <label>Timeout</label>
+                                   <ui-select ng-model="vm.device.timeout" theme="bootstrap" uis-open-close="vm.onOpenClose(isOpen)">
+                                       <ui-select-match placeholder="Seleccione un timeout">{{$select.selected.value}}</ui-select-match>
+                                       <ui-select-choices repeat="item in vm.timeouts | filter: $select.search">
+                                           <div ng-bind-html="item | highlight: $select.search"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                              </div>
+                             <div class="col-md-2" ng-class="{ 'has-error': deviceForm.active.$touched && deviceForm.active.$invalid }">
+                                <label>Activo</label>
+                                <select class="form-control" name="active" ng-model="vm.user.active" ng-options="active for active in vm.actives" selected="Si" required></select>
+
+                                <div class="help-block" ng-messages="deviceForm.active.$error" ng-show="deviceForm.active.$touched && deviceForm.active.$invalid">
+                                    <p ng-message="required">Debe indicar si el usuario se encuentra activo o no.</p>
+                                </div>
+                             </div>
+                        </div>
+
                     </fieldset>
                 </form>
             </div>
@@ -52,4 +136,4 @@
         </script>
     </div>
 
-</div>
+</div>-+

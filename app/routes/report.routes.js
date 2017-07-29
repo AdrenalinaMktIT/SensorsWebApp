@@ -270,7 +270,7 @@ module.exports = function(app) {
         let imei;
         // busco los ids de todos los sensores y los guardo en un arreglo.
 
-        Measure.aggregate([{
+         Measure.aggregate([{
             // proyecto solo las propiedades imei, data y timestamp de la coleccion 'measures'.
             $project: {
                 _id: 0,
@@ -386,13 +386,14 @@ module.exports = function(app) {
             },
             {
                 $unwind: "$sensor.type"
-            }], function (err, result) {
-            if (err) {
-                console.log(err);
-            } else {
-                res.json(result);
-            }
-        });
+            }]).allowDiskUse(true)
+             .exec(function (err, result) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        res.json(result);
+                    }
+            });
     });
 
     // Reporte de Lecturas en formato xls (tipo Excel).

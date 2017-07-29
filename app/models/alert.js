@@ -1,4 +1,5 @@
-let mongoose = require('mongoose');
+let mongoose = require('mongoose'),
+Schema = mongoose.Schema;
 
 let alertSchema = mongoose.Schema(
     {
@@ -7,8 +8,8 @@ let alertSchema = mongoose.Schema(
             required: true
         },
 
-        sensor: {
-            type: Number,
+        sensors: {
+            type: Schema.Types.ObjectId,
             ref: 'Sensor'
         },
 

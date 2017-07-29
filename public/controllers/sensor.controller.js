@@ -44,7 +44,7 @@ angular.module('sensorController', [])
                     vm.sensors = response.data.sensors;
                     vm.gridOptions.data = response.data.sensors;
                 }, function errorCallback(response) {
-                    // called asynchronously if an error occurs
+                    // cal--led asynchronously if an error occurs
                     // or server returns response with an error status.
                     console.log('Error: ' + response);
                 });

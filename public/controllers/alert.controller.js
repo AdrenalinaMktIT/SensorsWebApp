@@ -72,6 +72,15 @@ angular.module('alertController', [])
                 });
         }
 
+        function loadClients(){
+            Clients.getAll()
+                .then(function sucessCallback(response){
+                    vm.clients = response.data.clients;
+                }, function errorCallback(response){
+                    console.log('Error: ' + response);
+                });
+        }
+
         vm.openModal = function (id, mode) {
 
             var vm = this;
